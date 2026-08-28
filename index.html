@@ -89,11 +89,31 @@
     transition: border-color .15s, box-shadow .15s;
   }
 
-  input:focus {
+  textarea {
+    width: 100%;
+    padding: 11px 13px;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    resize: vertical;
+    min-height: 78px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  input:focus,
+  textarea:focus {
     outline: none;
     border-color: var(--blue);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
   }
+
+  .optional { color: var(--muted); font-weight: 400; }
+
+  .field .hint { margin-top: -2px; }
 
   /* ---------- Slots ---------- */
 
@@ -408,6 +428,14 @@
       </div>
     </div>
 
+    <div class="field">
+      <label for="more-dates">Need the room on other dates? <span class="optional">(optional)</span></label>
+      <p class="hint">Only the date and hours you picked above are confirmed. List any other dates
+        you need and we&rsquo;ll check whether the room is free and follow up.</p>
+      <textarea id="more-dates" name="additionalDates" rows="3" maxlength="500"
+                placeholder="Sept 3 and Sept 10, same times"></textarea>
+    </div>
+
     <button type="submit" class="submit" id="submit-btn">Request Reservation</button>
     <div class="status" id="status" role="status" hidden></div>
   </form>
@@ -438,6 +466,7 @@ const END_HOUR   = 22;
 
 const form       = document.getElementById('reservation-form');
 const titleInput = document.getElementById('event-title');
+const moreDates  = document.getElementById('more-dates');
 const nameInput  = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const dateInput  = document.getElementById('date');
@@ -888,6 +917,12 @@ async function handleSubmit(event) {
     date: dateInput.value,                    // "2026-08-31"
     startTime: formatTime(blockStart),        // "11:00 AM"
     endTime: formatTime(blockEnd),            // "2:00 PM"
+
+    // Free text, empty when unused. When it is NOT empty someone has to read it
+    // and duplicate the event by hand — availability was never checked for the
+    // dates named here, so the Zap should make a filled-in value impossible to
+    // miss rather than burying it in the body of a notification.
+    additionalDates: moreDates.value.trim(),
 
     // --- Extras, safe to leave unmapped ------------------------------
     name: nameInput.value.trim(),
