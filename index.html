@@ -207,6 +207,52 @@
     margin-top: 2px;
   }
 
+  /* ---------- Event checklist ---------- */
+
+  .checklist {
+    margin-bottom: 24px;
+    padding: 18px 20px;
+    background: #f8fafc;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .checklist .lead {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .checklist .lead + .lead { margin-bottom: 12px; }
+
+  .checklist ol {
+    margin: 0 0 12px;
+    padding-left: 22px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .checklist ol li { margin-bottom: 9px; line-height: 1.5; }
+  .checklist ol li:last-child { margin-bottom: 0; }
+  .checklist ol li::marker { font-weight: 700; color: var(--blue); }
+
+  .checklist .updated {
+    margin: 0 0 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e8edf3;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .checklist .terms { margin: 0 0 14px; }
+  .checklist .terms p {
+    margin: 0 0 9px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .checklist .terms p:last-child { margin-bottom: 0; }
+
   /* ---------- Conditional block ---------- */
 
   .conditional {
@@ -749,6 +795,48 @@
                 placeholder="Anything we should know."></textarea>
     </div>
 
+    <div class="form-section"><h2>Event checklist</h2></div>
+
+    <div class="checklist">
+      <p class="lead">100 Panetta Conference is a <strong>NO-HOST</strong> event space.
+        Set-up and clean-up is the responsibility of the Responsible Party.</p>
+      <p class="lead"><strong>I agree to all of the following conditions:</strong></p>
+
+      <ol>
+        <li>Begin and end your event on time (reservation times include setup and cleanup).</li>
+        <li>Return the facility, tables and chairs to a neat configuration (2 chairs per table).
+            Any extra chairs used should be returned to the chair dolly.</li>
+        <li>Wipe down tables, chairs and lectern using provided sanitary wipes (including on patios).</li>
+        <li>Wipe clean and return extra chairs to the chair rack in the chair room.</li>
+        <li>Remove and tie trash bags. Place them into the provided large white trash can in the chair room.</li>
+        <li>Close and lock all windows and balcony doors. <strong>Leave the balcony key in the lectern!</strong></li>
+        <li>Turn off all A/V equipment, including D-Ten. Projector and screen are controlled from the wall
+            controller. All other AV equipment is controlled from the AV cart <strong>MAIN ON/OFF</strong> switch.</li>
+        <li>Turn off conference room lights (hall &amp; stair lights are on motion sensors).</li>
+        <li>Close conference room doors.</li>
+        <li>Return the 4-wheel cart to the 3rd floor chair room.</li>
+      </ol>
+
+      <p class="updated">Updated 8/2026</p>
+
+      <div class="terms">
+        <p>I agree that if the above items are not completed, and 100 Panetta staff time is required to
+           complete any of these tasks, our department will cover the costs of returning the room to its
+           original condition.</p>
+        <p>If items are damaged or missing, our department agrees to repair or replace items.</p>
+        <p>We agree to provide a department FOAPAL should there be any charges related to the facility
+           condition after our event.</p>
+        <p>We acknowledge that this reservation is for the 3rd floor conference room only. Access to other
+           parts of the building is not included in this reservation, other than the additional rest room on
+           the second floor, unless otherwise arranged separately.</p>
+      </div>
+
+      <label class="agree" for="checklist-agree">
+        <input type="checkbox" id="checklist-agree" name="checklistAgreement" required>
+        <span>I agree with the event checklist. <span class="req" aria-hidden="true">*</span></span>
+      </label>
+    </div>
+
     <button type="submit" class="submit" id="submit-btn">Request Reservation</button>
     <div class="status" id="status" role="status" hidden></div>
   </form>
@@ -795,6 +883,7 @@ const guestsUnder21 = document.getElementById('guests-under-21');
 const notesInput = document.getElementById('notes');
 const alcoholPolicyBox  = document.getElementById('alcohol-policy');
 const alcoholAgreeBox   = document.getElementById('alcohol-agree');
+const checklistBox      = document.getElementById('checklist-agree');
 
 // Reads the selected value of a radio group, or '' when nothing is picked.
 function radioValue(name) {
@@ -1320,6 +1409,12 @@ async function handleSubmit(event) {
     return;
   }
 
+  if (!checklistBox.checked) {
+    showStatus('Please review and agree to the event checklist.', 'error');
+    checklistBox.focus();
+    return;
+  }
+
   const chosen = slotButtons.filter(button => button.classList.contains('selected'));
 
   // The UI can only build a contiguous block, but the webhook depends on it —
@@ -1376,6 +1471,7 @@ async function handleSubmit(event) {
     alcoholPolicyAgreement: radioValue('alcohol') === 'Yes, alcohol' ? 'Yes' : 'N/A',
 
     additionalNotes: notesInput.value.trim(),
+    checklistAgreement: 'Yes',
     // Same two moments as full timestamps, in case a step ever needs them
     // without having to recombine the date and the plain-text time.
     startTimeISO: toZonedISO(blockStart),     // "2026-08-31T11:00:00-07:00"
