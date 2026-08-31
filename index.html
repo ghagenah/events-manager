@@ -115,6 +115,74 @@
 
   .field .hint { margin-top: -2px; }
 
+  /* ---------- Occupancy agreement ---------- */
+
+  .occupancy {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    background: #f8fafc;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .occupancy > p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .occupancy .caps {
+    margin: 0 0 14px;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .occupancy .caps th,
+  .occupancy .caps td {
+    text-align: left;
+    padding: 5px 0;
+    border-bottom: 1px solid #e8edf3;
+    vertical-align: baseline;
+  }
+
+  .occupancy .caps tr:last-child th,
+  .occupancy .caps tr:last-child td { border-bottom: none; }
+
+  .occupancy .caps th {
+    width: 3.4em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .occupancy .caps td { color: var(--muted); padding-left: 10px; }
+
+  .agree {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .agree input[type="checkbox"] {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .agree input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
   /* ---------- Slots ---------- */
 
   .slots-section { margin-bottom: 24px; }
@@ -436,6 +504,23 @@
                 placeholder="Sept 3 and Sept 10, same times"></textarea>
     </div>
 
+    <div class="occupancy">
+      <p>I agree that my reservation <strong>WILL NOT EXCEED</strong> the Fire Marshal&rsquo;s listed occupancy.</p>
+      <table class="caps">
+        <tbody>
+          <tr><th scope="row">28</th><td>Conference (tables and chairs)</td></tr>
+          <tr><th scope="row">32</th><td>Dining (tables and chairs)</td></tr>
+          <tr><th scope="row">32</th><td>Presentation style seating (tables and chairs)</td></tr>
+          <tr><th scope="row">54</th><td>Presentation style seating (chairs only)</td></tr>
+          <tr><th scope="row">73</th><td>Standing (no tables or chairs)</td></tr>
+        </tbody>
+      </table>
+      <label class="agree" for="occupancy">
+        <input type="checkbox" id="occupancy" name="occupancyAgreement" required>
+        <span>I agree to not exceed listed occupancy. <span class="req" aria-hidden="true">*</span></span>
+      </label>
+    </div>
+
     <button type="submit" class="submit" id="submit-btn">Request Reservation</button>
     <div class="status" id="status" role="status" hidden></div>
   </form>
@@ -467,6 +552,7 @@ const END_HOUR   = 22;
 const form       = document.getElementById('reservation-form');
 const titleInput = document.getElementById('event-title');
 const moreDates  = document.getElementById('more-dates');
+const occupancyBox = document.getElementById('occupancy');
 const nameInput  = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const dateInput  = document.getElementById('date');
@@ -888,6 +974,12 @@ async function handleSubmit(event) {
     return;
   }
 
+  if (!occupancyBox.checked) {
+    showStatus('Please confirm your reservation will not exceed the listed occupancy.', 'error');
+    occupancyBox.focus();
+    return;
+  }
+
   const chosen = slotButtons.filter(button => button.classList.contains('selected'));
 
   // The UI can only build a contiguous block, but the webhook depends on it —
@@ -923,6 +1015,7 @@ async function handleSubmit(event) {
     // dates named here, so the Zap should make a filled-in value impossible to
     // miss rather than burying it in the body of a notification.
     additionalDates: moreDates.value.trim(),
+    occupancyAgreement: 'Yes',
 
     // --- Extras, safe to leave unmapped ------------------------------
     name: nameInput.value.trim(),
