@@ -1504,6 +1504,11 @@ async function loadAvailability() {
 
 const DEMO_MODE = new URLSearchParams(location.search).has('demo');
 
+// Every demo address is this one real inbox. Generated names like
+// first.last@ucsc.edu look plausible enough to belong to an actual person at
+// UCSC, and a test reservation must never mail a stranger.
+const DEMO_EMAIL = 'ghagenah@ucsc.edu';
+
 const DEMO = {
   titles: ['Faculty planning session', 'Guest lecture reception', 'Department retreat',
            'Thesis defense', 'Research group meeting', 'Visiting scholar talk'],
@@ -1554,12 +1559,11 @@ async function fillDemo() {
 
   const first = randomOf(DEMO.firstNames);
   const last = randomOf(DEMO.lastNames);
-  const handle = `${first}.${last}`.toLowerCase();
 
   setValue(titleInput, `TEST \u2014 ${randomOf(DEMO.titles)}`);
   setValue(descInput, randomOf(DEMO.descriptions));
   setValue(nameInput, `${first} ${last}`);
-  setValue(emailInput, `${handle}@ucsc.edu`);
+  setValue(emailInput, DEMO_EMAIL);
   setValue(deptInput, randomOf(DEMO.departments));
 
   sameAsMe.checked = false;
@@ -1568,7 +1572,7 @@ async function fillDemo() {
   const rpLast = randomOf(DEMO.lastNames);
   setValue(rpName, `${rpFirst} ${rpLast}`);
   setValue(rpPhone, `(831) 555-${String(randomInt(0, 9999)).padStart(4, '0')}`);
-  setValue(rpEmail, `${rpFirst}.${rpLast}`.toLowerCase() + '@ucsc.edu');
+  setValue(rpEmail, DEMO_EMAIL);
 
   const total = randomInt(6, 60);
   setValue(totalGuests, String(total));
