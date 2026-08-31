@@ -207,6 +207,47 @@
     margin-top: 2px;
   }
 
+  /* ---------- Demo fill (testing only) ---------- */
+
+  .demo-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-bottom: 22px;
+    padding: 12px 14px;
+    background: #fffbeb;
+    border: 1px dashed #d9a441;
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: #7a5314;
+  }
+
+  .demo-bar[hidden] { display: none; }
+
+  .demo-bar strong { font-weight: 700; }
+  .demo-bar .grow { flex: 1 1 auto; }
+
+  .demo-bar button {
+    padding: 7px 13px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    color: #fff;
+    background: #b0781f;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .demo-bar button:hover { background: #96661a; }
+  .demo-bar button:disabled { opacity: .6; cursor: not-allowed; }
+
+  .demo-bar button:focus-visible {
+    outline: 2px solid #7a5314;
+    outline-offset: 2px;
+  }
+
   /* ---------- Inline validation ---------- */
 
   .field-error {
@@ -730,6 +771,12 @@
   </header>
 
   <form id="reservation-form" novalidate>
+
+    <div class="demo-bar" id="demo-bar" hidden>
+      <span class="grow"><strong>Testing mode.</strong> Fills every field with sample data,
+        including a real open time slot.</span>
+      <button type="button" id="fill-demo">Fill with demo info</button>
+    </div>
 
     <div class="draft-note" id="draft-note" hidden>
       <span>We restored what you had filled in earlier.</span>
@@ -1446,6 +1493,121 @@ async function loadAvailability() {
 }
 
 /* =========================================================
+   DEMO FILL  —  TESTING ONLY, REMOVE WHEN NO LONGER NEEDED
+   =========================================================
+
+   Only appears with ?demo=1 in the URL. It is deliberately not shown to
+   ordinary visitors: a one-click "fill everything" button on a live booking
+   page would eventually produce a junk reservation, and every submission here
+   becomes a real calendar event. Titles are prefixed TEST so anything that
+   does get submitted is obvious in the calendar and in Zapier.            */
+
+const DEMO_MODE = new URLSearchParams(location.search).has('demo');
+
+const DEMO = {
+  titles: ['Faculty planning session', 'Guest lecture reception', 'Department retreat',
+           'Thesis defense', 'Research group meeting', 'Visiting scholar talk'],
+  descriptions: [
+    'Monthly planning meeting with a short presentation and discussion.',
+    'Reception for a visiting speaker, with a talk beforehand.',
+    'Working session for the department, with a break in the middle.',
+    'Dissertation defense followed by a brief celebration.'
+  ],
+  firstNames: ['Alex', 'Priya', 'Jordan', 'Mei', 'Sam', 'Rosa', 'Ken', 'Amara'],
+  lastNames: ['Alvarez', 'Chen', 'Okafor', 'Nguyen', 'Ramirez', 'Patel', 'Brooks', 'Yamada'],
+  departments: ['Politics', 'History', 'Astronomy', 'Literature',
+                'Environmental Studies', 'Sociology', 'Anthropology'],
+  notes: ['', '', 'We may need an extra table near the entrance.',
+          'One attendee is arriving early to set up slides.']
+};
+
+const randomOf = list => list[Math.floor(Math.random() * list.length)];
+const randomInt = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+
+function setValue(el, value) {
+  el.value = value;
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function setRadio(name, value) {
+  const radio = form.querySelector(`input[name="${name}"][value="${CSS.escape(value)}"]`);
+  if (radio) {
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
+
+// A calendar date a few days out, counted in the room's own time zone.
+function demoDateValue() {
+  const [y, m, d] = todayInZone().split('-').map(Number);
+  const shifted = new Date(y, m - 1, d + randomInt(2, 14));   // Date normalises rollover
+  const pad = n => String(n).padStart(2, '0');
+  return `${shifted.getFullYear()}-${pad(shifted.getMonth() + 1)}-${pad(shifted.getDate())}`;
+}
+
+async function fillDemo() {
+  const button = document.getElementById('fill-demo');
+  button.disabled = true;
+  button.textContent = 'Filling\u2026';
+  clearErrors();
+  clearStatus();
+
+  const first = randomOf(DEMO.firstNames);
+  const last = randomOf(DEMO.lastNames);
+  const handle = `${first}.${last}`.toLowerCase();
+
+  setValue(titleInput, `TEST \u2014 ${randomOf(DEMO.titles)}`);
+  setValue(descInput, randomOf(DEMO.descriptions));
+  setValue(nameInput, `${first} ${last}`);
+  setValue(emailInput, `${handle}@ucsc.edu`);
+  setValue(deptInput, randomOf(DEMO.departments));
+
+  sameAsMe.checked = false;
+  syncSameAsMe();
+  const rpFirst = randomOf(DEMO.firstNames);
+  const rpLast = randomOf(DEMO.lastNames);
+  setValue(rpName, `${rpFirst} ${rpLast}`);
+  setValue(rpPhone, `(831) 555-${String(randomInt(0, 9999)).padStart(4, '0')}`);
+  setValue(rpEmail, `${rpFirst}.${rpLast}`.toLowerCase() + '@ucsc.edu');
+
+  const total = randomInt(6, 60);
+  setValue(totalGuests, String(total));
+  setRadio('openToPublic', randomOf(['Yes, open to the public', 'Not open to the public']));
+  occupancyBox.checked = true;
+
+  setRadio('food', randomOf(['Yes, self-service food', 'Yes, catered food', 'No, food will not be served']));
+  setRadio('outsideVendor', randomOf(['Yes, outside vendor', 'No, outside vendor']));
+
+  const servingAlcohol = Math.random() < 0.5;
+  setRadio('alcohol', servingAlcohol ? 'Yes, alcohol' : 'No alcohol');
+  syncAlcoholPolicy();
+  if (servingAlcohol) {
+    setValue(guestsUnder21, String(randomInt(0, Math.min(5, total))));
+    alcoholAgreeBox.checked = true;
+  }
+
+  setValue(notesInput, randomOf(DEMO.notes));
+  checklistBox.checked = true;
+
+  // Pick a real open block, which means waiting on the live availability check.
+  setValue(dateInput, demoDateValue());
+  await loadAvailability();
+
+  const firstFree = slotButtons.findIndex(slot => !slot.disabled);
+  if (firstFree !== -1) {
+    slotButtons[firstFree].click();
+    const next = slotButtons[firstFree + 1];
+    if (next && !next.disabled) next.click();          // a two-hour block
+  } else {
+    showStatus('Demo fill: that date has no open hours. Pick another date.', 'info');
+  }
+
+  saveDraft();
+  button.disabled = false;
+  button.textContent = 'Fill with demo info';
+}
+
+/* =========================================================
    DRAFT PERSISTENCE
    ========================================================= */
 
@@ -1806,6 +1968,11 @@ document.getElementById('discard-draft').addEventListener('click', discardDraft)
 form.addEventListener('input', saveDraft);
 form.addEventListener('change', saveDraft);
 restoreDraft();
+
+if (DEMO_MODE) {
+  document.getElementById('demo-bar').hidden = false;
+  document.getElementById('fill-demo').addEventListener('click', fillDemo);
+}
 document.getElementById('alcohol-policy-link').href = ALCOHOL_POLICY_URL;
 form.querySelectorAll('input[name="alcohol"]')
     .forEach(radio => radio.addEventListener('change', syncAlcoholPolicy));
