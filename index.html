@@ -1028,6 +1028,10 @@ const UCSC_EMAIL = /^[^@\s]+@([a-z0-9-]+\.)*ucsc\.edu$/i;
 
 const DRAFT_KEY = 'panetta-reservation-draft';
 
+// Where a successful submission lands, and the key it passes details through.
+const CONFIRMATION_PAGE = 'confirmed.html';
+const CONFIRMATION_KEY  = 'panetta-reservation-confirmation';
+
 // Consent is never restored from a draft — agreeing has to be a deliberate act
 // each time, not something a saved form does on someone's behalf.
 const NEVER_RESTORE = ['occupancy', 'checklist-agree', 'alcohol-agree'];
@@ -1759,19 +1763,29 @@ async function handleSubmit(event) {
 
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
 
-    form.reset();
     clearDraft();
-    syncSameAsMe();
-    syncAlcoholPolicy();          // re-hide the conditional agreement
-    resetSlots('Select a date to see available times.');
-    showStatus(
-      `Reservation sent — ${payload.startTime} to ${payload.endTime} ${TIME_ZONE_LABEL} on ${payload.date}. ` +
-      `A confirmation is on its way to ${payload.email}.`,
-      'success'
-    );
+
+    // Hand the confirmation page just enough to show what was requested.
+    // sessionStorage, not the URL — a name and email do not belong in a query
+    // string, browser history, or a referrer header.
+    try {
+      sessionStorage.setItem(CONFIRMATION_KEY, JSON.stringify({
+        eventTitle: payload.eventTitle,
+        date: payload.date,
+        startTime: payload.startTime,
+        endTime: payload.endTime,
+        department: payload.department,
+        email: payload.email
+      }));
+    } catch (_) { /* the confirmation page copes without it */ }
+
+    // Leave the button disabled: the request is gone, and the page is about to
+    // change. Re-enabling invites a second submission during the navigation.
+    showStatus('Reservation sent. Taking you to your confirmation\u2026', 'success');
+    window.location.assign(CONFIRMATION_PAGE);
+    return;
   } catch (error) {
     showStatus(`Something went wrong sending your reservation: ${error.message}. Please try again.`, 'error');
-  } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;
   }
