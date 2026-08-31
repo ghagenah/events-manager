@@ -470,6 +470,12 @@
     </div>
 
     <div class="field">
+      <label for="department">Requesting UCSC Department <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="department" name="department" required maxlength="120"
+             autocomplete="organization" placeholder="Politics">
+    </div>
+
+    <div class="field">
       <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
       <input type="date" id="date" name="date" required>
     </div>
@@ -555,6 +561,7 @@ const moreDates  = document.getElementById('more-dates');
 const occupancyBox = document.getElementById('occupancy');
 const nameInput  = document.getElementById('name');
 const emailInput = document.getElementById('email');
+const deptInput  = document.getElementById('department');
 const dateInput  = document.getElementById('date');
 const slotsBox   = document.getElementById('slots');
 const slotCount  = document.getElementById('slot-count');
@@ -963,6 +970,12 @@ async function handleSubmit(event) {
     return;
   }
 
+  if (!deptInput.value.trim()) {
+    showStatus('Please enter the UCSC department making this request.', 'error');
+    deptInput.focus();
+    return;
+  }
+
   if (!dateInput.value) {
     showStatus('Please choose a date.', 'error');
     dateInput.focus();
@@ -1019,6 +1032,7 @@ async function handleSubmit(event) {
 
     // --- Extras, safe to leave unmapped ------------------------------
     name: nameInput.value.trim(),
+    department: deptInput.value.trim(),
     // Same two moments as full timestamps, in case a step ever needs them
     // without having to recombine the date and the plain-text time.
     startTimeISO: toZonedISO(blockStart),     // "2026-08-31T11:00:00-07:00"
