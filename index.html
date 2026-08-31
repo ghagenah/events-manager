@@ -207,6 +207,127 @@
     margin-top: 2px;
   }
 
+  /* ---------- Inline validation ---------- */
+
+  .field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--danger);
+  }
+
+  .field-error::before {
+    content: "!";
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    color: #fff;
+    background: var(--danger);
+    border-radius: 50%;
+  }
+
+  .has-error input[type="text"],
+  .has-error input[type="email"],
+  .has-error input[type="tel"],
+  .has-error input[type="number"],
+  .has-error input[type="date"],
+  .has-error textarea {
+    border-color: var(--danger);
+    background: #fffbfb;
+  }
+
+  .has-error .choice { border-color: #fca5a5; }
+
+  .error-summary {
+    margin-bottom: 24px;
+    padding: 14px 16px;
+    background: var(--danger-soft);
+    border: 1px solid #fecaca;
+    border-radius: var(--radius);
+  }
+
+  .error-summary[hidden] { display: none; }
+
+  .error-summary h2 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--danger);
+  }
+
+  .error-summary ul { margin: 0; padding-left: 18px; }
+  .error-summary li { margin-bottom: 4px; font-size: 13px; }
+  .error-summary li:last-child { margin-bottom: 0; }
+
+  .error-summary a {
+    color: var(--danger);
+    text-underline-offset: 2px;
+  }
+
+  .error-summary a:hover { text-decoration: none; }
+
+  /* ---------- Draft notice ---------- */
+
+  .draft-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin-bottom: 22px;
+    padding: 11px 14px;
+    background: var(--blue-soft);
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--blue-dark);
+  }
+
+  .draft-note[hidden] { display: none; }
+
+  .draft-note button {
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-dark);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ---------- Same as requester ---------- */
+
+  .same-as-me {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .same-as-me input[type="checkbox"] {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .field[hidden], .conditional .field[hidden] { display: none; }
+
   /* ---------- Event checklist ---------- */
 
   .checklist {
@@ -610,6 +731,13 @@
 
   <form id="reservation-form" novalidate>
 
+    <div class="draft-note" id="draft-note" hidden>
+      <span>We restored what you had filled in earlier.</span>
+      <button type="button" id="discard-draft">Start over</button>
+    </div>
+
+    <div class="error-summary" id="error-summary" role="alert" tabindex="-1" hidden></div>
+
     <div class="form-section"><h2>Event</h2></div>
 
     <div class="field">
@@ -649,7 +777,12 @@
          AV operation, and similar arrangements.</p>
     </div>
 
-    <div class="field">
+    <label class="same-as-me" for="same-as-me">
+      <input type="checkbox" id="same-as-me">
+      <span>The responsible party is me</span>
+    </label>
+
+    <div class="field" id="rp-name-field">
       <label for="rp-name">Name of UCSC Responsible Party <span class="req" aria-hidden="true">*</span></label>
       <input type="text" id="rp-name" name="responsiblePartyName" required maxlength="120"
              autocomplete="off" placeholder="First and last name">
@@ -661,7 +794,7 @@
              autocomplete="tel" placeholder="(831) 555-0123">
     </div>
 
-    <div class="field">
+    <div class="field" id="rp-email-field">
       <label for="rp-email">Email of Responsible Party <span class="req" aria-hidden="true">*</span></label>
       <p class="hint">Must be a ucsc.edu address.</p>
       <input type="email" id="rp-email" name="responsiblePartyEmail" required
@@ -712,12 +845,6 @@
       <p class="hint">Please see the occupancy limits below.</p>
       <input type="number" id="total-guests" name="totalGuests" required min="1" max="73"
              inputmode="numeric" placeholder="20">
-    </div>
-
-    <div class="field">
-      <label for="guests-under-21">Number of guests under 21 <span class="req" aria-hidden="true">*</span></label>
-      <input type="number" id="guests-under-21" name="guestsUnder21" required min="0" max="73"
-             inputmode="numeric" placeholder="0">
     </div>
 
     <fieldset>
@@ -777,6 +904,12 @@
     </fieldset>
 
     <div class="conditional" id="alcohol-policy" hidden>
+      <div class="field" id="under-21-field">
+        <label for="guests-under-21">Number of guests under 21 <span class="req" aria-hidden="true">*</span></label>
+        <input type="number" id="guests-under-21" name="guestsUnder21" min="0" max="73"
+               inputmode="numeric" placeholder="0">
+      </div>
+
       <p>If your event will serve alcohol, you agree that you have read, understand, and will
          abide by the University Alcohol Policy.
          <a id="alcohol-policy-link" href="#" target="_blank" rel="noopener noreferrer">Link to policy</a></p>
@@ -884,6 +1017,32 @@ const notesInput = document.getElementById('notes');
 const alcoholPolicyBox  = document.getElementById('alcohol-policy');
 const alcoholAgreeBox   = document.getElementById('alcohol-agree');
 const checklistBox      = document.getElementById('checklist-agree');
+const sameAsMe     = document.getElementById('same-as-me');
+const rpNameField  = document.getElementById('rp-name-field');
+const rpEmailField = document.getElementById('rp-email-field');
+const errorSummary = document.getElementById('error-summary');
+const draftNote    = document.getElementById('draft-note');
+
+// ucsc.edu and its subdomains, e.g. soe.ucsc.edu
+const UCSC_EMAIL = /^[^@\s]+@([a-z0-9-]+\.)*ucsc\.edu$/i;
+
+const DRAFT_KEY = 'panetta-reservation-draft';
+
+// Consent is never restored from a draft — agreeing has to be a deliberate act
+// each time, not something a saved form does on someone's behalf.
+const NEVER_RESTORE = ['occupancy', 'checklist-agree', 'alcohol-agree'];
+
+// When the requester is also the responsible party, mirror their details down
+// rather than making them type the same thing twice.
+function syncSameAsMe() {
+  const same = sameAsMe.checked;
+  rpNameField.hidden = same;
+  rpEmailField.hidden = same;
+  if (same) {
+    rpName.value = nameInput.value;
+    rpEmail.value = emailInput.value;
+  }
+}
 
 // Reads the selected value of a radio group, or '' when nothing is picked.
 function radioValue(name) {
@@ -1283,137 +1442,236 @@ async function loadAvailability() {
 }
 
 /* =========================================================
+   DRAFT PERSISTENCE
+   ========================================================= */
+
+/* A long form is easy to lose to a closed tab or a flat battery, so what has
+   been typed is kept in this browser until the reservation is sent. It never
+   leaves the device, and the agreement checkboxes are deliberately excluded. */
+
+let saveTimer = null;
+
+function saveDraft() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      const draft = {};
+      form.querySelectorAll('input, textarea').forEach(el => {
+        if (!el.id && !el.name) return;
+        if (NEVER_RESTORE.includes(el.id)) return;
+        if (el.type === 'checkbox') draft['#' + el.id] = el.checked;
+        else if (el.type === 'radio') { if (el.checked) draft['@' + el.name] = el.value; }
+        else if (el.id) draft['#' + el.id] = el.value;
+      });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch (_) { /* private mode, or storage is full — drafts are a nicety */ }
+  }, 400);
+}
+
+function restoreDraft() {
+  let draft;
+  try {
+    draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+  } catch (_) { return; }
+  if (!draft || typeof draft !== 'object') return;
+
+  let restoredAnything = false;
+
+  Object.entries(draft).forEach(([key, value]) => {
+    const name = key.slice(1);
+    if (key.startsWith('@')) {
+      const radio = form.querySelector(`input[name="${name}"][value="${CSS.escape(value)}"]`);
+      if (radio) { radio.checked = true; restoredAnything = true; }
+      return;
+    }
+    const el = document.getElementById(name);
+    if (!el || NEVER_RESTORE.includes(name)) return;
+    if (el.type === 'checkbox') { el.checked = !!value; if (value) restoredAnything = true; }
+    else if (value) {
+      // A date saved before today is no longer bookable, so let it go.
+      if (el.type === 'date' && value < todayInZone()) return;
+      el.value = value;
+      restoredAnything = true;
+    }
+  });
+
+  if (!restoredAnything) return;
+
+  syncSameAsMe();
+  syncAlcoholPolicy();
+  draftNote.hidden = false;
+
+  // Re-check the calendar for the restored date rather than trusting old availability.
+  if (dateInput.value) loadAvailability();
+}
+
+function clearDraft() {
+  // Cancel any save still sitting in the debounce, or it fires after this and
+  // writes the draft straight back.
+  clearTimeout(saveTimer);
+  try { localStorage.removeItem(DRAFT_KEY); } catch (_) { /* nothing to clear */ }
+  draftNote.hidden = true;
+}
+
+function discardDraft() {
+  clearDraft();
+  form.reset();
+  clearErrors();
+  clearStatus();
+  syncSameAsMe();
+  syncAlcoholPolicy();
+  resetSlots('Select a date to see available times.');
+  titleInput.focus();
+}
+
+/* =========================================================
    SUBMISSION
    ========================================================= */
+
+// Errors are collected for the whole form, then shown together — one field at
+// a time would mean a scroll and a resubmit for each mistake on a form this long.
+function fieldErrors() {
+  const errors = [];
+  const add = (el, message) => errors.push({ el, message });
+  const blank = el => !el.value.trim();
+
+  if (blank(titleInput)) add(titleInput, 'Enter an event title.');
+  if (blank(descInput)) add(descInput, 'Add a brief description of your event.');
+  if (blank(nameInput)) add(nameInput, 'Enter your full name.');
+  if (blank(emailInput) || !emailInput.checkValidity()) add(emailInput, 'Enter a valid email address.');
+  if (blank(deptInput)) add(deptInput, 'Enter the UCSC department making this request.');
+
+  if (sameAsMe.checked) {
+    // The responsible party must be reachable at a ucsc.edu address, so when
+    // that party is the requester their own address has to qualify.
+    if (!UCSC_EMAIL.test(emailInput.value.trim())) {
+      add(emailInput, 'You are listed as the responsible party, so this must be a ucsc.edu address.');
+    }
+  } else {
+    if (blank(rpName)) add(rpName, 'Name the UCSC responsible party for this event.');
+    if (!UCSC_EMAIL.test(rpEmail.value.trim())) {
+      add(rpEmail, 'The responsible party must have a ucsc.edu email address.');
+    }
+  }
+
+  if (rpPhone.value.replace(/\D/g, '').length < 10) {
+    add(rpPhone, 'Enter a 10-digit cell phone number for the responsible party.');
+  }
+
+  if (!dateInput.value) add(dateInput, 'Choose a date.');
+  else if (selectedSlots.length === 0) add(slotsBox, 'Select at least one time slot.');
+
+  const total = Number(totalGuests.value);
+  if (blank(totalGuests) || !Number.isFinite(total) || total < 1) {
+    add(totalGuests, 'Enter the total number of guests.');
+  } else if (total > 73) {
+    add(totalGuests, '73 is the highest listed occupancy, for standing room.');
+  }
+
+  if (!radioValue('openToPublic')) {
+    add(form.querySelector('input[name="openToPublic"]'), 'Say whether the event is open to the general public.');
+  }
+
+  if (!occupancyBox.checked) {
+    add(occupancyBox, 'Confirm your reservation will not exceed the listed occupancy.');
+  }
+
+  if (!radioValue('food')) {
+    add(form.querySelector('input[name="food"]'), 'Say whether your event will include food.');
+  }
+
+  if (!radioValue('outsideVendor')) {
+    add(form.querySelector('input[name="outsideVendor"]'), 'Say whether your event will use an outside vendor.');
+  }
+
+  const alcohol = radioValue('alcohol');
+  if (!alcohol) {
+    add(form.querySelector('input[name="alcohol"]'), 'Say whether your event will serve alcohol.');
+  } else if (alcohol === 'Yes, alcohol') {
+    const under21 = Number(guestsUnder21.value);
+    if (blank(guestsUnder21) || !Number.isFinite(under21) || under21 < 0) {
+      add(guestsUnder21, 'Enter the number of guests under 21 (enter 0 if none).');
+    } else if (Number.isFinite(total) && under21 > total) {
+      add(guestsUnder21, 'Guests under 21 can\u2019t exceed the total number of guests.');
+    }
+    if (!alcoholAgreeBox.checked) {
+      add(alcoholAgreeBox, 'Confirm you agree to abide by the University Alcohol Policy.');
+    }
+  }
+
+  if (!checklistBox.checked) add(checklistBox, 'Review and agree to the event checklist.');
+
+  return errors;
+}
+
+// The block an error message should be attached to.
+function errorAnchor(el) {
+  return el.closest('.field, fieldset, .occupancy, .checklist, .conditional, .slots-section') || el;
+}
+
+function clearErrors() {
+  form.querySelectorAll('.field-error').forEach(node => node.remove());
+  form.querySelectorAll('.has-error').forEach(node => node.classList.remove('has-error'));
+  form.querySelectorAll('[aria-invalid]').forEach(node => node.removeAttribute('aria-invalid'));
+  errorSummary.hidden = true;
+  errorSummary.innerHTML = '';
+}
+
+function showErrors(errors) {
+  clearErrors();
+
+  const list = document.createElement('ul');
+
+  errors.forEach((error, i) => {
+    const anchor = errorAnchor(error.el);
+    anchor.classList.add('has-error');
+
+    const id = `err-${i}`;
+    const note = document.createElement('p');
+    note.className = 'field-error';
+    note.id = id;
+    note.textContent = error.message;
+    anchor.appendChild(note);
+
+    if (error.el.tagName === 'INPUT' || error.el.tagName === 'TEXTAREA') {
+      error.el.setAttribute('aria-invalid', 'true');
+    }
+
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${id}`;
+    link.textContent = error.message;
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (error.el.focus) error.el.focus({ preventScroll: true });
+    });
+    item.appendChild(link);
+    list.appendChild(item);
+  });
+
+  const heading = document.createElement('h2');
+  heading.textContent = errors.length === 1
+    ? 'One thing needs fixing before you can submit'
+    : `${errors.length} things need fixing before you can submit`;
+
+  errorSummary.append(heading, list);
+  errorSummary.hidden = false;
+  errorSummary.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  errorSummary.focus({ preventScroll: true });
+}
 
 async function handleSubmit(event) {
   event.preventDefault();
   clearStatus();
 
-  if (!titleInput.value.trim()) {
-    showStatus('Please enter an event title.', 'error');
-    titleInput.focus();
+  const errors = fieldErrors();
+  if (errors.length) {
+    showErrors(errors);
     return;
   }
 
-  if (!descInput.value.trim()) {
-    showStatus('Please add a brief description of your event.', 'error');
-    descInput.focus();
-    return;
-  }
-
-  if (!nameInput.value.trim()) {
-    showStatus('Please enter your full name.', 'error');
-    nameInput.focus();
-    return;
-  }
-
-  if (!emailInput.value.trim() || !emailInput.checkValidity()) {
-    showStatus('Please enter a valid email address.', 'error');
-    emailInput.focus();
-    return;
-  }
-
-  if (!deptInput.value.trim()) {
-    showStatus('Please enter the UCSC department making this request.', 'error');
-    deptInput.focus();
-    return;
-  }
-
-  if (!rpName.value.trim()) {
-    showStatus('Please name the UCSC responsible party for this event.', 'error');
-    rpName.focus();
-    return;
-  }
-
-  if (rpPhone.value.replace(/\D/g, '').length < 10) {
-    showStatus('Please enter a 10-digit cell phone number for the responsible party.', 'error');
-    rpPhone.focus();
-    return;
-  }
-
-  // Accepts ucsc.edu and its subdomains (e.g. soe.ucsc.edu).
-  if (!/^[^@\s]+@([a-z0-9-]+\.)*ucsc\.edu$/i.test(rpEmail.value.trim())) {
-    showStatus('The responsible party must have a ucsc.edu email address.', 'error');
-    rpEmail.focus();
-    return;
-  }
-
-  if (!dateInput.value) {
-    showStatus('Please choose a date.', 'error');
-    dateInput.focus();
-    return;
-  }
-
-  if (selectedSlots.length === 0) {
-    showStatus('Please select at least one time slot.', 'error');
-    return;
-  }
-
-  const total = Number(totalGuests.value);
-  if (!totalGuests.value.trim() || !Number.isFinite(total) || total < 1) {
-    showStatus('Please enter the total number of guests.', 'error');
-    totalGuests.focus();
-    return;
-  }
-
-  if (total > 73) {
-    showStatus('73 is the highest listed occupancy, for standing room. Please check the limits below.', 'error');
-    totalGuests.focus();
-    return;
-  }
-
-  const under21 = Number(guestsUnder21.value);
-  if (!guestsUnder21.value.trim() || !Number.isFinite(under21) || under21 < 0) {
-    showStatus('Please enter the number of guests under 21 (enter 0 if none).', 'error');
-    guestsUnder21.focus();
-    return;
-  }
-
-  if (under21 > total) {
-    showStatus('Guests under 21 can\u2019t exceed the total number of guests.', 'error');
-    guestsUnder21.focus();
-    return;
-  }
-
-  if (!radioValue('openToPublic')) {
-    showStatus('Please say whether the event is open to the general public.', 'error');
-    return;
-  }
-
-  if (!occupancyBox.checked) {
-    showStatus('Please confirm your reservation will not exceed the listed occupancy.', 'error');
-    occupancyBox.focus();
-    return;
-  }
-
-  if (!radioValue('food')) {
-    showStatus('Please say whether your event will include food.', 'error');
-    return;
-  }
-
-  if (!radioValue('outsideVendor')) {
-    showStatus('Please say whether your event will use an outside vendor.', 'error');
-    return;
-  }
-
-  const alcohol = radioValue('alcohol');
-  if (!alcohol) {
-    showStatus('Please say whether your event will serve alcohol.', 'error');
-    return;
-  }
-
-  if (alcohol === 'Yes, alcohol' && !alcoholAgreeBox.checked) {
-    showStatus('Please confirm you agree to abide by the University Alcohol Policy.', 'error');
-    alcoholAgreeBox.focus();
-    return;
-  }
-
-  if (!checklistBox.checked) {
-    showStatus('Please review and agree to the event checklist.', 'error');
-    checklistBox.focus();
-    return;
-  }
+  clearErrors();
 
   const chosen = slotButtons.filter(button => button.classList.contains('selected'));
 
@@ -1462,7 +1720,7 @@ async function handleSubmit(event) {
     responsiblePartyEmail: rpEmail.value.trim(),
 
     totalGuests: totalGuests.value.trim(),
-    guestsUnder21: guestsUnder21.value.trim(),
+    guestsUnder21: radioValue('alcohol') === 'Yes, alcohol' ? guestsUnder21.value.trim() : 'N/A',
     openToPublic: radioValue('openToPublic'),
 
     food: radioValue('food'),
@@ -1502,6 +1760,8 @@ async function handleSubmit(event) {
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
 
     form.reset();
+    clearDraft();
+    syncSameAsMe();
     syncAlcoholPolicy();          // re-hide the conditional agreement
     resetSlots('Select a date to see available times.');
     showStatus(
@@ -1525,6 +1785,13 @@ document.getElementById('tz-note').textContent = TIME_ZONE_LABEL;
 dateInput.min = todayInZone();
 dateInput.addEventListener('change', loadAvailability);
 clearBtn.addEventListener('click', clearSelection);
+sameAsMe.addEventListener('change', syncSameAsMe);
+[nameInput, emailInput].forEach(input =>
+  input.addEventListener('input', () => { if (sameAsMe.checked) syncSameAsMe(); }));
+document.getElementById('discard-draft').addEventListener('click', discardDraft);
+form.addEventListener('input', saveDraft);
+form.addEventListener('change', saveDraft);
+restoreDraft();
 document.getElementById('alcohol-policy-link').href = ALCOHOL_POLICY_URL;
 form.querySelectorAll('input[name="alcohol"]')
     .forEach(radio => radio.addEventListener('change', syncAlcoholPolicy));
