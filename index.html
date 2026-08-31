@@ -77,6 +77,8 @@
 
   input[type="text"],
   input[type="email"],
+  input[type="tel"],
+  input[type="number"],
   input[type="date"] {
     width: 100%;
     padding: 11px 13px;
@@ -114,6 +116,114 @@
   .optional { color: var(--muted); font-weight: 400; }
 
   .field .hint { margin-top: -2px; }
+
+  input[type="number"] { width: 8rem; }
+
+  /* ---------- Section headings ---------- */
+
+  .form-section {
+    margin: 30px 0 18px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .form-section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .form-section h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  .form-section p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ---------- Radio groups ---------- */
+
+  fieldset {
+    margin: 0 0 20px;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  fieldset .hint { margin: 0 0 10px; }
+
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+
+  .choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+
+  .choice:hover { border-color: var(--blue); background: var(--blue-soft); }
+
+  .choice input[type="radio"] {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 1px 0 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .choice:has(input:checked) {
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  .choice:has(input:focus-visible) {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+  }
+
+  .choice .sub {
+    display: block;
+    font-weight: 400;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ---------- Conditional block ---------- */
+
+  .conditional {
+    margin: -8px 0 20px;
+    padding: 14px 16px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius);
+  }
+
+  .conditional[hidden] { display: none; }
+
+  .conditional p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--ink);
+  }
 
   /* ---------- Occupancy agreement ---------- */
 
@@ -453,11 +563,22 @@
   </header>
 
   <form id="reservation-form" novalidate>
+
+    <div class="form-section"><h2>Event</h2></div>
+
     <div class="field">
       <label for="event-title">Event Title <span class="req" aria-hidden="true">*</span></label>
       <input type="text" id="event-title" name="eventTitle" required maxlength="120"
              autocomplete="off" placeholder="Team planning session">
     </div>
+
+    <div class="field">
+      <label for="description">Brief description of your meeting/event <span class="req" aria-hidden="true">*</span></label>
+      <textarea id="description" name="eventDescription" rows="3" maxlength="1000" required
+                placeholder="Monthly faculty meeting with a short presentation."></textarea>
+    </div>
+
+    <div class="form-section"><h2>Who&rsquo;s requesting</h2></div>
 
     <div class="field">
       <label for="name">Full Name <span class="req" aria-hidden="true">*</span></label>
@@ -474,6 +595,34 @@
       <input type="text" id="department" name="department" required maxlength="120"
              autocomplete="organization" placeholder="Politics">
     </div>
+
+    <div class="form-section">
+      <h2>UCSC Responsible Party</h2>
+      <p>This person will be the main contact for your event and will be responsible for
+         coordinating access to the building, set-up and break-down, catering, supplies,
+         AV operation, and similar arrangements.</p>
+    </div>
+
+    <div class="field">
+      <label for="rp-name">Name of UCSC Responsible Party <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="rp-name" name="responsiblePartyName" required maxlength="120"
+             autocomplete="off" placeholder="First and last name">
+    </div>
+
+    <div class="field">
+      <label for="rp-phone">Cell Phone Number <span class="req" aria-hidden="true">*</span></label>
+      <input type="tel" id="rp-phone" name="responsiblePartyPhone" required maxlength="30"
+             autocomplete="tel" placeholder="(831) 555-0123">
+    </div>
+
+    <div class="field">
+      <label for="rp-email">Email of Responsible Party <span class="req" aria-hidden="true">*</span></label>
+      <p class="hint">Must be a ucsc.edu address.</p>
+      <input type="email" id="rp-email" name="responsiblePartyEmail" required
+             autocomplete="email" placeholder="name@ucsc.edu">
+    </div>
+
+    <div class="form-section"><h2>When</h2></div>
 
     <div class="field">
       <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
@@ -510,6 +659,29 @@
                 placeholder="Sept 3 and Sept 10, same times"></textarea>
     </div>
 
+    <div class="form-section"><h2>Attendance</h2></div>
+
+    <div class="field">
+      <label for="total-guests">Total number of guests <span class="req" aria-hidden="true">*</span></label>
+      <p class="hint">Please see the occupancy limits below.</p>
+      <input type="number" id="total-guests" name="totalGuests" required min="1" max="73"
+             inputmode="numeric" placeholder="20">
+    </div>
+
+    <div class="field">
+      <label for="guests-under-21">Number of guests under 21 <span class="req" aria-hidden="true">*</span></label>
+      <input type="number" id="guests-under-21" name="guestsUnder21" required min="0" max="73"
+             inputmode="numeric" placeholder="0">
+    </div>
+
+    <fieldset>
+      <legend>Will this event be open to the general public? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="openToPublic" value="Yes, open to the public"><span>Yes, event is open to the public</span></label>
+        <label class="choice"><input type="radio" name="openToPublic" value="Not open to the public"><span>Not open to the public</span></label>
+      </div>
+    </fieldset>
+
     <div class="occupancy">
       <p>I agree that my reservation <strong>WILL NOT EXCEED</strong> the Fire Marshal&rsquo;s listed occupancy.</p>
       <table class="caps">
@@ -525,6 +697,56 @@
         <input type="checkbox" id="occupancy" name="occupancyAgreement" required>
         <span>I agree to not exceed listed occupancy. <span class="req" aria-hidden="true">*</span></span>
       </label>
+    </div>
+
+
+    <div class="form-section"><h2>Food, vendors &amp; alcohol</h2></div>
+
+    <fieldset>
+      <legend>Will your event include food? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="food" value="Yes, self-service food"><span>Yes, self-service food</span></label>
+        <label class="choice"><input type="radio" name="food" value="Yes, catered food"><span>Yes, catered food<span class="sub">Responsible party must meet the caterer during the set-up time of the event.</span></span></label>
+        <label class="choice"><input type="radio" name="food" value="No, food will not be served"><span>No, food will not be served</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Will your event use an outside vendor for additional tables, chairs or set-up? <span class="req" aria-hidden="true">*</span></legend>
+      <p class="hint">The responsible party must arrange to meet the catering company or vendor on-site,
+        at the time of delivery and pick-up, on the date of your reservation. Items may
+        <strong>not</strong> be delivered before your reservation or picked up after it.</p>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="outsideVendor" value="Yes, outside vendor"><span>Yes: outside vendor</span></label>
+        <label class="choice"><input type="radio" name="outsideVendor" value="No, outside vendor"><span>No: outside vendor</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Will your event serve alcohol? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="alcohol" value="Yes, alcohol"><span>Yes, alcohol</span></label>
+        <label class="choice"><input type="radio" name="alcohol" value="No alcohol"><span>No alcohol</span></label>
+      </div>
+    </fieldset>
+
+    <div class="conditional" id="alcohol-policy" hidden>
+      <p>If your event will serve alcohol, you agree that you have read, understand, and will
+         abide by the University Alcohol Policy.
+         <a id="alcohol-policy-link" href="#" target="_blank" rel="noopener noreferrer">Link to policy</a></p>
+      <label class="agree" for="alcohol-agree">
+        <input type="checkbox" id="alcohol-agree" name="alcoholPolicyAgreement">
+        <span>I have read, understand, and agree to abide by the University Alcohol Policy.
+          <span class="req" aria-hidden="true">*</span></span>
+      </label>
+    </div>
+
+    <div class="form-section"><h2>Anything else</h2></div>
+
+    <div class="field">
+      <label for="notes">Is there anything else you would like to communicate regarding your reservation request? <span class="optional">(optional)</span></label>
+      <textarea id="notes" name="additionalNotes" rows="3" maxlength="1000"
+                placeholder="Anything we should know."></textarea>
     </div>
 
     <button type="submit" class="submit" id="submit-btn">Request Reservation</button>
@@ -543,6 +765,11 @@ const CALENDAR_ID        = 'c_f477f318e76558b105514d45eac70620263207ec74bd5d848a
 
 // The room's own time zone. Slots are shown and submitted in this zone no
 // matter where the person booking happens to be.
+// UCSC BAS 0009, "Events with Alcoholic Beverages". Swap in your canonical
+// link if this one moves — the URL carries an access token.
+const ALCOHOL_POLICY_URL =
+  'https://ucscpolicy.ellucid.com/pman/documents/view/112/?security=5917c4f5043157c8189734f41e1f81e62acecd1e';
+
 const TIME_ZONE       = 'America/Los_Angeles';
 const TIME_ZONE_LABEL = 'Pacific';
 
@@ -559,6 +786,28 @@ const form       = document.getElementById('reservation-form');
 const titleInput = document.getElementById('event-title');
 const moreDates  = document.getElementById('more-dates');
 const occupancyBox = document.getElementById('occupancy');
+const descInput  = document.getElementById('description');
+const rpName     = document.getElementById('rp-name');
+const rpPhone    = document.getElementById('rp-phone');
+const rpEmail    = document.getElementById('rp-email');
+const totalGuests   = document.getElementById('total-guests');
+const guestsUnder21 = document.getElementById('guests-under-21');
+const notesInput = document.getElementById('notes');
+const alcoholPolicyBox  = document.getElementById('alcohol-policy');
+const alcoholAgreeBox   = document.getElementById('alcohol-agree');
+
+// Reads the selected value of a radio group, or '' when nothing is picked.
+function radioValue(name) {
+  const picked = form.querySelector(`input[name="${name}"]:checked`);
+  return picked ? picked.value : '';
+}
+
+// The alcohol policy agreement only applies when alcohol is actually served.
+function syncAlcoholPolicy() {
+  const serving = radioValue('alcohol') === 'Yes, alcohol';
+  alcoholPolicyBox.hidden = !serving;
+  if (!serving) alcoholAgreeBox.checked = false;   // never submit a stale agreement
+}
 const nameInput  = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const deptInput  = document.getElementById('department');
@@ -958,6 +1207,12 @@ async function handleSubmit(event) {
     return;
   }
 
+  if (!descInput.value.trim()) {
+    showStatus('Please add a brief description of your event.', 'error');
+    descInput.focus();
+    return;
+  }
+
   if (!nameInput.value.trim()) {
     showStatus('Please enter your full name.', 'error');
     nameInput.focus();
@@ -976,6 +1231,25 @@ async function handleSubmit(event) {
     return;
   }
 
+  if (!rpName.value.trim()) {
+    showStatus('Please name the UCSC responsible party for this event.', 'error');
+    rpName.focus();
+    return;
+  }
+
+  if (rpPhone.value.replace(/\D/g, '').length < 10) {
+    showStatus('Please enter a 10-digit cell phone number for the responsible party.', 'error');
+    rpPhone.focus();
+    return;
+  }
+
+  // Accepts ucsc.edu and its subdomains (e.g. soe.ucsc.edu).
+  if (!/^[^@\s]+@([a-z0-9-]+\.)*ucsc\.edu$/i.test(rpEmail.value.trim())) {
+    showStatus('The responsible party must have a ucsc.edu email address.', 'error');
+    rpEmail.focus();
+    return;
+  }
+
   if (!dateInput.value) {
     showStatus('Please choose a date.', 'error');
     dateInput.focus();
@@ -987,9 +1261,62 @@ async function handleSubmit(event) {
     return;
   }
 
+  const total = Number(totalGuests.value);
+  if (!totalGuests.value.trim() || !Number.isFinite(total) || total < 1) {
+    showStatus('Please enter the total number of guests.', 'error');
+    totalGuests.focus();
+    return;
+  }
+
+  if (total > 73) {
+    showStatus('73 is the highest listed occupancy, for standing room. Please check the limits below.', 'error');
+    totalGuests.focus();
+    return;
+  }
+
+  const under21 = Number(guestsUnder21.value);
+  if (!guestsUnder21.value.trim() || !Number.isFinite(under21) || under21 < 0) {
+    showStatus('Please enter the number of guests under 21 (enter 0 if none).', 'error');
+    guestsUnder21.focus();
+    return;
+  }
+
+  if (under21 > total) {
+    showStatus('Guests under 21 can\u2019t exceed the total number of guests.', 'error');
+    guestsUnder21.focus();
+    return;
+  }
+
+  if (!radioValue('openToPublic')) {
+    showStatus('Please say whether the event is open to the general public.', 'error');
+    return;
+  }
+
   if (!occupancyBox.checked) {
     showStatus('Please confirm your reservation will not exceed the listed occupancy.', 'error');
     occupancyBox.focus();
+    return;
+  }
+
+  if (!radioValue('food')) {
+    showStatus('Please say whether your event will include food.', 'error');
+    return;
+  }
+
+  if (!radioValue('outsideVendor')) {
+    showStatus('Please say whether your event will use an outside vendor.', 'error');
+    return;
+  }
+
+  const alcohol = radioValue('alcohol');
+  if (!alcohol) {
+    showStatus('Please say whether your event will serve alcohol.', 'error');
+    return;
+  }
+
+  if (alcohol === 'Yes, alcohol' && !alcoholAgreeBox.checked) {
+    showStatus('Please confirm you agree to abide by the University Alcohol Policy.', 'error');
+    alcoholAgreeBox.focus();
     return;
   }
 
@@ -1033,6 +1360,22 @@ async function handleSubmit(event) {
     // --- Extras, safe to leave unmapped ------------------------------
     name: nameInput.value.trim(),
     department: deptInput.value.trim(),
+    eventDescription: descInput.value.trim(),
+
+    responsiblePartyName: rpName.value.trim(),
+    responsiblePartyPhone: rpPhone.value.trim(),
+    responsiblePartyEmail: rpEmail.value.trim(),
+
+    totalGuests: totalGuests.value.trim(),
+    guestsUnder21: guestsUnder21.value.trim(),
+    openToPublic: radioValue('openToPublic'),
+
+    food: radioValue('food'),
+    outsideVendor: radioValue('outsideVendor'),
+    alcohol: radioValue('alcohol'),
+    alcoholPolicyAgreement: radioValue('alcohol') === 'Yes, alcohol' ? 'Yes' : 'N/A',
+
+    additionalNotes: notesInput.value.trim(),
     // Same two moments as full timestamps, in case a step ever needs them
     // without having to recombine the date and the plain-text time.
     startTimeISO: toZonedISO(blockStart),     // "2026-08-31T11:00:00-07:00"
@@ -1063,6 +1406,7 @@ async function handleSubmit(event) {
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
 
     form.reset();
+    syncAlcoholPolicy();          // re-hide the conditional agreement
     resetSlots('Select a date to see available times.');
     showStatus(
       `Reservation sent — ${payload.startTime} to ${payload.endTime} ${TIME_ZONE_LABEL} on ${payload.date}. ` +
@@ -1085,6 +1429,9 @@ document.getElementById('tz-note').textContent = TIME_ZONE_LABEL;
 dateInput.min = todayInZone();
 dateInput.addEventListener('change', loadAvailability);
 clearBtn.addEventListener('click', clearSelection);
+document.getElementById('alcohol-policy-link').href = ALCOHOL_POLICY_URL;
+form.querySelectorAll('input[name="alcohol"]')
+    .forEach(radio => radio.addEventListener('change', syncAlcoholPolicy));
 form.addEventListener('submit', handleSubmit);
 </script>
 
