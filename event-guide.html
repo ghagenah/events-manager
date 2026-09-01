@@ -218,44 +218,62 @@
   .btn-link:hover { background: var(--blue-dark); color: #fff; }
   .btn-link:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 60, 108, .38); }
 
+  .closing-cta {
+    margin-top: 28px;
+    padding: 20px 22px;
+    background: var(--blue-soft);
+    border: 1px solid #a9c3d6;
+    border-radius: var(--radius);
+  }
+
+  .closing-cta p { margin: 0 0 12px; font-size: 14.5px; }
+  .closing-cta .btn-link { margin: 0; border: none; cursor: pointer; font-family: inherit; }
+
   .detail-hint { margin: 16px 0 0; font-size: 14px; color: var(--muted-strong); }
 
   /* ---------- Tabs ---------- */
 
   .tabs {
     display: flex;
-    gap: 4px;
-    margin: 22px 0 4px;
-    padding: 4px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    gap: 0;
+    margin: 24px 0 0;
+    border-bottom: 2px solid var(--line);
   }
 
   .tabs button {
-    flex: 1;
-    padding: 10px 14px;
+    padding: 12px 4px;
+    margin: 0 26px -2px 0;
     font: inherit;
-    font-size: 14.5px;
+    font-size: 15.5px;
     font-weight: 650;
     color: var(--muted-strong);
     background: none;
     border: none;
-    border-radius: 9px;
+    border-bottom: 3px solid transparent;
     cursor: pointer;
-    transition: background .12s, color .12s;
+    transition: color .12s, border-color .12s;
+  }
+
+  .tabs button .count {
+    font-weight: 500;
+    font-size: 13.5px;
+    color: var(--muted);
   }
 
   .tabs button:hover { color: var(--blue); }
+  .tabs button:hover .count { color: var(--blue); }
 
   .tabs button[aria-selected="true"] {
-    background: var(--blue);
-    color: #fff;
+    color: var(--blue);
+    border-bottom-color: var(--blue);
   }
 
+  .tabs button[aria-selected="true"] .count { color: var(--blue); }
+
   .tabs button:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 60, 108, .38);
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+    border-radius: 3px;
   }
 
   [role="tabpanel"][hidden] { display: none; }
@@ -505,7 +523,7 @@
 
   <div class="tabs" role="tablist" aria-label="Guide sections">
     <button type="button" role="tab" id="tab-before" aria-controls="panel-before" aria-selected="true">Before your event</button>
-    <button type="button" role="tab" id="tab-checklist" aria-controls="panel-checklist" aria-selected="false" tabindex="-1">End of event checklist</button>
+    <button type="button" role="tab" id="tab-checklist" aria-controls="panel-checklist" aria-selected="false" tabindex="-1">End of event checklist <span class="count">11 items</span></button>
   </div>
 
   <div role="tabpanel" id="panel-before" aria-labelledby="tab-before">
@@ -651,6 +669,12 @@
       <a href="mailto:panettac@ucsc.edu">panettac@ucsc.edu</a></p>
         </div>
       </details>
+    </div>
+
+    <div class="closing-cta">
+      <p><strong>When your event finishes</strong>, work through the checklist before you leave &mdash;
+        it is the quickest way to be sure nothing has been missed.</p>
+      <button type="button" class="btn-link" id="goto-checklist">Open the end of event checklist</button>
     </div>
   </div>
 
@@ -809,6 +833,11 @@ expandAll.addEventListener('click', () => {
 });
 
 details.forEach(d => d.addEventListener('toggle', syncExpandAll));
+
+document.getElementById('goto-checklist').addEventListener('click', () => {
+  selectTab(1);
+  document.querySelector('.tabs').scrollIntoView({ block: 'start' });
+});
 
 /* A link to a section should open it, whether it came from the page, an
    email, or a bookmark — a deep link that lands on a closed drawer is a
