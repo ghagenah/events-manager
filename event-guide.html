@@ -68,8 +68,8 @@
   .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
 
   h2 {
-    margin: 40px 0 12px;
-    padding-top: 26px;
+    margin: 26px 0 10px;
+    padding-top: 18px;
     border-top: 1px solid var(--line);
     font-size: 19px;
     font-weight: 650;
@@ -218,33 +218,116 @@
   .btn-link:hover { background: var(--blue-dark); color: #fff; }
   .btn-link:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 60, 108, .38); }
 
-  /* ---------- Sticky jump to checklist ---------- */
+  .detail-hint { margin: 16px 0 0; font-size: 14px; color: var(--muted-strong); }
 
-  .to-checklist {
-    position: fixed;
-    right: 18px;
-    bottom: 18px;
-    z-index: 20;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 18px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 650;
-    text-decoration: none;
-    border-radius: 999px;
-    box-shadow: 0 4px 14px rgba(18, 33, 46, .22);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(8px);
-    transition: opacity .2s, transform .2s, visibility .2s;
+  /* ---------- Tabs ---------- */
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin: 22px 0 4px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
   }
 
-  .to-checklist.show { opacity: 1; visibility: visible; transform: none; }
-  .to-checklist:hover { background: var(--blue-dark); color: #fff; }
-  .to-checklist:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 60, 108, .38); }
+  .tabs button {
+    flex: 1;
+    padding: 10px 14px;
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 650;
+    color: var(--muted-strong);
+    background: none;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+
+  .tabs button:hover { color: var(--blue); }
+
+  .tabs button[aria-selected="true"] {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  .tabs button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .38);
+  }
+
+  [role="tabpanel"][hidden] { display: none; }
+
+  /* ---------- Collapsible sections ---------- */
+
+  .sec {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sec > summary {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 15px 2px;
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -.01em;
+    cursor: pointer;
+    list-style: none;
+    scroll-margin-top: 12px;
+  }
+
+  .sec > summary::-webkit-details-marker { display: none; }
+
+  .sec > summary::after {
+    content: "";
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--muted-strong);
+    border-bottom: 2px solid var(--muted-strong);
+    transform: rotate(45deg) translate(-2px, -2px);
+    transition: transform .15s;
+  }
+
+  .sec[open] > summary::after { transform: rotate(-135deg) translate(-2px, -2px); }
+  .sec > summary:hover { color: var(--blue); }
+  .sec > summary:hover::after { border-color: var(--blue); }
+
+  .sec > summary:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+
+  .sec > summary .num {
+    flex: none;
+    min-width: 1.5em;
+    color: var(--blue);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sec .body { padding: 0 2px 18px 2px; }
+  .sec .body > :first-child { margin-top: 0; }
+
+  .expand-all {
+    display: block;
+    margin: 14px 0 0 auto;
+    padding: 7px 13px;
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 650;
+    color: var(--blue);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .expand-all:hover { border-color: var(--blue); background: var(--blue-soft); }
+  .expand-all:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 60, 108, .28); }
 
   /* ---------- Checklist ---------- */
 
@@ -369,7 +452,9 @@
   @media print {
     body { background: #fff; padding: 0; display: block; }
     .card { max-width: none; border: none; box-shadow: none; padding: 0; }
-    .to-checklist, .checklist-actions, .contents, .btn-link { display: none !important; }
+    .tabs, .checklist-actions, .btn-link, .expand-all, .detail-hint { display: none !important; }
+    [role="tabpanel"][hidden] { display: block !important; }
+    .sec > summary::after { display: none; }
     .checklist input[type="checkbox"] { -webkit-appearance: none; appearance: none;
       width: 15px; height: 15px; border: 1.5px solid #333; border-radius: 2px; }
     .checklist li.done label, .all-done { background: none !important; }
@@ -407,26 +492,16 @@
     </ul>
   </div>
 
-  <nav class="contents" aria-label="On this page">
-    <h2>On this page</h2>
-    <ol>
-      <li><span class="n">1.</span> <a href="#card-key">Card key access</a></li>
-      <li><span class="n">2.</span> <a href="#guests">Access for your guests</a></li>
-      <li><span class="n">3.</span> <a href="#entry">Building entry</a></li>
-      <li><span class="n">4.</span> <a href="#walkthrough">Schedule a walk-through</a></li>
-      <li><span class="n">5.</span> <a href="#setup">Set-up and break-down</a></li>
-      <li><span class="n">6.</span> <a href="#deliveries">Deliveries and catering</a></li>
-      <li><span class="n">7.</span> <a href="#supplies">Supplies</a></li>
-      <li><span class="n">8.</span> <a href="#av">AV equipment</a></li>
-      <li><span class="n">9.</span> <a href="#end">End of your event</a></li>
-      <li><span class="n">10.</span> <a href="#questions">Questions</a></li>
-      <li class="jump"><a href="#checklist">&darr; Jump to the end of event checklist</a></li>
-    </ol>
-  </nav>
+  <div class="tabs" role="tablist" aria-label="Guide sections">
+    <button type="button" role="tab" id="tab-before" aria-controls="panel-before" aria-selected="true">Before your event</button>
+    <button type="button" role="tab" id="tab-checklist" aria-controls="panel-checklist" aria-selected="false" tabindex="-1">End of event checklist</button>
+  </div>
 
-  <section>
-    <h2 id="responsibilities"><span class="num"></span>What you are responsible for</h2>
-    <p>As the Responsible Party you are the main contact for this event, and you are responsible for:</p>
+  <div role="tabpanel" id="panel-before" aria-labelledby="tab-before">
+
+    <section>
+      <h2>What you are responsible for</h2>
+<p>As the Responsible Party you are the main contact for this event, and you are responsible for:</p>
     <ol>
       <li>Coordinating access to the building, including guest access throughout your event, and directing people to the correct entrance.</li>
       <li>Scheduling a walk-through before your event.</li>
@@ -436,11 +511,17 @@
       <li>Operating the AV equipment.</li>
       <li>Returning the room to a clean, organised set-up for the next event.</li>
     </ol>
-  </section>
+    </section>
 
-  <section>
-    <h2 id="card-key"><span class="num">1.</span> Card key access</h2>
-    <p>Your UCSC ID card must be programmed before you can get into the 100 Panetta building — both the
+    <p class="detail-hint">The details of each are below. Open any section to read it.</p>
+
+    <button type="button" class="expand-all" id="expand-all" aria-expanded="false">Expand all</button>
+
+    <div class="sections">
+      <details class="sec" id="card-key">
+        <summary><span class="num">1.</span>Card key access</summary>
+        <div class="body">
+<p>Your UCSC ID card must be programmed before you can get into the 100 Panetta building — both the
       entry door and the interior lobby door.</p>
     <ul>
       <li>Access is programmed <strong>for the date and time of your event only</strong>.</li>
@@ -456,11 +537,12 @@
         knows their PIN before the day.</p>
     </div>
     <a class="btn-link" href="https://sites.google.com/ucsc.edu/panettaconference/card-key-access-request" target="_blank" rel="noopener noreferrer">Request card key access</a>
-  </section>
-
-  <section>
-    <h2 id="guests"><span class="num">2.</span> Access for your guests</h2>
-    <p>This is a <strong>no-host event space</strong>. You, or someone you assign, must remain in the business
+        </div>
+      </details>
+      <details class="sec" id="guests">
+        <summary><span class="num">2.</span>Access for your guests</summary>
+        <div class="body">
+<p>This is a <strong>no-host event space</strong>. You, or someone you assign, must remain in the business
       lobby throughout your reservation, or whenever guests and deliveries need to get in.</p>
     <ul>
       <li>It is your responsibility to identify your guests, let them into the building, and keep the building
@@ -475,28 +557,31 @@
     <div class="warn">
       <p><strong>Propping exterior or interior lobby doors open is not allowed.</strong> Alarms will sound.</p>
     </div>
-  </section>
-
-  <section>
-    <h2 id="entry"><span class="num">3.</span> Building entry</h2>
-    <ul>
+        </div>
+      </details>
+      <details class="sec" id="entry">
+        <summary><span class="num">3.</span>Building entry</summary>
+        <div class="body">
+<ul>
       <li>Event entry is through the <strong>Business Entry on Panetta Ave</strong>.</li>
       <li>Please <strong>do not</strong> use the IAS gallery entrance on Delaware Ave.</li>
       <li>Tell your guests which entrance to use before the day.</li>
     </ul>
-  </section>
-
-  <section>
-    <h2 id="walkthrough"><span class="num">4.</span> Schedule a walk-through</h2>
-    <p>If this is your first time reserving the Panetta Conference Room, we strongly recommend booking a short
+        </div>
+      </details>
+      <details class="sec" id="walkthrough">
+        <summary><span class="num">4.</span>Schedule a walk-through</summary>
+        <div class="body">
+<p>If this is your first time reserving the Panetta Conference Room, we strongly recommend booking a short
       walk-through before your event. It covers the building, access, the AV equipment, and what is expected of
       your event — and it is much easier than working it out on the day.</p>
     <p>AV instructions are covered during the walk-through.</p>
-  </section>
-
-  <section>
-    <h2 id="setup"><span class="num">5.</span> Set-up and break-down</h2>
-    <p>Your reservation's start and end times <strong>include set-up and clean-up</strong>. As the Responsible
+        </div>
+      </details>
+      <details class="sec" id="setup">
+        <summary><span class="num">5.</span>Set-up and break-down</summary>
+        <div class="body">
+<p>Your reservation's start and end times <strong>include set-up and clean-up</strong>. As the Responsible
       Party you coordinate both, so plan the time accordingly.</p>
     <ul>
       <li>There may be other events before or after yours.</li>
@@ -504,36 +589,40 @@
         not be able to get in</strong> until your start time.</li>
       <li>Arts Division staff are not available to meet you or your vendors, or to let anyone in.</li>
     </ul>
-  </section>
-
-  <section>
-    <h2 id="deliveries"><span class="num">6.</span> Deliveries and catering</h2>
-    <p>You must arrange to meet vendors and caterers on site, in person, at both delivery and pick-up. Arts
+        </div>
+      </details>
+      <details class="sec" id="deliveries">
+        <summary><span class="num">6.</span>Deliveries and catering</summary>
+        <div class="body">
+<p>You must arrange to meet vendors and caterers on site, in person, at both delivery and pick-up. Arts
       Division staff are not available to meet them.</p>
     <p>Deliveries cannot arrive before your reservation starts, and items cannot be collected after it ends.</p>
-  </section>
-
-  <section>
-    <h2 id="supplies"><span class="num">7.</span> Supplies</h2>
-    <p>As with other rooms you might reserve on campus, the Arts Division does not provide staff, tech support,
+        </div>
+      </details>
+      <details class="sec" id="supplies">
+        <summary><span class="num">7.</span>Supplies</summary>
+        <div class="body">
+<p>As with other rooms you might reserve on campus, the Arts Division does not provide staff, tech support,
       or supplies for your event. Nobody will set up the room or the AV equipment for you.</p>
     <p>Check the
       <a href="https://sites.google.com/ucsc.edu/panettaconference/space-details" target="_blank" rel="noopener noreferrer">Space Details</a>
       page to see exactly what is and is not included with the room.</p>
-  </section>
-
-  <section>
-    <h2 id="av"><span class="num">8.</span> AV equipment</h2>
-    <p>Please review the
+        </div>
+      </details>
+      <details class="sec" id="av">
+        <summary><span class="num">8.</span>AV equipment</summary>
+        <div class="body">
+<p>Please review the
       <a href="https://sites.google.com/ucsc.edu/panettaconference/av-resources" target="_blank" rel="noopener noreferrer">AV resources</a>
       page before your event.</p>
     <p>If you are not comfortable connecting to a standard AV set-up, bring someone from your event who is.
       <strong>100 Panetta staff will not be on site to help with AV.</strong></p>
-  </section>
-
-  <section>
-    <h2 id="end"><span class="num">9.</span> End of your event</h2>
-    <p>You are responsible for leaving the room clean and reset. We do not expect a particular layout, but we
+        </div>
+      </details>
+      <details class="sec" id="end">
+        <summary><span class="num">9.</span>End of your event</summary>
+        <div class="body">
+<p>You are responsible for leaving the room clean and reset. We do not expect a particular layout, but we
       do require that you:</p>
     <ul>
       <li>Wipe down all tables, chairs and the lectern.</li>
@@ -541,21 +630,22 @@
       <li>Return any extra chairs you took from storage to the chair rack.</li>
     </ul>
     <p>Work through the <a href="#checklist">end of event checklist</a> below before you leave.</p>
-  </section>
-
-  <section>
-    <h2 id="questions"><span class="num">10.</span> Questions</h2>
-    <p>Please call or email if you have any questions, or if anything about your reservation changes.</p>
+        </div>
+      </details>
+      <details class="sec" id="questions">
+        <summary><span class="num">10.</span>Questions</summary>
+        <div class="body">
+<p>Please call or email if you have any questions, or if anything about your reservation changes.</p>
     <p><strong><a href="tel:+18314594183">831-459-4183</a></strong> &nbsp;·&nbsp;
       <a href="mailto:panettac@ucsc.edu">panettac@ucsc.edu</a></p>
-  </section>
+        </div>
+      </details>
+    </div>
+  </div>
 
-  <!-- ================= End of event checklist ================= -->
-
-  <section class="checklist-section" id="checklist">
-    <h2>End of event checklist</h2>
-
-    <p>Work through this at the end of your event, before you leave. It keeps the room ready for the next
+  <div role="tabpanel" id="panel-checklist" aria-labelledby="tab-checklist" hidden>
+    <section class="checklist-section" id="checklist">
+<p>Work through this at the end of your event, before you leave. It keeps the room ready for the next
       guests — and it is the fastest way to be sure you have not forgotten anything.</p>
 
     <p>This is a no-host space: set-up and clean-up, including configuring the chairs and tables, are your
@@ -591,7 +681,8 @@
       <p>If Panetta staff have to complete any of these tasks, your department will be expected to cover the
         cost of returning the venue to its original condition.</p>
     </div>
-  </section>
+    </section>
+  </div>
 
   <footer>
     100 Panetta Ave, Santa Cruz, CA 95060 &nbsp;·&nbsp; Updated June 2026
@@ -599,7 +690,6 @@
 
 </main>
 
-<a class="to-checklist" id="to-checklist" href="#checklist">&darr; End of event checklist</a>
 
 <script>
 /* =========================================================
@@ -667,24 +757,80 @@ document.getElementById('reset-btn').addEventListener('click', () => {
 
 document.getElementById('print-btn').addEventListener('click', () => window.print());
 
-/* Show the jump button once the reader is past the intro, and hide it again
-   once the checklist itself is on screen — at which point it is just clutter. */
-const checklist = document.getElementById('checklist');
+/* =========================================================
+   TABS AND COLLAPSIBLE SECTIONS
+   ========================================================= */
 
-if ('IntersectionObserver' in window) {
-  const watcher = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      jumpBtn.classList.toggle('show', !entry.isIntersecting && window.scrollY > 400);
-    });
-  }, { rootMargin: '0px 0px -60% 0px' });
-  watcher.observe(checklist);
+const tabs   = [document.getElementById('tab-before'), document.getElementById('tab-checklist')];
+const panels = [document.getElementById('panel-before'), document.getElementById('panel-checklist')];
+const details = Array.from(document.querySelectorAll('.sec'));
+const expandAll = document.getElementById('expand-all');
+
+function selectTab(index, { focus = false } = {}) {
+  tabs.forEach((tab, i) => {
+    const on = i === index;
+    tab.setAttribute('aria-selected', String(on));
+    tab.tabIndex = on ? 0 : -1;
+    panels[i].hidden = !on;
+  });
+  if (focus) tabs[index].focus();
 }
 
-window.addEventListener('scroll', () => {
-  const nearChecklist = checklist.getBoundingClientRect().top < window.innerHeight * 0.6;
-  jumpBtn.classList.toggle('show', window.scrollY > 400 && !nearChecklist);
-}, { passive: true });
+tabs.forEach((tab, i) => {
+  tab.addEventListener('click', () => selectTab(i));
+  tab.addEventListener('keydown', event => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    selectTab(event.key === 'ArrowRight' ? (i + 1) % tabs.length : (i + tabs.length - 1) % tabs.length,
+              { focus: true });
+  });
+});
 
+function syncExpandAll() {
+  const allOpen = details.every(d => d.open);
+  expandAll.textContent = allOpen ? 'Collapse all' : 'Expand all';
+  expandAll.setAttribute('aria-expanded', String(allOpen));
+}
+
+expandAll.addEventListener('click', () => {
+  const open = !details.every(d => d.open);
+  details.forEach(d => { d.open = open; });
+  syncExpandAll();
+});
+
+details.forEach(d => d.addEventListener('toggle', syncExpandAll));
+
+/* A link to a section should open it, whether it came from the page, an
+   email, or a bookmark — a deep link that lands on a closed drawer is a
+   dead end. */
+function openFromHash() {
+  const id = location.hash.slice(1);
+  if (!id) return;
+
+  if (id === 'checklist') { selectTab(1); return; }
+
+  const target = document.getElementById(id);
+  if (!target) return;
+  selectTab(0);
+  if (target.classList.contains('sec')) {
+    target.open = true;
+    syncExpandAll();
+    target.querySelector('summary').scrollIntoView({ block: 'start' });
+  }
+}
+
+window.addEventListener('hashchange', openFromHash);
+
+/* Printing must show everything: both panels, every section open. */
+function expandForPrint() {
+  panels.forEach(panel => { panel.hidden = false; });
+  details.forEach(d => { d.open = true; });
+}
+window.addEventListener('beforeprint', expandForPrint);
+document.getElementById('print-btn').addEventListener('click', expandForPrint);
+
+openFromHash();
+syncExpandAll();
 restore();
 render();
 </script>
