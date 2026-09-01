@@ -6,18 +6,24 @@
 <title>Panetta Conference Room Reservations</title>
 <style>
   :root {
-    --blue: #2563eb;
-    --blue-dark: #1d4ed8;
-    --blue-soft: #eff6ff;
-    --ink: #0f172a;
-    --muted: #64748b;
-    --line: #e2e8f0;
-    --bg: #f1f5f9;
+    /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
+       Neutrals are not specified by the brand, so those below are derived
+       with a blue bias toward the primary so they read as chosen. */
+    --blue: #003c6c;           /* Primary Blue  */
+    --gold: #fdc700;           /* Primary Yellow — blocks only, never text */
+    --teal: #007988;           /* Dark Teal     */
+    --rubine: #da216d;         /* Rubine Red    */
+    --blue-dark: #00294a;
+    --blue-soft: #e6eef4;
+    --ink: #12212e;
+    --muted: #5b6b79;
+    --line: #d5dee6;
+    --bg: #edf1f5;
     --card: #ffffff;
-    --danger: #dc2626;
-    --danger-soft: #fef2f2;
-    --success: #15803d;
-    --success-soft: #f0fdf4;
+    --danger: #da216d;
+    --danger-soft: #fdeaf2;
+    --success: #007988;
+    --success-soft: #e3f0f1;
     --radius: 12px;
   }
 
@@ -44,8 +50,9 @@
     max-width: 560px;
     background: var(--card);
     border: 1px solid var(--line);
+    border-top: 5px solid var(--gold);
     border-radius: 16px;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .07);
+    box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
     padding: 32px;
   }
 
@@ -110,7 +117,7 @@
   textarea:focus {
     outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .18);
   }
 
   .optional { color: var(--muted); font-weight: 400; }
@@ -196,7 +203,7 @@
   }
 
   .choice:has(input:focus-visible) {
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .22);
   }
 
   .choice .sub {
@@ -216,11 +223,11 @@
     gap: 10px 14px;
     margin-bottom: 22px;
     padding: 12px 14px;
-    background: #fffbeb;
-    border: 1px dashed #d9a441;
+    background: #fff8e0;
+    border: 1px dashed #fdc700;
     border-radius: var(--radius);
     font-size: 13px;
-    color: #7a5314;
+    color: #12212e;
   }
 
   .demo-bar[hidden] { display: none; }
@@ -233,18 +240,18 @@
     font: inherit;
     font-size: 13px;
     font-weight: 650;
-    color: #fff;
-    background: #b0781f;
+    color: #12212e;            /* white on gold is 1.6:1 — ink is 14:1 */
+    background: #fdc700;
     border: none;
     border-radius: 8px;
     cursor: pointer;
   }
 
-  .demo-bar button:hover { background: #96661a; }
+  .demo-bar button:hover { background: #e6b400; }
   .demo-bar button:disabled { opacity: .6; cursor: not-allowed; }
 
   .demo-bar button:focus-visible {
-    outline: 2px solid #7a5314;
+    outline: 2px solid #12212e;
     outline-offset: 2px;
   }
 
@@ -282,16 +289,16 @@
   .has-error input[type="date"],
   .has-error textarea {
     border-color: var(--danger);
-    background: #fffbfb;
+    background: #fff7fa;
   }
 
-  .has-error .choice { border-color: #fca5a5; }
+  .has-error .choice { border-color: #f0a3c3; }
 
   .error-summary {
     margin-bottom: 24px;
     padding: 14px 16px;
     background: var(--danger-soft);
-    border: 1px solid #fecaca;
+    border: 1px solid #f5b9d2;
     border-radius: var(--radius);
   }
 
@@ -325,7 +332,7 @@
     margin-bottom: 22px;
     padding: 11px 14px;
     background: var(--blue-soft);
-    border: 1px solid #bfdbfe;
+    border: 1px solid #a9c3d6;
     border-radius: var(--radius);
     font-size: 13px;
     color: var(--blue-dark);
@@ -374,7 +381,7 @@
   .checklist {
     margin-bottom: 24px;
     padding: 18px 20px;
-    background: #f8fafc;
+    background: #f4f7fa;
     border: 1px solid var(--line);
     border-radius: var(--radius);
   }
@@ -401,7 +408,7 @@
   .checklist .updated {
     margin: 0 0 14px;
     padding-bottom: 14px;
-    border-bottom: 1px solid #e8edf3;
+    border-bottom: 1px solid #dde5ec;
     font-size: 12px;
     color: var(--muted);
   }
@@ -420,8 +427,8 @@
   .conditional {
     margin: -8px 0 20px;
     padding: 14px 16px;
-    background: #fffbeb;
-    border: 1px solid #fde68a;
+    background: #fff8e0;
+    border: 1px solid #fdc700;
     border-radius: var(--radius);
   }
 
@@ -438,7 +445,7 @@
   .occupancy {
     margin-bottom: 24px;
     padding: 16px 18px;
-    background: #f8fafc;
+    background: #f4f7fa;
     border: 1px solid var(--line);
     border-radius: var(--radius);
   }
@@ -460,7 +467,7 @@
   .occupancy .caps td {
     text-align: left;
     padding: 5px 0;
-    border-bottom: 1px solid #e8edf3;
+    border-bottom: 1px solid #dde5ec;
     vertical-align: baseline;
   }
 
@@ -586,7 +593,7 @@
   .slot:focus-visible {
     outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .22);
   }
 
   .slot:active { transform: scale(.98); }
@@ -616,10 +623,10 @@
 
   .slot.unavailable,
   .slot.unavailable:hover {
-    background: #f8fafc;
+    background: #f4f7fa;
     border-color: var(--line);
     border-style: dashed;
-    color: #94a3b8;
+    color: #8c9aa6;
     cursor: not-allowed;
     pointer-events: none;
     transform: none;
@@ -629,7 +636,7 @@
      propagate to the status line below it and can't be cancelled there. */
   .slot.unavailable .slot-time { text-decoration: line-through; }
 
-  .slot.unavailable .until { color: #94a3b8; }
+  .slot.unavailable .until { color: #8c9aa6; }
 
   /* ---------- Messages ---------- */
 
@@ -644,12 +651,12 @@
     text-align: center;
   }
 
-  .loading { color: var(--blue); border-color: #bfdbfe; background: var(--blue-soft); }
+  .loading { color: var(--blue); border-color: #a9c3d6; background: var(--blue-soft); }
 
   .slot-error {
     color: var(--danger);
     border-style: solid;
-    border-color: #fecaca;
+    border-color: #f5b9d2;
     background: var(--danger-soft);
     text-align: left;
   }
@@ -662,7 +669,7 @@
     font-weight: 600;
     color: var(--danger);
     background: #fff;
-    border: 1px solid #fecaca;
+    border: 1px solid #f5b9d2;
     border-radius: 8px;
     cursor: pointer;
   }
@@ -706,7 +713,7 @@
   .swatch.free  { background: #fff; }
   .swatch.sel   { background: var(--blue); border-color: var(--blue); }
   .swatch.faded { background: #fff; opacity: .38; }
-  .swatch.busy  { background: #f8fafc; border-style: dashed; }
+  .swatch.busy  { background: #f4f7fa; border-style: dashed; }
 
   /* ---------- Submit ---------- */
 
@@ -728,7 +735,7 @@
 
   .submit:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .35);
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .38);
   }
 
   .submit:disabled { opacity: .6; cursor: not-allowed; }
@@ -742,9 +749,9 @@
   }
 
   .status[hidden] { display: none; }
-  .status.info    { color: var(--blue);    background: var(--blue-soft);   border-color: #bfdbfe; }
-  .status.error   { color: var(--danger);  background: var(--danger-soft); border-color: #fecaca; }
-  .status.success { color: var(--success); background: var(--success-soft);border-color: #bbf7d0; }
+  .status.info    { color: var(--blue);    background: var(--blue-soft);   border-color: #a9c3d6; }
+  .status.error   { color: var(--danger);  background: var(--danger-soft); border-color: #f5b9d2; }
+  .status.success { color: var(--success); background: var(--success-soft);border-color: #a8d3d8; }
 
   .sr-only {
     position: absolute;
