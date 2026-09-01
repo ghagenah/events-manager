@@ -700,7 +700,6 @@ const boxes     = Array.from(document.querySelectorAll('#checklist-items input[t
 const progress  = document.getElementById('progress');
 const allDone   = document.getElementById('all-done');
 const savedNote = document.getElementById('saved-note');
-const jumpBtn   = document.getElementById('to-checklist');
 
 const STORE_KEY = 'panetta-end-of-event-checklist';
 
@@ -820,6 +819,10 @@ function openFromHash() {
 }
 
 window.addEventListener('hashchange', openFromHash);
+
+/* Some launchers apply the fragment after the document has parsed, which
+   fires no hashchange — so check again once loading settles. */
+window.addEventListener('load', openFromHash);
 
 /* Printing must show everything: both panels, every section open. */
 function expandForPrint() {
