@@ -254,21 +254,13 @@
     transition: color .12s, border-color .12s;
   }
 
-  .tabs button .count {
-    font-weight: 500;
-    font-size: 13.5px;
-    color: var(--muted);
-  }
 
   .tabs button:hover { color: var(--blue); }
-  .tabs button:hover .count { color: var(--blue); }
 
   .tabs button[aria-selected="true"] {
     color: var(--blue);
     border-bottom-color: var(--blue);
   }
-
-  .tabs button[aria-selected="true"] .count { color: var(--blue); }
 
   .tabs button:focus-visible {
     outline: 2px solid var(--blue);
@@ -523,7 +515,7 @@
 
   <div class="tabs" role="tablist" aria-label="Guide sections">
     <button type="button" role="tab" id="tab-before" aria-controls="panel-before" aria-selected="true">Before your event</button>
-    <button type="button" role="tab" id="tab-checklist" aria-controls="panel-checklist" aria-selected="false" tabindex="-1">End of event checklist <span class="count">11 items</span></button>
+    <button type="button" role="tab" id="tab-checklist" aria-controls="panel-checklist" aria-selected="false" tabindex="-1">End of event checklist</button>
   </div>
 
   <div role="tabpanel" id="panel-before" aria-labelledby="tab-before">
