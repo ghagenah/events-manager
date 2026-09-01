@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Responsible Party Guide</title>
+<style>
+  :root {
+    /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
+       Neutrals are derived with a blue bias toward the primary. */
+    --blue: #003c6c;           /* Primary Blue  */
+    --blue-dark: #00294a;
+    --blue-soft: #e6eef4;
+    --gold: #fdc700;           /* Primary Yellow — blocks only, never text */
+    --gold-soft: #fff8e0;
+    --teal: #007988;           /* Dark Teal     */
+    --teal-soft: #e3f0f1;
+    --rubine: #da216d;         /* Rubine Red    */
+    --ink: #12212e;
+    --muted: #5b6b79;
+    --line: #d5dee6;
+    --line-soft: #dde5ec;
+    --bg: #edf1f5;
+    --card: #ffffff;
+    --surface: #f4f7fa;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 40px 20px 96px;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 720px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
+    padding: 36px 40px 40px;
+  }
+
+  header { margin-bottom: 26px; }
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: 27px;
+    font-weight: 650;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+  }
+
+  .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+
+  h2 {
+    margin: 40px 0 12px;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+    font-size: 19px;
+    font-weight: 650;
+    letter-spacing: -.01em;
+    scroll-margin-top: 20px;
+  }
+
+  h2 .num {
+    display: inline-block;
+    min-width: 1.5em;
+    color: var(--blue);
+    font-variant-numeric: tabular-nums;
+  }
+
+  h3 {
+    margin: 22px 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  p { margin: 0 0 12px; }
+  p:last-child { margin-bottom: 0; }
+
+  a { color: var(--blue); text-underline-offset: 2px; }
+  a:hover { color: var(--blue-dark); }
+  a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 2px; }
+
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 7px; }
+  li:last-child { margin-bottom: 0; }
+  li::marker { color: var(--muted); }
+
+  strong { font-weight: 700; }
+
+  /* ---------- Who this is for ---------- */
+
+  .whofor {
+    margin-bottom: 22px;
+    padding: 15px 18px;
+    background: var(--blue-soft);
+    border: 1px solid #a9c3d6;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+  }
+
+  /* ---------- Read this first ---------- */
+
+  .critical {
+    margin-bottom: 26px;
+    padding: 18px 20px 16px;
+    background: var(--gold-soft);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+  }
+
+  .critical h2 {
+    margin: 0 0 10px;
+    padding: 0;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .critical ul { margin: 0; padding-left: 20px; font-size: 14.5px; }
+  .critical li { margin-bottom: 8px; }
+
+  /* ---------- Contents ---------- */
+
+  .contents {
+    margin-bottom: 8px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .contents h2 {
+    margin: 0 0 10px;
+    padding: 0;
+    border: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .contents ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 20px;
+    font-size: 14.5px;
+  }
+
+  .contents li { margin: 0; }
+  .contents a { text-decoration: none; }
+  .contents a:hover { text-decoration: underline; }
+  .contents .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .contents .jump {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+
+  .contents .jump a { font-weight: 700; }
+
+  /* ---------- Callouts ---------- */
+
+  .note {
+    margin: 14px 0;
+    padding: 13px 16px;
+    background: var(--surface);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 14.5px;
+  }
+
+  .warn {
+    margin: 14px 0;
+    padding: 13px 16px;
+    background: #fdeaf2;
+    border: 1px solid #f5b9d2;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+  }
+
+  .btn-link {
+    display: inline-block;
+    margin: 6px 0 4px;
+    padding: 11px 18px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 650;
+    text-decoration: none;
+    border-radius: var(--radius);
+  }
+
+  .btn-link:hover { background: var(--blue-dark); color: #fff; }
+  .btn-link:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 60, 108, .38); }
+
+  /* ---------- Sticky jump to checklist ---------- */
+
+  .to-checklist {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 650;
+    text-decoration: none;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(18, 33, 46, .22);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity .2s, transform .2s, visibility .2s;
+  }
+
+  .to-checklist.show { opacity: 1; visibility: visible; transform: none; }
+  .to-checklist:hover { background: var(--blue-dark); color: #fff; }
+  .to-checklist:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 60, 108, .38); }
+
+  /* ---------- Checklist ---------- */
+
+  .checklist-section { scroll-margin-top: 16px; }
+
+  .checklist-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 14px;
+    margin-bottom: 10px;
+  }
+
+  .progress {
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--blue);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .checklist {
+    margin: 14px 0 16px;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .checklist li { margin: 0; border-bottom: 1px solid var(--line-soft); }
+  .checklist li:last-child { border-bottom: none; }
+
+  .checklist label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 16px;
+    cursor: pointer;
+    font-size: 14.5px;
+    line-height: 1.5;
+    transition: background .12s;
+  }
+
+  .checklist label:hover { background: var(--surface); }
+
+  .checklist input[type="checkbox"] {
+    flex: none;
+    width: 19px;
+    height: 19px;
+    margin: 1px 0 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .checklist input:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .checklist .n {
+    flex: none;
+    min-width: 1.4em;
+    color: var(--muted);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .checklist li.done label { background: var(--teal-soft); }
+  .checklist li.done .text { color: var(--muted); }
+
+  .checklist-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  .ghost-btn {
+    padding: 9px 15px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--blue);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+
+  .ghost-btn:hover { border-color: var(--blue); background: var(--blue-soft); }
+  .ghost-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 60, 108, .28); }
+
+  .all-done {
+    margin: 14px 0 0;
+    padding: 13px 16px;
+    background: var(--teal-soft);
+    border: 1px solid #a8d3d8;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .all-done[hidden] { display: none; }
+
+  .saved-note { font-size: 13px; color: var(--muted); }
+
+  footer {
+    margin-top: 34px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 20px 12px 88px; }
+    .card { padding: 24px 22px 30px; }
+    h1 { font-size: 23px; }
+    .contents ol { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  /* ---------- Print: the checklist can still go in the AV binder ---------- */
+
+  @media print {
+    body { background: #fff; padding: 0; display: block; }
+    .card { max-width: none; border: none; box-shadow: none; padding: 0; }
+    .to-checklist, .checklist-actions, .contents, .btn-link { display: none !important; }
+    .checklist input[type="checkbox"] { -webkit-appearance: none; appearance: none;
+      width: 15px; height: 15px; border: 1.5px solid #333; border-radius: 2px; }
+    .checklist li.done label, .all-done { background: none !important; }
+    a { color: #000; text-decoration: underline; }
+    h2 { page-break-after: avoid; }
+    .checklist { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<main class="card">
+
+  <header>
+    <h1>Your event at 100 Panetta</h1>
+    <p class="subtitle">What you need to arrange before your reservation, and what to check before you leave.</p>
+  </header>
+
+  <div class="whofor">
+    <p>You have this link because you are listed as the <strong>Responsible Party</strong> for an event in the
+      Panetta Conference Room. <strong>If that is not you</strong>, please
+      <a href="mailto:panettac@ucsc.edu?subject=Responsible%20Party%20correction">let us know</a>
+      so we can send it to the right person and update the reservation.</p>
+  </div>
+
+  <div class="critical">
+    <h2>Read this first</h2>
+    <ul>
+      <li><strong>This is a no-host space.</strong> Nobody from the Arts Division will greet your guests, let them in, or help during your event.</li>
+      <li><strong>Someone from your event must stay in the business lobby</strong> for the whole reservation to let guests and deliveries in.</li>
+      <li><strong>Do not prop the exterior or lobby doors open.</strong> Alarms will sound.</li>
+      <li><strong>Card key access has to be requested ahead of time</strong>, and everyone who needs access requests their own. Last-minute programming may not be possible.</li>
+      <li><strong>Enter through the Business Entry on Panetta Ave</strong> — not the IAS gallery entrance on Delaware Ave. Tell your guests.</li>
+      <li><strong>Your reservation window includes set-up and clean-up.</strong> Your card will not work outside it, so you cannot arrive early to set up.</li>
+    </ul>
+  </div>
+
+  <nav class="contents" aria-label="On this page">
+    <h2>On this page</h2>
+    <ol>
+      <li><span class="n">1.</span> <a href="#card-key">Card key access</a></li>
+      <li><span class="n">2.</span> <a href="#guests">Access for your guests</a></li>
+      <li><span class="n">3.</span> <a href="#entry">Building entry</a></li>
+      <li><span class="n">4.</span> <a href="#walkthrough">Schedule a walk-through</a></li>
+      <li><span class="n">5.</span> <a href="#setup">Set-up and break-down</a></li>
+      <li><span class="n">6.</span> <a href="#deliveries">Deliveries and catering</a></li>
+      <li><span class="n">7.</span> <a href="#supplies">Supplies</a></li>
+      <li><span class="n">8.</span> <a href="#av">AV equipment</a></li>
+      <li><span class="n">9.</span> <a href="#end">End of your event</a></li>
+      <li><span class="n">10.</span> <a href="#questions">Questions</a></li>
+      <li class="jump"><a href="#checklist">&darr; Jump to the end of event checklist</a></li>
+    </ol>
+  </nav>
+
+  <section>
+    <h2 id="responsibilities"><span class="num"></span>What you are responsible for</h2>
+    <p>As the Responsible Party you are the main contact for this event, and you are responsible for:</p>
+    <ol>
+      <li>Coordinating access to the building, including guest access throughout your event, and directing people to the correct entrance.</li>
+      <li>Scheduling a walk-through before your event.</li>
+      <li>Setting up and breaking down the tables and chairs, and cleaning.</li>
+      <li>Being on site to meet catering and any other deliveries.</li>
+      <li>Providing all supplies your event needs.</li>
+      <li>Operating the AV equipment.</li>
+      <li>Returning the room to a clean, organised set-up for the next event.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 id="card-key"><span class="num">1.</span> Card key access</h2>
+    <p>Your UCSC ID card must be programmed before you can get into the 100 Panetta building — both the
+      entry door and the interior lobby door.</p>
+    <ul>
+      <li>Access is programmed <strong>for the date and time of your event only</strong>.</li>
+      <li>Everyone who needs access must <strong>submit their own request</strong>, up to three additional
+        cardholders. Forward the link below to them before your reservation date.</li>
+      <li>Everyone requesting access needs their own UCSC ID card and their 5-digit PIN. If you do not have a
+        PIN you must set one, or one will be assigned.</li>
+      <li>No UCSC ID card? Request one from
+        <a href="https://idcards.ucsc.edu/" target="_blank" rel="noopener noreferrer">ID Card Services</a>.</li>
+    </ul>
+    <div class="warn">
+      <p><strong>Please plan ahead.</strong> Last-minute programming may not be available. Make sure everyone
+        knows their PIN before the day.</p>
+    </div>
+    <a class="btn-link" href="https://sites.google.com/ucsc.edu/panettaconference/card-key-access-request" target="_blank" rel="noopener noreferrer">Request card key access</a>
+  </section>
+
+  <section>
+    <h2 id="guests"><span class="num">2.</span> Access for your guests</h2>
+    <p>This is a <strong>no-host event space</strong>. You, or someone you assign, must remain in the business
+      lobby throughout your reservation, or whenever guests and deliveries need to get in.</p>
+    <ul>
+      <li>It is your responsibility to identify your guests, let them into the building, and keep the building
+        secure during your event.</li>
+      <li>The Arts Division does not provide staff to greet, identify, or admit your guests.</li>
+      <li>If a guest steps out during your event, someone from your event will need to let them back in.</li>
+    </ul>
+    <div class="note">
+      <p>A tip from other events: print a portrait sign for the entry door with the mobile number of someone
+        at your event who can come down and let people in.</p>
+    </div>
+    <div class="warn">
+      <p><strong>Propping exterior or interior lobby doors open is not allowed.</strong> Alarms will sound.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="entry"><span class="num">3.</span> Building entry</h2>
+    <ul>
+      <li>Event entry is through the <strong>Business Entry on Panetta Ave</strong>.</li>
+      <li>Please <strong>do not</strong> use the IAS gallery entrance on Delaware Ave.</li>
+      <li>Tell your guests which entrance to use before the day.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2 id="walkthrough"><span class="num">4.</span> Schedule a walk-through</h2>
+    <p>If this is your first time reserving the Panetta Conference Room, we strongly recommend booking a short
+      walk-through before your event. It covers the building, access, the AV equipment, and what is expected of
+      your event — and it is much easier than working it out on the day.</p>
+    <p>AV instructions are covered during the walk-through.</p>
+  </section>
+
+  <section>
+    <h2 id="setup"><span class="num">5.</span> Set-up and break-down</h2>
+    <p>Your reservation's start and end times <strong>include set-up and clean-up</strong>. As the Responsible
+      Party you coordinate both, so plan the time accordingly.</p>
+    <ul>
+      <li>There may be other events before or after yours.</li>
+      <li>Your key card is programmed only for your reservation window. <strong>If you arrive early, you may
+        not be able to get in</strong> until your start time.</li>
+      <li>Arts Division staff are not available to meet you or your vendors, or to let anyone in.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2 id="deliveries"><span class="num">6.</span> Deliveries and catering</h2>
+    <p>You must arrange to meet vendors and caterers on site, in person, at both delivery and pick-up. Arts
+      Division staff are not available to meet them.</p>
+    <p>Deliveries cannot arrive before your reservation starts, and items cannot be collected after it ends.</p>
+  </section>
+
+  <section>
+    <h2 id="supplies"><span class="num">7.</span> Supplies</h2>
+    <p>As with other rooms you might reserve on campus, the Arts Division does not provide staff, tech support,
+      or supplies for your event. Nobody will set up the room or the AV equipment for you.</p>
+    <p>Check the
+      <a href="https://sites.google.com/ucsc.edu/panettaconference/space-details" target="_blank" rel="noopener noreferrer">Space Details</a>
+      page to see exactly what is and is not included with the room.</p>
+  </section>
+
+  <section>
+    <h2 id="av"><span class="num">8.</span> AV equipment</h2>
+    <p>Please review the
+      <a href="https://sites.google.com/ucsc.edu/panettaconference/av-resources" target="_blank" rel="noopener noreferrer">AV resources</a>
+      page before your event.</p>
+    <p>If you are not comfortable connecting to a standard AV set-up, bring someone from your event who is.
+      <strong>100 Panetta staff will not be on site to help with AV.</strong></p>
+  </section>
+
+  <section>
+    <h2 id="end"><span class="num">9.</span> End of your event</h2>
+    <p>You are responsible for leaving the room clean and reset. We do not expect a particular layout, but we
+      do require that you:</p>
+    <ul>
+      <li>Wipe down all tables, chairs and the lectern.</li>
+      <li>Pair two chairs with each table, in any neat and usable arrangement.</li>
+      <li>Return any extra chairs you took from storage to the chair rack.</li>
+    </ul>
+    <p>Work through the <a href="#checklist">end of event checklist</a> below before you leave.</p>
+  </section>
+
+  <section>
+    <h2 id="questions"><span class="num">10.</span> Questions</h2>
+    <p>Please call or email if you have any questions, or if anything about your reservation changes.</p>
+    <p><strong><a href="tel:+18314594183">831-459-4183</a></strong> &nbsp;·&nbsp;
+      <a href="mailto:panettac@ucsc.edu">panettac@ucsc.edu</a></p>
+  </section>
+
+  <!-- ================= End of event checklist ================= -->
+
+  <section class="checklist-section" id="checklist">
+    <h2>End of event checklist</h2>
+
+    <p>Work through this at the end of your event, before you leave. It keeps the room ready for the next
+      guests — and it is the fastest way to be sure you have not forgotten anything.</p>
+
+    <p>This is a no-host space: set-up and clean-up, including configuring the chairs and tables, are your
+      event's responsibility. In reserving the space, your department agreed to the following.</p>
+
+    <div class="checklist-head">
+      <span class="saved-note" id="saved-note">Your ticks are saved on this device as you go.</span>
+      <span class="progress" id="progress">0 of 11 done</span>
+    </div>
+
+    <ul class="checklist" id="checklist-items">
+      <li><label><input type="checkbox"><span class="n">1.</span><span class="text">The event began and ended on time (reservations include set-up and clean-up).</span></label></li>
+      <li><label><input type="checkbox"><span class="n">2.</span><span class="text">The facility was left clean and organised.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">3.</span><span class="text">Tables and chairs were wiped clean, including the balconies, and left with two chairs per table.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">4.</span><span class="text">Extra chairs were cleaned and returned to the chair rack.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">5.</span><span class="text">Trash was bagged, tied, and left inside the large white trash can. Recycling was left in the blue receptacles.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">6.</span><span class="text">Windows were closed and locked.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">7.</span><span class="text">All A/V equipment was turned off.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">8.</span><span class="text">Balcony doors were closed and locked, and <strong>the key was left in the lectern</strong>.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">9.</span><span class="text">Air conditioning was turned off.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">10.</span><span class="text">Lights were turned off. One light always stays on, as do the stairwell lights.</span></label></li>
+      <li><label><input type="checkbox"><span class="n">11.</span><span class="text">Conference room doors were closed.</span></label></li>
+    </ul>
+
+    <p class="all-done" id="all-done" hidden>All eleven done — thank you for leaving the room ready for the next event.</p>
+
+    <div class="checklist-actions">
+      <button type="button" class="ghost-btn" id="print-btn">Print this checklist</button>
+      <button type="button" class="ghost-btn" id="reset-btn">Clear ticks</button>
+    </div>
+
+    <div class="warn" style="margin-top:18px;">
+      <p>If Panetta staff have to complete any of these tasks, your department will be expected to cover the
+        cost of returning the venue to its original condition.</p>
+    </div>
+  </section>
+
+  <footer>
+    100 Panetta Ave, Santa Cruz, CA 95060 &nbsp;·&nbsp; Updated June 2026
+  </footer>
+
+</main>
+
+<a class="to-checklist" id="to-checklist" href="#checklist">&darr; End of event checklist</a>
+
+<script>
+/* =========================================================
+   END OF EVENT CHECKLIST
+   ========================================================= */
+
+const boxes     = Array.from(document.querySelectorAll('#checklist-items input[type="checkbox"]'));
+const progress  = document.getElementById('progress');
+const allDone   = document.getElementById('all-done');
+const savedNote = document.getElementById('saved-note');
+const jumpBtn   = document.getElementById('to-checklist');
+
+const STORE_KEY = 'panetta-end-of-event-checklist';
+
+// A part-finished checklist is only meaningful during the event it belongs to.
+// After this long it is almost certainly a previous booking, so it is dropped
+// rather than shown to the next person as though it were theirs.
+const STALE_AFTER_MS = 12 * 60 * 60 * 1000;
+
+function render() {
+  const done = boxes.filter(b => b.checked).length;
+  progress.textContent = `${done} of ${boxes.length} done`;
+  allDone.hidden = done !== boxes.length;
+  boxes.forEach(b => b.closest('li').classList.toggle('done', b.checked));
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      at: Date.now(),
+      ticks: boxes.map(b => b.checked)
+    }));
+  } catch (_) { /* private browsing — the checklist still works, it just won't persist */ }
+}
+
+function restore() {
+  let saved;
+  try {
+    saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+  } catch (_) { return; }
+
+  if (!saved || !Array.isArray(saved.ticks)) return;
+  if (Date.now() - (saved.at || 0) > STALE_AFTER_MS) { clear(); return; }
+  if (saved.ticks.length !== boxes.length) { clear(); return; }   // list has changed since
+
+  saved.ticks.forEach((on, i) => { boxes[i].checked = !!on; });
+  if (saved.ticks.some(Boolean)) {
+    const when = new Date(saved.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    savedNote.textContent = `Picking up where you left off at ${when}.`;
+  }
+}
+
+function clear() {
+  try { localStorage.removeItem(STORE_KEY); } catch (_) { /* nothing to clear */ }
+}
+
+boxes.forEach(box => box.addEventListener('change', () => { render(); save(); }));
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  boxes.forEach(b => { b.checked = false; });
+  clear();
+  savedNote.textContent = 'Your ticks are saved on this device as you go.';
+  render();
+});
+
+document.getElementById('print-btn').addEventListener('click', () => window.print());
+
+/* Show the jump button once the reader is past the intro, and hide it again
+   once the checklist itself is on screen — at which point it is just clutter. */
+const checklist = document.getElementById('checklist');
+
+if ('IntersectionObserver' in window) {
+  const watcher = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      jumpBtn.classList.toggle('show', !entry.isIntersecting && window.scrollY > 400);
+    });
+  }, { rootMargin: '0px 0px -60% 0px' });
+  watcher.observe(checklist);
+}
+
+window.addEventListener('scroll', () => {
+  const nearChecklist = checklist.getBoundingClientRect().top < window.innerHeight * 0.6;
+  jumpBtn.classList.toggle('show', window.scrollY > 400 && !nearChecklist);
+}, { passive: true });
+
+restore();
+render();
+</script>
+
+</body>
+</html>
