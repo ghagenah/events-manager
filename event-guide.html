@@ -18,6 +18,7 @@
     --rubine: #da216d;         /* Rubine Red    */
     --ink: #12212e;
     --muted: #5b6b79;
+    --muted-strong: #4a5967;   /* small text over tinted rows */
     --line: #d5dee6;
     --line-soft: #dde5ec;
     --bg: #edf1f5;
@@ -304,13 +305,13 @@
   .checklist .n {
     flex: none;
     min-width: 1.4em;
-    color: var(--muted);
+    color: var(--muted-strong);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
 
   .checklist li.done label { background: var(--teal-soft); }
-  .checklist li.done .text { color: var(--muted); }
+  .checklist li.done .n { color: #00606d; }
 
   .checklist-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
