@@ -9,7 +9,6 @@
     /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
        Neutrals are derived with a blue bias toward the primary. */
     --blue: #003c6c;           /* Primary Blue  */
-    --gold: #fdc700;           /* Primary Yellow — blocks only, never text */
     --blue-dark: #00294a;
     --blue-soft: #e6eef4;
     --ink: #12212e;
@@ -45,7 +44,6 @@
     max-width: 560px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-top: 5px solid var(--gold);
     border-radius: 16px;
     box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
     padding: 36px 32px;
@@ -181,8 +179,9 @@
     <dl id="summary-list"></dl>
   </section>
 
-  <p class="pending">This page confirms your request was received. It is not a confirmation of your
-    booking &mdash; the room is not held until an administrator approves it.</p>
+  <p class="pending">Your time is held on the calendar while an administrator reviews the request, so
+    nobody else can book those hours in the meantime. It is not a confirmed booking until they
+    approve it.</p>
 
   <a class="again" href="./">Make another reservation</a>
 </main>
