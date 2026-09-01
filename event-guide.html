@@ -260,6 +260,17 @@
 
   [role="tabpanel"][hidden] { display: none; }
 
+  /* Both panels open the same distance below the tab bar, and neither draws a
+     rule under it — the tabs are already the separator, so a heading border
+     there reads as a stray line. */
+  [role="tabpanel"] { padding-top: 26px; }
+
+  [role="tabpanel"] > section:first-child > h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
   /* ---------- Collapsible sections ---------- */
 
   .sec {
