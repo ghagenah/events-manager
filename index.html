@@ -141,6 +141,79 @@
 
   input[type="number"] { width: 8rem; }
 
+  /* ---------- Calendar dialog ---------- */
+
+  .cal-link-row { margin-top: 8px; }
+
+  .cal-link {
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    color: var(--blue);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    cursor: pointer;
+  }
+  .cal-link:hover { color: var(--blue-dark); }
+
+  #cal-dialog {
+    width: min(92vw, 900px);
+    max-width: 900px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--ink);
+    overflow: hidden;
+  }
+  #cal-dialog::backdrop { background: rgba(18, 33, 46, .55); }
+
+  .cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .cal-head h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .cal-close {
+    padding: 0 6px;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .cal-close:hover { color: var(--ink); }
+
+  /* Fixed viewport height so the month grid is usable without the dialog
+     growing past the screen on a laptop. */
+  .cal-body { height: min(70vh, 620px); }
+  .cal-body iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+  .cal-foot {
+    margin: 0;
+    padding: 10px 16px;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+  }
+  .cal-foot a { color: var(--blue); }
+
+  @media (max-width: 480px) {
+    #cal-dialog { width: 96vw; }
+    .cal-body { height: 68vh; }
+  }
+
   /* ---------- Section headings ---------- */
 
   .form-section {
@@ -859,6 +932,9 @@
       <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
       <p class="hint" id="date-window"></p>
       <input type="date" id="date" name="date" required>
+      <p class="hint cal-link-row">
+        <button type="button" class="cal-link" id="cal-open">View the full calendar</button>
+      </p>
     </div>
 
     <div class="slots-section">
@@ -1020,6 +1096,25 @@
     <div class="status" id="status" role="status" hidden></div>
   </form>
 </main>
+
+<!-- Month view of the room calendar. A dialog rather than a new tab: the form
+     is long and often half-filled by this point, and a tab switch is where a
+     draft gets lost. The iframe src is set on first open, so the page does not
+     call Google Calendar for people who never look. -->
+<dialog id="cal-dialog" aria-labelledby="cal-dialog-title">
+  <div class="cal-head">
+    <h2 id="cal-dialog-title">Room availability</h2>
+    <button type="button" class="cal-close" id="cal-close" aria-label="Close calendar">&times;</button>
+  </div>
+  <div class="cal-body">
+    <iframe id="cal-frame" title="Panetta Conference Room calendar" src="about:blank"
+            frameborder="0" scrolling="no"></iframe>
+  </div>
+  <p class="cal-foot">
+    Showing hours already booked. Close this to pick your times on the form.
+    <a id="cal-newtab" href="#" target="_blank" rel="noopener">Open in a new tab</a>
+  </p>
+</dialog>
 
 <script>
 /* =========================================================
@@ -2156,7 +2251,52 @@ document.getElementById('alcohol-policy-link').href = ALCOHOL_POLICY_URL;
 form.querySelectorAll('input[name="alcohol"]')
     .forEach(radio => radio.addEventListener('change', syncAlcoholPolicy));
 form.addEventListener('submit', handleSubmit);
+
+// ---------- Calendar dialog ----------
+// Built from CALENDAR_ID and TIME_ZONE rather than a pasted URL, so the room
+// and the zone cannot drift apart from the availability lookup above.
+const calDialog = document.getElementById('cal-dialog');
+const calFrame  = document.getElementById('cal-frame');
+
+const CALENDAR_EMBED_URL =
+  'https://calendar.google.com/calendar/embed'
+  + `?src=${encodeURIComponent(CALENDAR_ID)}`
+  + `&ctz=${encodeURIComponent(TIME_ZONE)}`
+  + '&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0';
+
+document.getElementById('cal-newtab').href = CALENDAR_EMBED_URL;
+
+document.getElementById('cal-open').addEventListener('click', () => {
+  // Loaded on first open only; reopening reuses the frame already there.
+  if (calFrame.getAttribute('src') === 'about:blank') {
+    calFrame.setAttribute('src', CALENDAR_EMBED_URL);
+  }
+  calDialog.showModal();
+});
+
+document.getElementById('cal-close').addEventListener('click', () => calDialog.close());
+
+// Esc is handled explicitly rather than left to the dialog's native cancel.
+// Note the limit: once someone clicks into the calendar, keystrokes belong to
+// that cross-origin frame and never reach this page, so the close button and
+// the backdrop are what actually get people out from there.
+calDialog.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  event.preventDefault();
+  calDialog.close();
+});
+
+// Clicking the backdrop closes it. The dialog is the click target only when the
+// press lands outside its own box, so compare against its bounds.
+calDialog.addEventListener('click', event => {
+  if (event.target !== calDialog) return;
+  const box = calDialog.getBoundingClientRect();
+  const inside = event.clientX >= box.left && event.clientX <= box.right
+              && event.clientY >= box.top  && event.clientY <= box.bottom;
+  if (!inside) calDialog.close();
+});
 </script>
+
 
 </body>
 </html>
