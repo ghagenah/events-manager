@@ -1897,6 +1897,7 @@ async function handleSubmit(event) {
   clearErrors();
 
   const chosen = slotButtons.filter(button => button.classList.contains('selected'));
+  const day = parseDateValue(dateInput.value);
 
   // The UI can only build a contiguous block, but the webhook depends on it —
   // so confirm the run really is unbroken before anything is sent.
@@ -1906,6 +1907,44 @@ async function handleSubmit(event) {
     showStatus('Please select a single block of back-to-back hours.', 'error');
     return;
   }
+
+  /* Availability was read when the date was picked, and this form takes
+     several minutes to fill in. Confirm the hours are still free before
+     sending, or two people who started at the same time both get a hold and
+     two groups turn up. This is a live query, never the cache. */
+  submitBtn.disabled = true;
+  const submitLabel = submitBtn.textContent;
+  submitBtn.textContent = 'Checking availability…';
+  showStatus('Making sure those hours are still free…', 'info');
+
+  let stillFree = true;
+  try {
+    const fresh = await fetchBusyIntervals(day);
+    const taken = chosen.filter(button =>
+      overlapsBusy(new Date(button.dataset.start), new Date(button.dataset.end), fresh));
+
+    if (taken.length) {
+      stillFree = false;
+      availability = null;               // the window is now known to be wrong
+      renderSlots(day, fresh);           // repaint with the truth; clears the selection
+      const which = taken.map(b => b.dataset.label.split(' – ')[0]).join(', ');
+      showStatus(
+        `Sorry — ${which} ${taken.length === 1 ? 'was' : 'were'} booked while you were filling this in. ` +
+        `Your details are still here; please pick another time.`,
+        'error'
+      );
+      slotsBox.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  } catch (_) {
+    /* The check could not run — a network blip, or the calendar refusing.
+       Carry on and submit: this is where the form stood before the check
+       existed, and blocking every booking on a verification outage is the
+       worse failure. An admin still sees the clash at approval. */
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = submitLabel;
+  if (!stillFree) return;
 
   const slotDetails = chosen.map(button => ({
     label: button.dataset.label,
