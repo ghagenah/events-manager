@@ -1261,51 +1261,119 @@ function resetSlots(message) {
    ========================================================= */
 
 // Returns busy intervals as [{ start: Date, end: Date }] for the given day.
-async function fetchBusyIntervals(day) {
-  // Midnight to 23:59:59.999 Pacific — the room's day, not the visitor's.
-  const timeMin = zonedInstant(day.year, day.month, day.day, 0, 0, 0, 0);
-  const timeMax = zonedInstant(day.year, day.month, day.day, 23, 59, 59, 999);
+/* Availability is fetched once for a whole window and reused, so changing the
+   date does not mean waiting on the network each time. Anything outside that
+   window, or a cache older than the TTL, falls back to a live single-day
+   query — the behaviour the form had before. */
 
-  const url = new URL(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events`
+const PREFETCH_DAYS = 45;
+const AVAILABILITY_TTL_MS = 5 * 60 * 1000;
+
+let availability = null;        // { from, to, intervals, fetchedAt }
+let prefetchInFlight = null;
+
+// Google returns at most 250 events per page. A single day never approaches
+// that, but a 45-day window on a busy calendar can — and events past the cap
+// come back silently, which would render booked hours as free.
+async function fetchBusyRange(timeMin, timeMax) {
+  const intervals = [];
+  let pageToken = null;
+  let pages = 0;
+
+  do {
+    const url = new URL(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events`
+    );
+    url.searchParams.set('key', GOOGLE_API_KEY);
+    url.searchParams.set('timeMin', timeMin.toISOString());
+    url.searchParams.set('timeMax', timeMax.toISOString());
+    url.searchParams.set('singleEvents', 'true');   // expand recurring events
+    url.searchParams.set('orderBy', 'startTime');
+    url.searchParams.set('maxResults', '250');
+    if (pageToken) url.searchParams.set('pageToken', pageToken);
+
+    const response = await fetch(url.toString());
+
+    if (!response.ok) {
+      let detail = `${response.status} ${response.statusText}`;
+      try {
+        const body = await response.json();
+        if (body && body.error && body.error.message) detail = body.error.message;
+      } catch (_) { /* response body was not JSON */ }
+      throw new Error(detail);
+    }
+
+    const data = await response.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+
+    items
+      .filter(event => event.status !== 'cancelled')
+      .forEach(event => {
+        // All-day events carry `date` rather than `dateTime`. Use the event's
+        // own dates: deriving them from the query bounds would turn one all-day
+        // event into a 45-day block across the entire window.
+        if (event.start && event.start.date) {
+          const [sy, sm, sd] = event.start.date.split('-').map(Number);
+          const endDate = (event.end && event.end.date) || null;
+          const [ey, em, ed] = endDate
+            ? endDate.split('-').map(Number)
+            : [sy, sm, sd + 1];                       // Google's end date is exclusive
+          intervals.push({
+            start: zonedInstant(sy, sm - 1, sd, 0),
+            end: zonedInstant(ey, em - 1, ed, 0)
+          });
+          return;
+        }
+        if (!event.start || !event.start.dateTime || !event.end || !event.end.dateTime) return;
+        intervals.push({
+          start: new Date(event.start.dateTime),
+          end: new Date(event.end.dateTime)
+        });
+      });
+
+    pageToken = data.nextPageToken || null;
+    pages += 1;
+  } while (pageToken && pages < 10);   // a stop, in case the token never clears
+
+  return intervals;
+}
+
+// One day, live. Used whenever the cache cannot answer.
+function fetchBusyIntervals(day) {
+  return fetchBusyRange(
+    zonedInstant(day.year, day.month, day.day, 0, 0, 0, 0),
+    zonedInstant(day.year, day.month, day.day, 23, 59, 59, 999)
   );
-  url.searchParams.set('key', GOOGLE_API_KEY);
-  url.searchParams.set('timeMin', timeMin.toISOString());
-  url.searchParams.set('timeMax', timeMax.toISOString());
-  url.searchParams.set('singleEvents', 'true');   // expand recurring events
-  url.searchParams.set('orderBy', 'startTime');
-  url.searchParams.set('maxResults', '250');
+}
 
-  const response = await fetch(url.toString());
+// Fetch the whole window in one request. Failure is silent: the cache stays
+// empty and every date falls back to a live query, exactly as before.
+function prefetchAvailability() {
+  const [y, m, d] = todayInZone().split('-').map(Number);
+  const from = zonedInstant(y, m - 1, d, 0, 0, 0, 0);
+  const to   = zonedInstant(y, m - 1, d + PREFETCH_DAYS, 23, 59, 59, 999);
 
-  if (!response.ok) {
-    let detail = `${response.status} ${response.statusText}`;
-    try {
-      const body = await response.json();
-      if (body && body.error && body.error.message) detail = body.error.message;
-    } catch (_) { /* response body was not JSON */ }
-    throw new Error(detail);
-  }
+  prefetchInFlight = fetchBusyRange(from, to)
+    .then(intervals => { availability = { from, to, intervals, fetchedAt: Date.now() }; })
+    .catch(() => { availability = null; })
+    .finally(() => { prefetchInFlight = null; });
 
-  const data = await response.json();
-  const items = Array.isArray(data.items) ? data.items : [];
+  return prefetchInFlight;
+}
 
-  return items
-    .filter(event => event.status !== 'cancelled')
-    .map(event => {
-      // All-day events carry `date` instead of `dateTime`; block the whole day.
-      if (event.start && event.start.date) {
-        return { start: timeMin, end: timeMax };
-      }
-      if (!event.start || !event.start.dateTime || !event.end || !event.end.dateTime) {
-        return null;
-      }
-      return {
-        start: new Date(event.start.dateTime),
-        end: new Date(event.end.dateTime)
-      };
-    })
-    .filter(Boolean);
+/* The cached intervals answer for a day only if the window covers it and the
+   data is still fresh. Every interval is handed to renderSlots regardless of
+   which day it falls on: an interval from another date simply never overlaps
+   this date's slots, so no per-day bucketing is needed. */
+function cachedBusyFor(day) {
+  if (!availability) return null;
+  if (Date.now() - availability.fetchedAt > AVAILABILITY_TTL_MS) return null;
+
+  const dayStart = zonedInstant(day.year, day.month, day.day, 0, 0, 0, 0);
+  const dayEnd   = zonedInstant(day.year, day.month, day.day, 23, 59, 59, 999);
+  if (dayStart < availability.from || dayEnd > availability.to) return null;
+
+  return availability.intervals;
 }
 
 function overlapsBusy(slotStart, slotEnd, busy) {
@@ -1472,10 +1540,23 @@ async function loadAvailability() {
   selection = null;
   updateSlotCount();
   legend.hidden = true;
-  slotsBox.innerHTML =
-    '<div class="loading"><span class="spinner"></span>Checking calendar availability&hellip;</div>';
+  if (!cachedBusyFor(day)) {
+    slotsBox.innerHTML =
+      '<div class="loading"><span class="spinner"></span>Checking calendar availability&hellip;</div>';
+  }
 
   try {
+    // If the window is still loading, wait for it rather than firing a
+    // duplicate request for a day it is about to cover.
+    if (prefetchInFlight) await prefetchInFlight;
+    if (token !== requestToken) return;
+
+    const cached = cachedBusyFor(day);
+    if (cached) {
+      renderSlots(day, cached);          // no network, no spinner
+      return;
+    }
+
     const busy = await fetchBusyIntervals(day);
     if (token !== requestToken) return; // a newer date was picked
     renderSlots(day, busy);
@@ -1972,6 +2053,15 @@ document.getElementById('tz-note').textContent = TIME_ZONE_LABEL;
 dateInput.min = todayInZone();
 dateInput.addEventListener('change', loadAvailability);
 clearBtn.addEventListener('click', clearSelection);
+
+prefetchAvailability();
+
+/* A tab left open for a while is the case most likely to act on stale data,
+   so expire the window on return and let the next date pick refetch. */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !availability) return;
+  if (Date.now() - availability.fetchedAt > AVAILABILITY_TTL_MS) availability = null;
+});
 sameAsMe.addEventListener('change', syncSameAsMe);
 [nameInput, emailInput].forEach(input =>
   input.addEventListener('input', () => { if (sameAsMe.checked) syncSameAsMe(); }));
