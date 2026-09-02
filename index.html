@@ -860,6 +860,7 @@
 
     <div class="field">
       <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
+      <p class="hint" id="date-window"></p>
       <input type="date" id="date" name="date" required>
     </div>
 
@@ -1042,6 +1043,11 @@ const ALCOHOL_POLICY_URL =
 const TIME_ZONE       = 'America/Los_Angeles';
 const TIME_ZONE_LABEL = 'Pacific';
 
+// How far ahead a request may be made, and the notice required. Both are
+// enforced on the date input, in validation, and in the draft restore.
+const MIN_LEAD_DAYS   = 10;
+const MAX_MONTHS_AHEAD = 12;
+
 // Bookable window, in the zone above. Slots start on the hour from START_HOUR
 // up to (END_HOUR - 1), so 8 / 22 renders 8:00 AM–9:00 AM through 9:00–10:00 PM.
 const START_HOUR = 8;
@@ -1179,6 +1185,28 @@ function zonedInstant(year, month, day, hour, minute = 0, second = 0, ms = 0) {
 function todayInZone() {
   const p = readZoneClock(new Date());
   return `${p.year}-${p.month}-${p.day}`;
+}
+
+// A calendar date offset from today in the room's zone, as "YYYY-MM-DD".
+// Date.UTC normalises month and year rollover, so +370 days or +12 months
+// both land correctly.
+function dateValueFromToday({ days = 0, months = 0 } = {}) {
+  const [y, m, d] = todayInZone().split('-').map(Number);
+  const shifted = new Date(Date.UTC(y, m - 1 + months, d + days));
+  const pad = n => String(n).padStart(2, '0');
+  return `${shifted.getUTCFullYear()}-${pad(shifted.getUTCMonth() + 1)}-${pad(shifted.getUTCDate())}`;
+}
+
+// The earliest and latest dates a request may be made for.
+function earliestBookableDate() { return dateValueFromToday({ days: MIN_LEAD_DAYS }); }
+function latestBookableDate()   { return dateValueFromToday({ months: MAX_MONTHS_AHEAD }); }
+
+// "Friday, 12 September 2026" — for messages, where a bare ISO date is unhelpful.
+function longDate(value) {
+  const [y, m, d] = value.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
 }
 
 // "2026-08-28" -> { year, month (0-based), day }
@@ -1341,7 +1369,9 @@ function fetchBusyIntervals(day) {
 // Fetch the whole window in one request. Failure is silent: the cache stays
 // empty and every date falls back to a live query, exactly as before.
 function prefetchAvailability() {
-  const [y, m, d] = todayInZone().split('-').map(Number);
+  // Start at the first bookable date: the days inside the notice period can
+  // never be chosen, so caching them wastes the window.
+  const [y, m, d] = earliestBookableDate().split('-').map(Number);
   const from = zonedInstant(y, m - 1, d, 0, 0, 0, 0);
   const to   = zonedInstant(y, m - 1, d + PREFETCH_DAYS, 23, 59, 59, 999);
 
@@ -1622,10 +1652,7 @@ function setRadio(name, value) {
 
 // A calendar date a few days out, counted in the room's own time zone.
 function demoDateValue() {
-  const [y, m, d] = todayInZone().split('-').map(Number);
-  const shifted = new Date(y, m - 1, d + randomInt(2, 14));   // Date normalises rollover
-  const pad = n => String(n).padStart(2, '0');
-  return `${shifted.getFullYear()}-${pad(shifted.getMonth() + 1)}-${pad(shifted.getDate())}`;
+  return dateValueFromToday({ days: randomInt(MIN_LEAD_DAYS, MIN_LEAD_DAYS + 21) });
 }
 
 async function fillDemo() {
@@ -1737,7 +1764,8 @@ function restoreDraft() {
     if (el.type === 'checkbox') { el.checked = !!value; if (value) restoredAnything = true; }
     else if (value) {
       // A date saved before today is no longer bookable, so let it go.
-      if (el.type === 'date' && value < todayInZone()) return;
+      // A saved date can fall inside the notice period while the draft sat idle.
+      if (el.type === 'date' && (value < earliestBookableDate() || value > latestBookableDate())) return;
       el.value = value;
       restoredAnything = true;
     }
@@ -1806,8 +1834,17 @@ function fieldErrors() {
     add(rpPhone, 'Enter a 10-digit cell phone number for the responsible party.');
   }
 
-  if (!dateInput.value) add(dateInput, 'Choose a date.');
-  else if (selectedSlots.length === 0) add(slotsBox, 'Select at least one time slot.');
+  if (!dateInput.value) {
+    add(dateInput, 'Choose a date.');
+  } else if (dateInput.value < earliestBookableDate()) {
+    add(dateInput, `Requests need at least ${MIN_LEAD_DAYS} days' notice. ` +
+                   `The earliest date available is ${longDate(earliestBookableDate())}.`);
+  } else if (dateInput.value > latestBookableDate()) {
+    add(dateInput, `Requests can only be made up to ${MAX_MONTHS_AHEAD} months ahead. ` +
+                   `The latest date available is ${longDate(latestBookableDate())}.`);
+  } else if (selectedSlots.length === 0) {
+    add(slotsBox, 'Select at least one time slot.');
+  }
 
   const total = Number(totalGuests.value);
   if (blank(totalGuests) || !Number.isFinite(total) || total < 1) {
@@ -2079,7 +2116,11 @@ async function handleSubmit(event) {
    ========================================================= */
 
 document.getElementById('tz-note').textContent = TIME_ZONE_LABEL;
-dateInput.min = todayInZone();
+dateInput.min = earliestBookableDate();
+dateInput.max = latestBookableDate();
+document.getElementById('date-window').textContent =
+  `Requests need at least ${MIN_LEAD_DAYS} days' notice, and can be made up to ` +
+  `${MAX_MONTHS_AHEAD} months ahead — so between ${longDate(dateInput.min)} and ${longDate(dateInput.max)}.`;
 dateInput.addEventListener('change', loadAvailability);
 clearBtn.addEventListener('click', clearSelection);
 
