@@ -1079,6 +1079,13 @@ const UCSC_EMAIL = /^[^@\s]+@([a-z0-9-]+\.)*ucsc\.edu$/i;
 
 const DRAFT_KEY = 'panetta-reservation-draft';
 
+/* The draft outlives a submission on purpose. A request can still be turned
+   away after it is sent — a clash, or times the Zap cannot read — and the
+   reply asks the person to come back and choose again. Keeping their answers
+   means only the time needs redoing. It also saves repeat bookers retyping
+   fields that never change. Consent is still never restored. */
+const DRAFT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
 // Where a successful submission lands, and the key it passes details through.
 const CONFIRMATION_PAGE = 'confirmed.html';
 const CONFIRMATION_KEY  = 'panetta-reservation-confirmation';
@@ -1727,7 +1734,7 @@ function saveDraft() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try {
-      const draft = {};
+      const draft = { at: Date.now() };
       form.querySelectorAll('input, textarea').forEach(el => {
         if (!el.id && !el.name) return;
         if (NEVER_RESTORE.includes(el.id)) return;
@@ -1746,10 +1753,12 @@ function restoreDraft() {
     draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
   } catch (_) { return; }
   if (!draft || typeof draft !== 'object') return;
+  if (Date.now() - (draft.at || 0) > DRAFT_TTL_MS) { clearDraft(); return; }
 
   let restoredAnything = false;
 
   Object.entries(draft).forEach(([key, value]) => {
+    if (key === 'at') return;                  // the timestamp, not a field
     const name = key.slice(1);
     if (key.startsWith('@')) {
       const radio = form.querySelector(`input[name="${name}"][value="${CSS.escape(value)}"]`);
@@ -2080,7 +2089,7 @@ async function handleSubmit(event) {
 
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
 
-    clearDraft();
+    // The draft is deliberately kept: see DRAFT_TTL_MS.
 
     // Hand the confirmation page just enough to show what was requested.
     // sessionStorage, not the URL — a name and email do not belong in a query
