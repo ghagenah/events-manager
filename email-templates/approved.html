@@ -9,11 +9,14 @@
 
 <!--
   Panetta Conference Room — "reservation approved".
-  Merge fields come from step 377233437, read as old.data.fN:
+  Merge fields come from step 377233437, read as gives.old.data.fN:
     f1 email · f2 name · f17 title · f18 start · f22 end
+  The times are read as ["label"], not ["value"].
   Leave the expressions exactly as written. The email address is plain text
   rather than a mailto link: this expression contains double quotes, which
   would close an href attribute early.
+  Two rows are still literal placeholders — the fN numbers for the
+  responsible party and the guest count are not known for this step.
   Styling matches the other three; keep them in step.
 -->
 
@@ -85,7 +88,7 @@
         <tr>
           <td class="text-body" style="padding:20px 32px 32px; color:#33424f; font-size:15px; line-height:1.6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
-            <p style="margin:0 0 16px;">Hi <strong>{{=output['377233437']["old"]["data"]["f2"]}}</strong>,</p>
+            <p style="margin:0 0 16px;">Hi <strong>{{=gives["377233437"]["old"]["data"]["f2"]}}</strong>,</p>
 
             <p style="margin:0 0 22px;">Your request has been approved and the room is booked. You have been added to the calendar event, so it should appear in your own calendar.</p>
 
@@ -116,7 +119,7 @@
 
                     <tr>
                       <td class="text-muted" width="96" valign="top" style="width:96px; padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Event</td>
-                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f17"]}}</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=gives["377233437"]["old"]["data"]["f17"]}}</td>
                     </tr>
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Location</td>
@@ -124,7 +127,7 @@
                     </tr>
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Time</td>
-                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f18"]["value"]}} &ndash; {{=output['377233437']["old"]["data"]["f22"]["value"]}} Pacific</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=gives["377233437"]["old"]["data"]["f18"]["label"]}} &ndash; {{=gives["377233437"]["old"]["data"]["f22"]["label"]}} Pacific</td>
                     </tr>
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Responsible</td>
@@ -136,11 +139,11 @@
                     </tr>
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Contact</td>
-                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f2"]}}</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=gives["377233437"]["old"]["data"]["f2"]}}</td>
                     </tr>
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Email</td>
-                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f1"]}}</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=gives["377233437"]["old"]["data"]["f1"]}}</td>
                     </tr>
 
                   </table>
