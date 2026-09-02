@@ -1,103 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light dark">
-  <meta name="supported-color-schemes" content="light dark">
-  <title>Reservation Request Approved</title>
-  <style>
-    :root { color-scheme: light dark; supported-color-schemes: light dark; }
-    @media (prefers-color-scheme: dark) {
-      body, .bg-outer, .bg-details, .bg-footer { background-color: #0f172a !important; }
-      .bg-card { background-color: #1e293b !important; border-color: #334155 !important; }
-      .text-header, .link-brand { color: #38bdf8 !important; }
-      .text-body, .text-details { color: #f1f5f9 !important; }
-      .text-muted, .bg-footer { color: #94a3b8 !important; }
-      .bg-details { border-left-color: #38bdf8 !important; }
-      .btn-pri { background-color: #0284c7 !important; border-color: #0284c7 !important; }
-      .bg-footer { border-top-color: #334155 !important; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>Reservation Approved</title>
+
+<!--
+  ==========================================================================
+  Panetta Conference Room — "reservation approved" email
+  Sent when an administrator approves a request and the booking becomes real.
+
+  Structurally identical to success.html, conflict.html and invalid.html —
+  keep the four in step when any one is edited.
+
+  PALETTE — UC Santa Cruz brand
+  communications.ucsc.edu/brand-overview/color
+    Primary Blue      #003c6c   headings, links, the button
+    Dark Teal         #007988   the approved tick (5.1:1, passes AA)
+  Neutrals are not specified by the brand, so these are derived with a blue
+  bias toward the primary: page #edf1f5, surface #f4f7fa, rules #d5dee6,
+  ink #12212e, muted #5b6b79, body #33424f.
+
+  Primary Yellow is deliberately unused: at 1.6:1 on white it cannot carry
+  text, and the rule it used to draw across the top has been removed.
+
+  MERGE FIELDS — this email is fired by a different step from the others
+    377233437   the reservation row, read as old.data.fN
+      f1  requester email      f2   requester name
+      f17 event title          f18  start time      f22  end time
+  Leave the merge expressions exactly as they are; the numeric IDs and field
+  keys are Zapier step references and rewriting them breaks the send.
+
+  The email address is plain text rather than a mailto link, unlike the
+  sibling templates: this expression contains double quotes, which would
+  close an href="" attribute early.
+  ==========================================================================
+-->
+
+<style>
+  :root { color-scheme: light dark; supported-color-schemes: light dark; }
+
+  /* Dark mode only. One rule per element so a change in one place cannot
+     silently affect another. Clients that strip <style> fall back to the
+     inline light styles, which is the safe outcome. */
+  @media (prefers-color-scheme: dark) {
+    .bg-page    { background-color: #12212e !important; }
+    .bg-card    { background-color: #0e2438 !important; border-color: #33424f !important; }
+    .bg-surface { background-color: #0b1c2c !important; border-color: #33424f !important; }
+    .bg-footer  { background-color: #0b1c2c !important; border-top-color: #33424f !important; }
+    .text-ink   { color: #edf1f5 !important; }
+    .text-body  { color: #c4d2dd !important; }
+    .text-muted { color: #93a6b5 !important; }
+    .text-link  { color: #7fc4e8 !important; }
+    .tick-well  { background-color: #0c2f33 !important; border-color: #0f6b76 !important; }
+    .tick-mark  { color: #6cc3ce !important; }
+  }
+</style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
 
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-outer" style="background-color: #f4f6f8; padding: 40px 16px;">
-    <tr>
-      <td align="center">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-card" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-          
-          <!-- Top Accent Bar -->
-          <tr><td style="background-color: #FFC72C; height: 6px;"></td></tr>
+<body style="margin:0; padding:0; background-color:#edf1f5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; -webkit-font-smoothing:antialiased;">
 
-          <!-- Header -->
-          <tr>
-            <td style="padding: 32px 32px 16px;">
-              <h1 class="text-header" style="margin: 0; color: #003C6C; font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">
-                Reservation Request Approved
-              </h1>
-            </td>
-          </tr>
+<!-- Preheader: the grey preview line beside the subject in an inbox list.
+     Without it, clients grab the first body text, which is just "Hi Name". -->
+<div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#edf1f5;">
+  The room is booked. Here is what to arrange before the day.
+</div>
 
-          <!-- Body Content -->
-          <tr>
-            <td class="text-body" style="padding: 0 32px 32px; color: #334155; font-size: 15px; line-height: 1.6;">
-              
-              <p style="margin: 0 0 16px;">Hi <strong> {{=output['377233437']["old"]["data"]["f2"]}}</strong>,</p>
-              
-              <p style="margin: 0 0 24px;">Great news! Your requested time slot has been approved and officially reserved on the calendar.</p>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-page" style="background-color:#edf1f5; padding:40px 16px;">
+  <tr>
+    <td align="center">
 
-              <!-- Details Box -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-details" style="background-color: #f8fafc; border-left: 4px solid #003C6C; border-radius: 4px; margin-bottom: 24px;">
-                <tr>
-                  <td class="text-details" style="padding: 16px 20px; color: #003C6C; font-size: 14px; line-height: 1.8;">
-                    <strong>Event Title:</strong> {{=output['377233437']["old"]["data"]["f17"]}}<br>
-                    <strong>Location:</strong> 100 Panetta Ave, Santa Cruz, CA 95060<br>
-                    <strong>Start Time:</strong> {{=output['377233437']["old"]["data"]["f18"]["value"]}}<br>
-                    <strong>End Time:</strong> {{=output['377233437']["old"]["data"]["f22"]["value"]}}<br>
-                    <strong>Contact Name:</strong> {{=output['377233437']["old"]["data"]["f2"]}}<br>
-                    <strong>Email:</strong> {{=output['377233437']["old"]["data"]["f1"]}}<br>
-                  </td>
-                </tr>
-              </table>
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-card" style="max-width:600px; background-color:#ffffff; border:1px solid #d5dee6; border-radius:16px; overflow:hidden;">
 
-              <p style="margin: 0 0 16px;">You can view or manage your reservation details anytime in your dashboard:</p>
+        <!-- ---------- Header: tick, then the headline ---------- -->
+        <tr>
+          <td style="padding:36px 32px 0;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td class="tick-well" width="46" height="46" align="center" valign="middle"
+                    style="width:46px; height:46px; background-color:#e3f0f1; border:1px solid #a8d3d8; border-radius:23px;">
+                  <span class="tick-mark" style="color:#007988; font-size:22px; line-height:22px; font-weight:700;">&#10003;</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-              <!-- Primary CTA -->
-              <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
-                <tr>
-                  <td class="btn-pri" style="border-radius: 6px; background-color: #003C6C;">
-                    <a href="https://panetta-user.zapier.app/dashboard" target="_blank" style="font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; padding: 12px 24px; display: inline-block;">
-                      View User Dashboard
-                    </a>
-                  </td>
-                </tr>
-              </table>
+        <tr>
+          <td style="padding:20px 32px 0;">
+            <h1 class="text-ink" style="margin:0; color:#12212e; font-size:25px; font-weight:700; letter-spacing:-0.5px; line-height:1.2;">
+              Your reservation is confirmed
+            </h1>
+          </td>
+        </tr>
 
-              <p style="margin: 0 0 20px;">We look forward to hosting your event!</p>
+        <!-- ---------- Body ---------- -->
+        <tr>
+          <td class="text-body" style="padding:14px 32px 32px; color:#33424f; font-size:15px; line-height:1.6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
-              <!-- Sign-off -->
-              <p style="margin: 0 0 4px;">Thank you,</p>
-              <p class="text-header" style="margin: 0 0 2px; font-weight: 700; color: #003C6C;">The Panetta Conference Team</p>
-              <p class="text-muted" style="margin: 0 0 2px; color: #64748b; font-size: 13px;">100 Panetta Ave</p>
-              <p style="margin: 0; font-size: 13px;">
-                <a class="link-brand" href="https://arts.ucsc.edu" target="_blank" style="color: #003C6C; text-decoration: underline;">Arts Division Website</a>
-              </p>
+            <p style="margin:0 0 16px;">Hi <strong>{{=output['377233437']["old"]["data"]["f2"]}}</strong>,</p>
 
-            </td>
-          </tr>
+            <p style="margin:0 0 22px;">Your request has been approved and the room is booked. You have been added to the calendar event, so it should appear in your own calendar.</p>
 
-          <!-- Footer -->
-          <tr>
-            <td class="bg-footer" style="background-color: #f8fafc; padding: 16px 32px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b;">
-              100 Panetta Ave Santa Cruz, CA 95060
-            </td>
-          </tr>
+            <!-- ---------- What you booked ----------
+                 Two columns rather than <br>-separated pairs, so the values
+                 line up and a long event title cannot push the layout around. -->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d5dee6; border-radius:12px; overflow:hidden; margin:0 0 22px;">
+              <tr>
+                <td class="bg-surface text-muted" style="background-color:#f4f7fa; border-bottom:1px solid #d5dee6; padding:11px 18px; color:#5b6b79; font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                  What you booked
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:6px 18px 14px;">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
-        </table>
-      </td>
-    </tr>
-  </table>
+                    <tr>
+                      <td class="text-muted" width="96" valign="top" style="width:96px; padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Event</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f17"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Location</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">Panetta Conference Room</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Starts</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f18"]["value"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Ends</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f22"]["value"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Contact</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f2"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Email</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f1"]}}</td>
+                    </tr>
+
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- ---------- Next steps ---------- -->
+            <p style="margin:0 0 18px;">Before the day, please work through the
+              <a class="text-link" href="https://ghagenah.github.io/events-manager/event-guide.html" target="_blank" style="color:#003c6c; text-decoration:underline;">event guide</a>
+              &mdash; card key access has to be requested ahead of time, and everyone who needs to get in must request their own.</p>
+
+            <!-- Button: table-wrapped anchor so the whole block is clickable
+                 in clients that ignore padding on inline elements. -->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
+              <tr>
+                <td align="center" style="background-color:#003c6c; border-radius:12px;">
+                  <a href="https://panetta-user.zapier.app/dashboard" target="_blank"
+                     style="display:inline-block; padding:13px 22px; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                    View your reservation
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <p class="text-muted" style="margin:0 0 26px; color:#5b6b79; font-size:13.5px; line-height:1.55;">
+              Need to change or cancel it?
+              <a class="text-link" href="mailto:panettac@ucsc.edu" style="color:#003c6c; text-decoration:underline;">Get in touch</a>
+              and we will sort it out.
+            </p>
+
+            <p style="margin:0 0 4px;">Thank you,</p>
+            <p class="text-ink" style="margin:0; color:#12212e; font-weight:700;">The Panetta Conference Team</p>
+
+          </td>
+        </tr>
+
+        <!-- ---------- Footer ---------- -->
+        <tr>
+          <td class="bg-footer text-muted" align="center" style="background-color:#f4f7fa; border-top:1px solid #d5dee6; padding:16px 32px; color:#5b6b79; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+            100 Panetta Ave, Santa Cruz, CA 95060
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
 
 </body>
 </html>
