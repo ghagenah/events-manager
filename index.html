@@ -1980,10 +1980,13 @@ async function handleSubmit(event) {
      several minutes to fill in. Confirm the hours are still free before
      sending, or two people who started at the same time both get a hold and
      two groups turn up. This is a live query, never the cache. */
+  /* The button carries the progress. Info messages in the status box below
+     were unreadable — three of them replaced each other inside a few hundred
+     milliseconds — so that box is now only used for things worth stopping to
+     read: a clash, or a failure. */
   submitBtn.disabled = true;
   const submitLabel = submitBtn.textContent;
-  submitBtn.textContent = 'Checking availability…';
-  showStatus('Making sure those hours are still free…', 'info');
+  submitBtn.textContent = 'Sending…';
 
   let stillFree = true;
   try {
@@ -2010,9 +2013,11 @@ async function handleSubmit(event) {
        worse failure. An admin still sees the clash at approval. */
   }
 
-  submitBtn.disabled = false;
-  submitBtn.textContent = submitLabel;
-  if (!stillFree) return;
+  if (!stillFree) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = submitLabel;
+    return;
+  }
 
   const slotDetails = chosen.map(button => ({
     label: button.dataset.label,
@@ -2071,10 +2076,6 @@ async function handleSubmit(event) {
     submittedAt: new Date().toISOString()
   };
 
-  submitBtn.disabled = true;
-  const originalText = submitBtn.textContent;
-  submitBtn.textContent = 'Submitting…';
-  showStatus('Submitting your reservation…', 'info');
 
   try {
     // Form-encoded rather than JSON on purpose. Zapier's catch hook answers a
@@ -2107,13 +2108,12 @@ async function handleSubmit(event) {
 
     // Leave the button disabled: the request is gone, and the page is about to
     // change. Re-enabling invites a second submission during the navigation.
-    showStatus('Reservation sent. Taking you to your confirmation\u2026', 'success');
     window.location.assign(CONFIRMATION_PAGE);
     return;
   } catch (error) {
     showStatus(`Something went wrong sending your reservation: ${error.message}. Please try again.`, 'error');
     submitBtn.disabled = false;
-    submitBtn.textContent = originalText;
+    submitBtn.textContent = submitLabel;
   }
 }
 
