@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>Time Slot Unavailable</title>
+
+<!--
+  ==========================================================================
+  Panetta Conference Room — "time slot unavailable" email
+  Sent by the Zapier outbound email step when the requested hours clash.
+
+  Structurally identical to reservation-received-email.html. The only
+  differences are the marker colour, the notice bar, and the copy — keep
+  them in step when either is edited.
+
+  PALETTE — UC Santa Cruz brand
+  communications.ucsc.edu/brand-overview/color
+    Primary Blue      #003c6c   headings, links, the button
+    Rubine Red        #da216d   the marker and the notice (4.8:1, passes AA)
+  Neutrals are not specified by the brand, so these are derived with a blue
+  bias toward the primary: page #edf1f5, surface #f4f7fa, rules #d5dee6,
+  ink #12212e, muted #5b6b79, body #33424f.
+
+  Primary Yellow is deliberately unused. At 1.6:1 on white it cannot carry
+  text, and the rule it used to draw across the top has been removed.
+
+  MERGE FIELDS — which Zap step each value comes from
+    373784826   the reservation itself (title, times, recipient)
+  Location is hardcoded here rather than merged: no calendar event is
+  created for a request that conflicts, so there is no event step to read.
+  Leave the merge expressions exactly as they are; the numeric IDs are
+  Zapier step references and renaming or reformatting them breaks the send.
+  ==========================================================================
+-->
+
+<style>
+  :root { color-scheme: light dark; supported-color-schemes: light dark; }
+
+  /* Dark mode only. One rule per element so a change in one place cannot
+     silently affect another. Clients that strip <style> fall back to the
+     inline light styles, which is the safe outcome. */
+  @media (prefers-color-scheme: dark) {
+    .bg-page    { background-color: #12212e !important; }
+    .bg-card    { background-color: #0e2438 !important; border-color: #33424f !important; }
+    .bg-surface { background-color: #0b1c2c !important; border-color: #33424f !important; }
+    .bg-footer  { background-color: #0b1c2c !important; border-top-color: #33424f !important; }
+    .text-ink   { color: #edf1f5 !important; }
+    .text-body  { color: #c4d2dd !important; }
+    .text-muted { color: #93a6b5 !important; }
+    .text-link  { color: #7fc4e8 !important; }
+    .mark-well  { background-color: #3a0f24 !important; border-color: #8f2050 !important; }
+    .mark-glyph { color: #f08cb4 !important; }
+    .bg-notice  { background-color: #3a0f24 !important; border-color: #8f2050 !important; }
+    .text-notice{ color: #f8c8dc !important; }
+  }
+</style>
+</head>
+
+<body style="margin:0; padding:0; background-color:#edf1f5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; -webkit-font-smoothing:antialiased;">
+
+<!-- Preheader: the grey preview line beside the subject in an inbox list.
+     Without it, clients grab the first body text, which is just "Hi Name". -->
+<div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#edf1f5;">
+  Those hours are already taken. Choose another time and we will hold it for you.
+</div>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-page" style="background-color:#edf1f5; padding:40px 16px;">
+  <tr>
+    <td align="center">
+
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-card" style="max-width:600px; background-color:#ffffff; border:1px solid #d5dee6; border-radius:16px; overflow:hidden;">
+
+        <!-- ---------- Header: marker, then the headline ---------- -->
+        <tr>
+          <td style="padding:36px 32px 0;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td class="mark-well" width="46" height="46" align="center" valign="middle"
+                    style="width:46px; height:46px; background-color:#fdeaf2; border:1px solid #f5b9d2; border-radius:23px;">
+                  <span class="mark-glyph" style="color:#da216d; font-size:24px; line-height:24px; font-weight:700;">!</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:20px 32px 0;">
+            <h1 class="text-ink" style="margin:0; color:#12212e; font-size:25px; font-weight:700; letter-spacing:-0.5px; line-height:1.2;">
+              Time slot unavailable
+            </h1>
+          </td>
+        </tr>
+
+        <!-- ---------- Body ---------- -->
+        <tr>
+          <td class="text-body" style="padding:14px 32px 32px; color:#33424f; font-size:15px; line-height:1.6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+
+            <p style="margin:0 0 16px;">Hi <strong>{{=gives["373784826"]["Recipient Name"]}}</strong>,</p>
+
+            <p style="margin:0 0 20px;">The hours you asked for were already booked, so we were not able to hold them. Nothing has been reserved &mdash; you just need to pick a different time.</p>
+
+            <!-- Notice bar: the one red element. The details block below stays
+                 neutral so it matches the "request received" email exactly. -->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-notice" style="background-color:#fdeaf2; border:1px solid #f5b9d2; border-radius:12px; margin:0 0 22px;">
+              <tr>
+                <td class="text-notice" style="padding:13px 18px; color:#12212e; font-size:14px; line-height:1.5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                  This request was <strong>not</strong> added to the calendar.
+                </td>
+              </tr>
+            </table>
+
+            <!-- ---------- What you requested ----------
+                 Two columns rather than <br>-separated pairs, so the values
+                 line up and a long event title cannot push the layout around. -->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d5dee6; border-radius:12px; overflow:hidden; margin:0 0 22px;">
+              <tr>
+                <td class="bg-surface text-muted" style="background-color:#f4f7fa; border-bottom:1px solid #d5dee6; padding:11px 18px; color:#5b6b79; font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                  What you requested
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:6px 18px 14px;">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+
+                    <tr>
+                      <td class="text-muted" width="96" valign="top" style="width:96px; padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Event</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output["373784826"]["Event Title"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Location</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">Panetta Conference Room</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Starts</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output["373784826"]["Start Time"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Ends</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output["373784826"]["End Time"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Contact</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=gives["373784826"]["Recipient Name"]}}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Email</td>
+                      <td valign="top" style="padding:8px 0; font-size:14px; font-weight:500;">
+                        <a class="text-link" href="mailto:{{=output['373784826']['Recipient Email']}}" style="color:#003c6c; text-decoration:underline;">{{=output["373784826"]["Recipient Email"]}}</a>
+                      </td>
+                    </tr>
+
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- ---------- Next steps ---------- -->
+            <p style="margin:0 0 18px;">Open the booking page to see what is still free and choose another time. Availability updates as soon as a request comes in, so the times shown there are current.</p>
+
+            <!-- Button: table-wrapped anchor so the whole block is clickable
+                 in clients that ignore padding on inline elements. -->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
+              <tr>
+                <td align="center" style="background-color:#003c6c; border-radius:12px;">
+                  <a href="https://panetta-user.zapier.app/dashboard" target="_blank"
+                     style="display:inline-block; padding:13px 22px; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                    Choose a different time
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <p class="text-muted" style="margin:0 0 26px; color:#5b6b79; font-size:13.5px; line-height:1.55;">
+              If the times you need are never free, or you would like help finding a slot,
+              <a class="text-link" href="mailto:pfortino@ucsc.edu" style="color:#003c6c; text-decoration:underline;">get in touch</a>.
+            </p>
+
+            <p style="margin:0 0 4px;">Thank you,</p>
+            <p class="text-ink" style="margin:0; color:#12212e; font-weight:700;">The Panetta Conference Team</p>
+
+          </td>
+        </tr>
+
+        <!-- ---------- Footer ---------- -->
+        <tr>
+          <td class="bg-footer text-muted" align="center" style="background-color:#f4f7fa; border-top:1px solid #d5dee6; padding:16px 32px; color:#5b6b79; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+            100 Panetta Ave, Santa Cruz, CA 95060
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Reservation Request Approved</title>
+  <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
+    @media (prefers-color-scheme: dark) {
+      body, .bg-outer, .bg-details, .bg-footer { background-color: #0f172a !important; }
+      .bg-card { background-color: #1e293b !important; border-color: #334155 !important; }
+      .text-header, .link-brand { color: #38bdf8 !important; }
+      .text-body, .text-details { color: #f1f5f9 !important; }
+      .text-muted, .bg-footer { color: #94a3b8 !important; }
+      .bg-details { border-left-color: #38bdf8 !important; }
+      .btn-pri { background-color: #0284c7 !important; border-color: #0284c7 !important; }
+      .bg-footer { border-top-color: #334155 !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-outer" style="background-color: #f4f6f8; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-card" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+          
+          <!-- Top Accent Bar -->
+          <tr><td style="background-color: #FFC72C; height: 6px;"></td></tr>
+
+          <!-- Header -->
+          <tr>
+            <td style="padding: 32px 32px 16px;">
+              <h1 class="text-header" style="margin: 0; color: #003C6C; font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">
+                Reservation Request Approved
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Body Content -->
+          <tr>
+            <td class="text-body" style="padding: 0 32px 32px; color: #334155; font-size: 15px; line-height: 1.6;">
+              
+              <p style="margin: 0 0 16px;">Hi <strong> {{=output['377233437']["old"]["data"]["f2"]}}</strong>,</p>
+              
+              <p style="margin: 0 0 24px;">Great news! Your requested time slot has been approved and officially reserved on the calendar.</p>
+
+              <!-- Details Box -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-details" style="background-color: #f8fafc; border-left: 4px solid #003C6C; border-radius: 4px; margin-bottom: 24px;">
+                <tr>
+                  <td class="text-details" style="padding: 16px 20px; color: #003C6C; font-size: 14px; line-height: 1.8;">
+                    <strong>Event Title:</strong> {{=output['377233437']["old"]["data"]["f17"]}}<br>
+                    <strong>Location:</strong> 100 Panetta Ave, Santa Cruz, CA 95060<br>
+                    <strong>Start Time:</strong> {{=output['377233437']["old"]["data"]["f18"]["value"]}}<br>
+                    <strong>End Time:</strong> {{=output['377233437']["old"]["data"]["f22"]["value"]}}<br>
+                    <strong>Contact Name:</strong> {{=output['377233437']["old"]["data"]["f2"]}}<br>
+                    <strong>Email:</strong> {{=output['377233437']["old"]["data"]["f1"]}}<br>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 16px;">You can view or manage your reservation details anytime in your dashboard:</p>
+
+              <!-- Primary CTA -->
+              <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
+                <tr>
+                  <td class="btn-pri" style="border-radius: 6px; background-color: #003C6C;">
+                    <a href="https://panetta-user.zapier.app/dashboard" target="_blank" style="font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; padding: 12px 24px; display: inline-block;">
+                      View User Dashboard
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 20px;">We look forward to hosting your event!</p>
+
+              <!-- Sign-off -->
+              <p style="margin: 0 0 4px;">Thank you,</p>
+              <p class="text-header" style="margin: 0 0 2px; font-weight: 700; color: #003C6C;">The Panetta Conference Team</p>
+              <p class="text-muted" style="margin: 0 0 2px; color: #64748b; font-size: 13px;">100 Panetta Ave</p>
+              <p style="margin: 0; font-size: 13px;">
+                <a class="link-brand" href="https://arts.ucsc.edu" target="_blank" style="color: #003C6C; text-decoration: underline;">Arts Division Website</a>
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="bg-footer" style="background-color: #f8fafc; padding: 16px 32px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b;">
+              100 Panetta Ave Santa Cruz, CA 95060
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
