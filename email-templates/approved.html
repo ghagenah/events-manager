@@ -62,26 +62,28 @@
           <td style="padding:36px 32px 0;">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0">
               <tr>
-                <td class="tick-well" width="46" height="46" align="center" valign="middle"
-                    style="width:46px; height:46px; background-color:#e3f0f1; border:1px solid #a8d3d8; border-radius:23px;">
-                  <span class="tick-mark" style="color:#007988; font-size:22px; line-height:22px; font-weight:700;">&#10003;</span>
+                <td width="46" valign="middle" style="width:46px;">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="46">
+                    <tr>
+                      <td class="tick-well" width="46" height="46" align="center" valign="middle"
+                          style="width:46px; height:46px; background-color:#e3f0f1; border:1px solid #a8d3d8; border-radius:23px;">
+                        <span class="tick-mark" style="color:#007988; font-size:22px; line-height:22px; font-weight:700;">&#10003;</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td valign="middle" style="padding-left:14px;">
+                  <h1 class="text-ink" style="margin:0; color:#12212e; font-size:25px; font-weight:700; letter-spacing:-0.5px; line-height:1.2;">Your reservation is confirmed</h1>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
 
-        <tr>
-          <td style="padding:20px 32px 0;">
-            <h1 class="text-ink" style="margin:0; color:#12212e; font-size:25px; font-weight:700; letter-spacing:-0.5px; line-height:1.2;">
-              Your reservation is confirmed
-            </h1>
-          </td>
-        </tr>
 
         <!-- ---------- Body ---------- -->
         <tr>
-          <td class="text-body" style="padding:14px 32px 32px; color:#33424f; font-size:15px; line-height:1.6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+          <td class="text-body" style="padding:20px 32px 32px; color:#33424f; font-size:15px; line-height:1.6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
             <p style="margin:0 0 16px;">Hi <strong>{{=output['377233437']["old"]["data"]["f2"]}}</strong>,</p>
 
@@ -106,12 +108,8 @@
                       <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">Panetta Conference Room</td>
                     </tr>
                     <tr>
-                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Starts</td>
-                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f18"]["value"]}}</td>
-                    </tr>
-                    <tr>
-                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Ends</td>
-                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f22"]["value"]}}</td>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Time</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f18"]["value"]}} &ndash; {{=output['377233437']["old"]["data"]["f22"]["value"]}} Pacific</td>
                     </tr>
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Contact</td>
