@@ -170,14 +170,40 @@
   .cal-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     padding: 12px 16px;
     background: var(--surface);
     border-bottom: 1px solid var(--line);
   }
+  /* Segmented view switcher. Google's own tab strip (showTabs=1) is the
+     alternative, but it crowds the embed header at phone width. */
+  .cal-views {
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .cal-views button {
+    padding: 5px 11px;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-left: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .cal-views button:first-child { border-left: 0; }
+  .cal-views button:hover { color: var(--ink); }
+  .cal-views button[aria-pressed="true"] {
+    color: #fff;
+    background: var(--blue);
+  }
   .cal-head h2 {
-    margin: 0;
+    /* auto on the right pushes the close button to the far edge */
+    margin: 0 auto 0 0;
     font-size: 15px;
     font-weight: 700;
   }
@@ -210,6 +236,11 @@
   @media (max-width: 480px) {
     #cal-dialog { width: 96vw; }
     .cal-body { height: 68vh; }
+    /* Title and close stay on the first row; the switcher drops below it
+       rather than squeezing three labels into the remaining strip. */
+    .cal-head { flex-wrap: wrap; row-gap: 10px; }
+    .cal-views { order: 3; width: 100%; }
+    .cal-views button { flex: 1; }
   }
 
   /* ---------- Section headings ---------- */
@@ -1100,6 +1131,11 @@
 <dialog id="cal-dialog" aria-labelledby="cal-dialog-title">
   <div class="cal-head">
     <h2 id="cal-dialog-title">Room availability</h2>
+    <div class="cal-views" id="cal-views" role="group" aria-label="Calendar view">
+      <button type="button" data-mode="WEEK">Week</button>
+      <button type="button" data-mode="MONTH">Month</button>
+      <button type="button" data-mode="AGENDA">List</button>
+    </div>
     <button type="button" class="cal-close" id="cal-close" aria-label="Close calendar">&times;</button>
   </div>
   <div class="cal-body">
@@ -2254,18 +2290,42 @@ form.addEventListener('submit', handleSubmit);
 const calDialog = document.getElementById('cal-dialog');
 const calFrame  = document.getElementById('cal-frame');
 
-const CALENDAR_EMBED_URL =
-  'https://calendar.google.com/calendar/embed'
-  + `?src=${encodeURIComponent(CALENDAR_ID)}`
-  + `&ctz=${encodeURIComponent(TIME_ZONE)}`
-  + '&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0';
+const calViews = document.getElementById('cal-views');
+let calMode = 'MONTH';
 
-document.getElementById('cal-newtab').href = CALENDAR_EMBED_URL;
+function calendarUrl(mode) {
+  return 'https://calendar.google.com/calendar/embed'
+    + `?src=${encodeURIComponent(CALENDAR_ID)}`
+    + `&ctz=${encodeURIComponent(TIME_ZONE)}`
+    + `&mode=${mode}`
+    + '&showTitle=0&showPrint=0&showTabs=0&showCalendars=0';
+}
+
+// Switching views means reloading the frame — Google owns what is inside it,
+// so there is no way to change the mode in place. `load` is false for the
+// initial call, which only has to mark the default button.
+function setCalView(mode, load = true) {
+  calMode = mode;
+  calViews.querySelectorAll('button').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
+  });
+  document.getElementById('cal-newtab').href = calendarUrl(mode);
+  if (load) calFrame.setAttribute('src', calendarUrl(mode));
+}
+
+setCalView(calMode, false);
+
+calViews.addEventListener('click', event => {
+  const button = event.target.closest('button[data-mode]');
+  // Re-clicking the current view would reload the frame for no reason.
+  if (!button || button.dataset.mode === calMode) return;
+  setCalView(button.dataset.mode);
+});
 
 document.getElementById('cal-open').addEventListener('click', () => {
   // Loaded on first open only; reopening reuses the frame already there.
   if (calFrame.getAttribute('src') === 'about:blank') {
-    calFrame.setAttribute('src', CALENDAR_EMBED_URL);
+    calFrame.setAttribute('src', calendarUrl(calMode));
   }
   calDialog.showModal();
 });
