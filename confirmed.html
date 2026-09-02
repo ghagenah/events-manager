@@ -211,13 +211,18 @@ function formatDate(value) {
   }
   if (!data) return;   // opened directly, without submitting
 
+  // Same rows, in the same order, as the "request received" email, so the
+  // page and the email that follows it do not disagree.
   const rows = [
     ['Event', data.eventTitle],
+    ['Location', 'Panetta Conference Room'],
     ['Date', formatDate(data.date)],
     ['Time', data.startTime && data.endTime
       ? `${data.startTime} – ${data.endTime} Pacific` : ''],
-    ['Department', data.department],
-    ['Confirmation to', data.email]
+    ['Responsible', data.responsiblePartyName],
+    ['Guests', data.totalGuests],
+    ['Contact', data.name],
+    ['Email', data.email]
   ].filter(([, value]) => value);
 
   if (!rows.length) return;

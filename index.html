@@ -2101,7 +2101,9 @@ async function handleSubmit(event) {
         date: payload.date,
         startTime: payload.startTime,
         endTime: payload.endTime,
-        department: payload.department,
+        responsiblePartyName: payload.responsiblePartyName,
+        totalGuests: payload.totalGuests,
+        name: payload.name,
         email: payload.email
       }));
     } catch (_) { /* the confirmation page copes without it */ }
