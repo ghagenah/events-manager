@@ -8,43 +8,19 @@
 <title>Reservation Approved</title>
 
 <!--
-  ==========================================================================
-  Panetta Conference Room — "reservation approved" email
-  Sent when an administrator approves a request and the booking becomes real.
-
-  Structurally identical to success.html, conflict.html and invalid.html —
-  keep the four in step when any one is edited.
-
-  PALETTE — UC Santa Cruz brand
-  communications.ucsc.edu/brand-overview/color
-    Primary Blue      #003c6c   headings, links, the button
-    Dark Teal         #007988   the approved tick (5.1:1, passes AA)
-  Neutrals are not specified by the brand, so these are derived with a blue
-  bias toward the primary: page #edf1f5, surface #f4f7fa, rules #d5dee6,
-  ink #12212e, muted #5b6b79, body #33424f.
-
-  Primary Yellow is deliberately unused: at 1.6:1 on white it cannot carry
-  text, and the rule it used to draw across the top has been removed.
-
-  MERGE FIELDS — this email is fired by a different step from the others
-    377233437   the reservation row, read as old.data.fN
-      f1  requester email      f2   requester name
-      f17 event title          f18  start time      f22  end time
-  Leave the merge expressions exactly as they are; the numeric IDs and field
-  keys are Zapier step references and rewriting them breaks the send.
-
-  The email address is plain text rather than a mailto link, unlike the
-  sibling templates: this expression contains double quotes, which would
-  close an href="" attribute early.
-  ==========================================================================
+  Panetta Conference Room — "reservation approved".
+  Merge fields come from step 377233437, read as old.data.fN:
+    f1 email · f2 name · f17 title · f18 start · f22 end
+  Leave the expressions exactly as written. The email address is plain text
+  rather than a mailto link: this expression contains double quotes, which
+  would close an href attribute early.
+  Styling matches the other three; keep them in step.
 -->
 
 <style>
   :root { color-scheme: light dark; supported-color-schemes: light dark; }
 
-  /* Dark mode only. One rule per element so a change in one place cannot
-     silently affect another. Clients that strip <style> fall back to the
-     inline light styles, which is the safe outcome. */
+  /* Dark mode. Clients that strip <style> keep the inline light styles. */
   @media (prefers-color-scheme: dark) {
     .bg-page    { background-color: #12212e !important; }
     .bg-card    { background-color: #0e2438 !important; border-color: #33424f !important; }
@@ -62,8 +38,7 @@
 
 <body style="margin:0; padding:0; background-color:#edf1f5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; -webkit-font-smoothing:antialiased;">
 
-<!-- Preheader: the grey preview line beside the subject in an inbox list.
-     Without it, clients grab the first body text, which is just "Hi Name". -->
+<!-- Inbox preview line -->
 <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#edf1f5;">
   The room is booked. Here is what to arrange before the day.
 </div>
@@ -74,7 +49,6 @@
 
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-card" style="max-width:600px; background-color:#ffffff; border:1px solid #d5dee6; border-radius:16px; overflow:hidden;">
 
-        <!-- ---------- Header: tick, then the headline ---------- -->
         <tr>
           <td style="padding:36px 32px 0;">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0">
@@ -104,9 +78,6 @@
 
             <p style="margin:0 0 22px;">Your request has been approved and the room is booked. You have been added to the calendar event, so it should appear in your own calendar.</p>
 
-            <!-- ---------- What you booked ----------
-                 Two columns rather than <br>-separated pairs, so the values
-                 line up and a long event title cannot push the layout around. -->
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d5dee6; border-radius:12px; overflow:hidden; margin:0 0 22px;">
               <tr>
                 <td class="bg-surface text-muted" style="background-color:#f4f7fa; border-bottom:1px solid #d5dee6; padding:11px 18px; color:#5b6b79; font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
@@ -151,8 +122,6 @@
             <p style="margin:0 0 18px;">There are a few things to arrange before the day. Card key access has to be
               requested ahead of time, and everyone who needs to get into the building must request their own.</p>
 
-            <!-- Button: table-wrapped anchor so the whole block is clickable
-                 in clients that ignore padding on inline elements. -->
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
               <tr>
                 <td align="center" style="background-color:#003c6c; border-radius:12px;">

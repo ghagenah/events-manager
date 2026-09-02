@@ -8,42 +8,16 @@
 <title>Booking Error</title>
 
 <!--
-  ==========================================================================
-  Panetta Conference Room — "invalid times" email
-  Sent by the Zapier outbound email step when the submitted start/end times
-  cannot be processed, e.g. the end falls before the start.
-
-  Structurally identical to reservation-received-email.html and
-  reservation-conflict-email.html. The only differences are the copy and,
-  against the received email, the marker colour and notice bar — keep the
-  three in step when any one is edited.
-
-  PALETTE — UC Santa Cruz brand
-  communications.ucsc.edu/brand-overview/color
-    Primary Blue      #003c6c   headings, links, the button
-    Rubine Red        #da216d   the marker and the notice (4.8:1, passes AA)
-  Neutrals are not specified by the brand, so these are derived with a blue
-  bias toward the primary: page #edf1f5, surface #f4f7fa, rules #d5dee6,
-  ink #12212e, muted #5b6b79, body #33424f.
-
-  Primary Yellow is deliberately unused: at 1.6:1 on white it cannot carry
-  text, and the rule it used to draw across the top has been removed.
-
-  MERGE FIELDS — which Zap step each value comes from
-    373784826   the reservation itself (title, times, recipient)
-  Location is hardcoded here rather than merged: no calendar event is
-  created for a request that fails, so there is no event step to read.
-  Leave the merge expressions exactly as they are; the numeric IDs are
-  Zapier step references and renaming or reformatting them breaks the send.
-  ==========================================================================
+  Panetta Conference Room — "invalid times", e.g. an end before a start.
+  Merge fields come from step 373784826. Location is hardcoded: no calendar
+  event exists for a request that failed. Leave the expressions as written.
+  Styling matches the other three; keep them in step.
 -->
 
 <style>
   :root { color-scheme: light dark; supported-color-schemes: light dark; }
 
-  /* Dark mode only. One rule per element so a change in one place cannot
-     silently affect another. Clients that strip <style> fall back to the
-     inline light styles, which is the safe outcome. */
+  /* Dark mode. Clients that strip <style> keep the inline light styles. */
   @media (prefers-color-scheme: dark) {
     .bg-page    { background-color: #12212e !important; }
     .bg-card    { background-color: #0e2438 !important; border-color: #33424f !important; }
@@ -63,8 +37,7 @@
 
 <body style="margin:0; padding:0; background-color:#edf1f5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; -webkit-font-smoothing:antialiased;">
 
-<!-- Preheader: the grey preview line beside the subject in an inbox list.
-     Without it, clients grab the first body text, which is just "Hi Name". -->
+<!-- Inbox preview line -->
 <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#edf1f5;">
   Nothing was booked. Check the start and end times, then submit again.
 </div>
@@ -75,7 +48,6 @@
 
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-card" style="max-width:600px; background-color:#ffffff; border:1px solid #d5dee6; border-radius:16px; overflow:hidden;">
 
-        <!-- ---------- Header: marker, then the headline ---------- -->
         <tr>
           <td style="padding:36px 32px 0;">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0">
@@ -105,8 +77,6 @@
 
             <p style="margin:0 0 20px;">We could not process your request because the start and end times did not make sense together &mdash; most often that means the end time falls before the start time. Nothing has been reserved.</p>
 
-            <!-- Notice bar: the one red element. The details block below stays
-                 neutral so it matches the "request received" email exactly. -->
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-notice" style="background-color:#fdeaf2; border:1px solid #f5b9d2; border-radius:12px; margin:0 0 22px;">
               <tr>
                 <td class="text-notice" style="padding:13px 18px; color:#12212e; font-size:14px; line-height:1.5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
@@ -115,11 +85,6 @@
               </tr>
             </table>
 
-            <!-- ---------- What you requested ----------
-                 Two columns rather than <br>-separated pairs, so the values
-                 line up and a long event title cannot push the layout around.
-                 Showing the times back is the point here: it is how the sender
-                 sees what went wrong. -->
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d5dee6; border-radius:12px; overflow:hidden; margin:0 0 22px;">
               <tr>
                 <td class="bg-surface text-muted" style="background-color:#f4f7fa; border-bottom:1px solid #d5dee6; padding:11px 18px; color:#5b6b79; font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
@@ -165,8 +130,6 @@
             <!-- ---------- Next steps ---------- -->
             <p style="margin:0 0 18px;">Open your dashboard, check that the end time comes after the start time, and submit the request again. Nothing else needs redoing.</p>
 
-            <!-- Button: table-wrapped anchor so the whole block is clickable
-                 in clients that ignore padding on inline elements. -->
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
               <tr>
                 <td align="center" style="background-color:#003c6c; border-radius:12px;">
