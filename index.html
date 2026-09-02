@@ -143,8 +143,6 @@
 
   /* ---------- Calendar dialog ---------- */
 
-  .cal-link-row { margin-top: 8px; }
-
   .cal-link {
     padding: 0;
     font: inherit;
@@ -930,11 +928,9 @@
 
     <div class="field">
       <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
-      <p class="hint" id="date-window"></p>
+      <p class="hint" id="date-window"><span id="date-window-text"></span>
+        <button type="button" class="cal-link" id="cal-open">View the full calendar</button></p>
       <input type="date" id="date" name="date" required>
-      <p class="hint cal-link-row">
-        <button type="button" class="cal-link" id="cal-open">View the full calendar</button>
-      </p>
     </div>
 
     <div class="slots-section">
@@ -2221,7 +2217,7 @@ async function handleSubmit(event) {
 document.getElementById('tz-note').textContent = TIME_ZONE_LABEL;
 dateInput.min = earliestBookableDate();
 dateInput.max = latestBookableDate();
-document.getElementById('date-window').textContent =
+document.getElementById('date-window-text').textContent =
   `Requests need at least ${MIN_LEAD_DAYS} days' notice, and can be made up to ` +
   `${MAX_MONTHS_AHEAD} months ahead — so between ${longDate(dateInput.min)} and ${longDate(dateInput.max)}.`;
 dateInput.addEventListener('change', loadAvailability);
