@@ -2259,14 +2259,16 @@ form.addEventListener('submit', handleSubmit);
 const calDialog = document.getElementById('cal-dialog');
 const calFrame  = document.getElementById('cal-frame');
 
-// showTabs=1 leaves Google's own view switcher in place — a "Month" dropdown
-// on desktop, a compact icon on a phone — so week and list views come free
+// Opens on the week view: it lays out actual hour blocks, which is what
+// someone about to pick time slots needs to see. Month only says a day has
+// something on it. showTabs=1 keeps Google's own switcher — a dropdown on
+// desktop, a compact icon on a phone — so month and list are a click away
 // and switching does not reload the frame.
 const CALENDAR_EMBED_URL =
   'https://calendar.google.com/calendar/embed'
   + `?src=${encodeURIComponent(CALENDAR_ID)}`
   + `&ctz=${encodeURIComponent(TIME_ZONE)}`
-  + '&mode=MONTH&showTitle=0&showPrint=0&showTabs=1&showCalendars=0';
+  + '&mode=WEEK&showTitle=0&showPrint=0&showTabs=1&showCalendars=0';
 
 document.getElementById('cal-newtab').href = CALENDAR_EMBED_URL;
 
