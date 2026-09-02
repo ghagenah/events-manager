@@ -51,8 +51,25 @@
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 16px;
+    overflow: hidden;
     box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
     padding: 36px 40px 40px;
+  }
+
+  /* Full-bleed banner: the negative margins cancel the card's padding so the
+     photo reaches the edges. 12/5 keeps the roofline and loses the road;
+     45% biases the crop up, since the lower third is tarmac. */
+  .hero {
+    display: block;
+    width: calc(100% + 80px);
+    margin: -36px -40px 26px;
+    /* height:auto is required — the img's height attribute is a presentational
+       hint that otherwise wins over aspect-ratio and renders it full height. */
+    height: auto;
+    aspect-ratio: 12 / 5;
+    object-fit: cover;
+    object-position: center 45%;
+    background: var(--surface);
   }
 
   header { margin-bottom: 26px; }
@@ -460,6 +477,7 @@
   @media (max-width: 620px) {
     body { padding: 20px 12px 88px; }
     .card { padding: 24px 22px 30px; }
+    .hero { width: calc(100% + 44px); margin: -24px -22px 20px; aspect-ratio: 16 / 9; }
     h1 { font-size: 23px; }
     .contents ol { grid-template-columns: 1fr; }
   }
@@ -473,7 +491,7 @@
   @media print {
     body { background: #fff; padding: 0; display: block; }
     .card { max-width: none; border: none; box-shadow: none; padding: 0; }
-    .tabs, .checklist-actions, .btn-link, .expand-all, .detail-hint { display: none !important; }
+    .tabs, .checklist-actions, .btn-link, .expand-all, .detail-hint, .hero { display: none !important; }
     [role="tabpanel"][hidden] { display: block !important; }
     .sec > summary::after { display: none; }
     .checklist input[type="checkbox"] { -webkit-appearance: none; appearance: none;
@@ -488,6 +506,10 @@
 <body>
 
 <main class="card">
+
+  <img class="hero" src="assets/panetta.webp" width="1569" height="1045"
+       alt="The 100 Panetta Avenue building seen from across Panetta Avenue: a two-storey
+            timber-clad upper floor cantilevered over a concrete ground floor.">
 
   <header>
     <h1>Your event at 100 Panetta</h1>
