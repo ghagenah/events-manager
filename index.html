@@ -689,28 +689,6 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .legend[hidden] { display: none; }
-
-  .legend span { display: flex; align-items: center; gap: 6px; }
-
-  .swatch {
-    width: 11px;
-    height: 11px;
-    border-radius: 3px;
-    border: 1px solid var(--line);
-  }
-
-  .swatch.faded { background: #fff; opacity: .38; }
-  .swatch.busy  { background: #f4f7fa; border-style: dashed; }
 
   /* ---------- Submit ---------- */
 
@@ -872,11 +850,6 @@
 
       <div id="slots" role="group" aria-labelledby="slots-label" aria-live="polite">
         <div class="placeholder">Select a date to see available times.</div>
-      </div>
-
-      <div class="legend" id="legend" hidden>
-        <span><i class="swatch faded"></i> Not adjacent</span>
-        <span><i class="swatch busy"></i> Unavailable</span>
       </div>
     </div>
 
@@ -1116,7 +1089,6 @@ const deptInput  = document.getElementById('department');
 const dateInput  = document.getElementById('date');
 const slotsBox   = document.getElementById('slots');
 const slotCount  = document.getElementById('slot-count');
-const legend     = document.getElementById('legend');
 const submitBtn  = document.getElementById('submit-btn');
 const statusBox  = document.getElementById('status');
 const clearBtn   = document.getElementById('clear-btn');
@@ -1244,7 +1216,6 @@ function resetSlots(message) {
   slotButtons = [];
   selection = null;
   updateSlotCount();
-  legend.hidden = true;
   slotsBox.innerHTML = '';
   const el = document.createElement('div');
   el.className = 'placeholder';
@@ -1436,7 +1407,6 @@ function renderSlots(day, busy) {
   }
 
   slotsBox.appendChild(grid);
-  legend.hidden = false;
 
   if (availableCount === 0) {
     const note = document.createElement('p');
@@ -1535,7 +1505,6 @@ async function loadAvailability() {
   slotButtons = [];
   selection = null;
   updateSlotCount();
-  legend.hidden = true;
   if (!cachedBusyFor(day)) {
     slotsBox.innerHTML =
       '<div class="loading"><span class="spinner"></span>Checking calendar availability&hellip;</div>';
