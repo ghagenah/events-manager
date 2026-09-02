@@ -89,6 +89,21 @@
 
             <p style="margin:0 0 22px;">Your request has been approved and the room is booked. You have been added to the calendar event, so it should appear in your own calendar.</p>
 
+            <!-- ---------- Next steps ---------- -->
+            <p style="margin:0 0 18px;">There are a few things to arrange before the day. Card key access has to be
+              requested ahead of time, and everyone who needs to get into the building must request their own.</p>
+
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
+              <tr>
+                <td align="center" style="background-color:#003c6c; border-radius:12px;">
+                  <a href="https://ghagenah.github.io/events-manager/event-guide.html" target="_blank"
+                     style="display:inline-block; padding:13px 22px; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                    Open the event guide
+                  </a>
+                </td>
+              </tr>
+            </table>
+
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d5dee6; border-radius:12px; overflow:hidden; margin:0 0 22px;">
               <tr>
                 <td class="bg-surface text-muted" style="background-color:#f4f7fa; border-bottom:1px solid #d5dee6; padding:11px 18px; color:#5b6b79; font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
@@ -112,6 +127,14 @@
                       <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f18"]["value"]}} &ndash; {{=output['377233437']["old"]["data"]["f22"]["value"]}} Pacific</td>
                     </tr>
                     <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Responsible party</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{responsiblePartyName}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Guests</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{totalGuests}</td>
+                    </tr>
+                    <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Contact</td>
                       <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{{=output['377233437']["old"]["data"]["f2"]}}</td>
                     </tr>
@@ -125,20 +148,7 @@
               </tr>
             </table>
 
-            <!-- ---------- Next steps ---------- -->
-            <p style="margin:0 0 18px;">There are a few things to arrange before the day. Card key access has to be
-              requested ahead of time, and everyone who needs to get into the building must request their own.</p>
 
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
-              <tr>
-                <td align="center" style="background-color:#003c6c; border-radius:12px;">
-                  <a href="https://ghagenah.github.io/events-manager/event-guide.html" target="_blank"
-                     style="display:inline-block; padding:13px 22px; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-                    Open the event guide
-                  </a>
-                </td>
-              </tr>
-            </table>
 
             <p class="text-muted" style="margin:0 0 26px; color:#5b6b79; font-size:13.5px; line-height:1.55;">
               Need to change or cancel it?
