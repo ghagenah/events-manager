@@ -12,6 +12,9 @@
   Merge fields come from step 377233437, read as gives.old.data.fN:
     f1 email · f2 name · f17 title · f18 start · f22 end
     f24 responsible party · f25 total guests
+  The Date row holds {DATE_FIELD} as a placeholder: this step has no
+  date field number yet. Replace it before enabling the Zap, or the
+  literal text is what recipients will see.
   The times are read as ["label"], not ["value"].
   Leave the expressions exactly as written. The email address is plain text
   rather than a mailto link: this expression contains double quotes, which
@@ -123,6 +126,10 @@
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Location</td>
                       <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">Panetta Conference Room</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Date</td>
+                      <td class="text-ink" valign="top" style="padding:8px 0; color:#12212e; font-size:14px; font-weight:500;">{DATE_FIELD}</td>
                     </tr>
                     <tr>
                       <td class="text-muted" valign="top" style="padding:8px 12px 8px 0; color:#5b6b79; font-size:13px; font-weight:600;">Time</td>
