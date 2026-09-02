@@ -41,12 +41,12 @@
 
   .card {
     width: 100%;
-    max-width: 560px;
+    max-width: 720px;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 16px;
     box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
-    padding: 36px 32px;
+    padding: 36px 40px 40px;
   }
 
   .tick {
@@ -149,9 +149,12 @@
     box-shadow: 0 0 0 3px rgba(0, 60, 108, .38);
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 620px) {
     body { padding: 20px 12px; }
-    .card { padding: 24px 22px; }
+    .card { padding: 24px 22px 30px; }
+  }
+
+  @media (max-width: 480px) {
     .summary dl { grid-template-columns: 1fr; gap: 0; }
     .summary dt { padding-bottom: 0; }
     .summary dd { padding-top: 2px; }
