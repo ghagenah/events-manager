@@ -47,12 +47,28 @@
 
   .card {
     width: 100%;
-    max-width: 560px;
+    max-width: 720px;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 16px;
+    overflow: hidden;              /* so the banner can reach the card edges */
     box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
-    padding: 32px;
+    padding: 32px 40px 40px;
+  }
+
+  /* Full-bleed banner: negative margins cancel the card padding. Shorter than
+     the guide's, since this page is a task and the photo should not push the
+     first field down the screen. 68% biases the crop to the signage. */
+  .hero {
+    display: block;
+    width: calc(100% + 80px);
+    margin: -32px -40px 26px;
+    height: auto;                  /* the height attribute would otherwise
+                                      override aspect-ratio */
+    aspect-ratio: 5 / 2;
+    object-fit: cover;
+    object-position: center 82%;
+    background: var(--surface);
   }
 
   header { margin-bottom: 28px; }
@@ -737,9 +753,13 @@
     white-space: nowrap;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 620px) {
     body { padding: 20px 12px; }
-    .card { padding: 22px; }
+    .card { padding: 24px 22px 30px; }
+    .hero { width: calc(100% + 44px); margin: -24px -22px 20px; aspect-ratio: 2 / 1; }
+  }
+
+  @media (max-width: 480px) {
     .slot-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
@@ -747,6 +767,11 @@
 <body>
 
 <main class="card">
+
+  <img class="hero" src="assets/panetta-close.webp" width="3000" height="2000"
+       alt="The Institute of the Arts and Sciences at 100 Panetta Avenue, its concrete
+            facade lettered UC Santa Cruz beneath a timber upper floor.">
+
   <header>
     <h1>Panetta Conference Room Reservations</h1>
     <p class="subtitle">Check the room&rsquo;s live availability and request a block of hours &mdash; an
