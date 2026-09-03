@@ -2,8 +2,9 @@
    Arts Division room reservations — shared form behaviour.
 
    Each page declares its own space — name, webhook, rooms — in a
-   window.SPACE_CONFIG block just before this script loads. index.html is
-   Panetta (one room, so no picker); darc/index.html is DARC (two rooms).
+   window.SPACE_CONFIG block just before this script loads. Each space is a
+   folder under reservations/ — panetta (one room, so no picker) and darc
+   (two rooms).
 
    Loaded at the end of <body>, so the DOM is already parsed and no
    defer/DOMContentLoaded guard is needed.
