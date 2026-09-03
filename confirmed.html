@@ -217,6 +217,11 @@ function formatDate(value) {
     document.getElementById('lead-location').textContent = data.location;
   }
 
+  // Back to the form they actually used — this page serves every space.
+  if (data.returnTo) {
+    document.querySelector('.again').setAttribute('href', data.returnTo);
+  }
+
   // Same rows, in the same order, as the "request received" email, so the
   // page and the email that follows it do not disagree.
   const rows = [

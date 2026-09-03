@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panetta Conference Room Reservations</title>
+<style>
+  :root {
+    /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
+       Neutrals are not specified by the brand, so those below are derived
+       with a blue bias toward the primary so they read as chosen. */
+    --blue: #003c6c;           /* Primary Blue  */
+    --gold: #fdc700;           /* Primary Yellow — blocks only, never text */
+    --teal: #007988;           /* Dark Teal     */
+    --rubine: #da216d;         /* Rubine Red    */
+    --blue-dark: #00294a;
+    --blue-soft: #e6eef4;
+    --ink: #12212e;
+    --muted: #5b6b79;
+    --line: #d5dee6;
+    --bg: #edf1f5;
+    --card: #ffffff;
+    --danger: #da216d;
+    --danger-soft: #fdeaf2;
+    --success: #007988;
+    --success-soft: #e3f0f1;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 40px 20px;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;              /* so the banner can reach the card edges */
+    box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
+    padding: 32px;
+  }
+
+  /* Full-bleed banner: negative margins cancel the card padding. Shorter than
+     the guide's, since this page is a task and the photo should not push the
+     first field down the screen. 68% biases the crop to the signage. */
+  .hero {
+    display: block;
+    width: calc(100% + 64px);
+    margin: -32px -32px 26px;
+    height: auto;                  /* the height attribute would otherwise
+                                      override aspect-ratio */
+    aspect-ratio: 5 / 2;
+    object-fit: cover;
+    object-position: center 82%;
+    background: var(--surface);
+  }
+
+  header { margin-bottom: 28px; }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 650;
+    letter-spacing: -.02em;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .field { margin-bottom: 20px; }
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .req { color: var(--danger); font-weight: 400; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"] {
+    width: 100%;
+    padding: 11px 13px;
+    font: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 11px 13px;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    resize: vertical;
+    min-height: 78px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .18);
+  }
+
+  .optional { color: var(--muted); font-weight: 400; }
+
+  .field .hint { margin-top: -2px; }
+
+  input[type="number"] { width: 8rem; }
+
+  /* ---------- Calendar dialog ---------- */
+
+  .cal-link {
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    color: var(--blue);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    cursor: pointer;
+  }
+  .cal-link:hover { color: var(--blue-dark); }
+
+  #cal-dialog {
+    width: min(92vw, 900px);
+    max-width: 900px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--ink);
+    overflow: hidden;
+  }
+  #cal-dialog::backdrop { background: rgba(18, 33, 46, .55); }
+
+  .cal-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .cal-head h2 {
+    margin: 0;
+    white-space: nowrap;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .cal-close {
+    padding: 0 6px;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .cal-close:hover { color: var(--ink); }
+
+  /* Fixed viewport height so the month grid is usable without the dialog
+     growing past the screen on a laptop. */
+  .cal-body { height: min(70vh, 620px); }
+  .cal-body iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+  /* Sits in the header rather than a footer bar of its own, which cost a
+     whole row of height for one line of text. */
+  .cal-note {
+    flex: 1;
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+  .cal-newtab { color: var(--blue); white-space: nowrap; }
+
+  @media (max-width: 480px) {
+    #cal-dialog { width: 96vw; }
+    .cal-body { height: 68vh; }
+    .cal-head { flex-wrap: wrap; row-gap: 8px; }
+    /* The note drops to its own row, so the title has to push the close
+       button to the edge on the first one. */
+    .cal-head h2 { margin-right: auto; }
+    .cal-note { order: 3; width: 100%; flex: none; }
+  }
+
+  /* ---------- Section headings ---------- */
+
+  .form-section {
+    margin: 30px 0 18px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .form-section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .form-section h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  .form-section p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ---------- Radio groups ---------- */
+
+  fieldset {
+    margin: 0 0 20px;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  fieldset .hint { margin: 0 0 10px; }
+
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+
+  .choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+
+  .choice:hover { border-color: var(--blue); background: var(--blue-soft); }
+
+  .choice input[type="radio"] {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 1px 0 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .choice:has(input:checked) {
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  .choice:has(input:focus-visible) {
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .22);
+  }
+
+  .choice .sub {
+    display: block;
+    font-weight: 400;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ---------- Demo fill (testing only) ---------- */
+
+  .demo-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-bottom: 22px;
+    padding: 12px 14px;
+    background: #fff8e0;
+    border: 1px dashed var(--gold);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: #12212e;
+  }
+
+  .demo-bar[hidden] { display: none; }
+
+  .demo-bar strong { font-weight: 700; }
+  .demo-bar .grow { flex: 1 1 auto; }
+
+  .demo-bar button {
+    padding: 7px 13px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    color: #12212e;            /* white on gold is 1.6:1 — ink is 14:1 */
+    background: var(--gold);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .demo-bar button:hover { background: #e6b400; }
+  .demo-bar button:disabled { opacity: .6; cursor: not-allowed; }
+
+  .demo-bar button:focus-visible {
+    outline: 2px solid #12212e;
+    outline-offset: 2px;
+  }
+
+  /* ---------- Inline validation ---------- */
+
+  .field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--danger);
+  }
+
+  .field-error::before {
+    content: "!";
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    color: #fff;
+    background: var(--danger);
+    border-radius: 50%;
+  }
+
+  .has-error input[type="text"],
+  .has-error input[type="email"],
+  .has-error input[type="tel"],
+  .has-error input[type="number"],
+  .has-error input[type="date"],
+  .has-error textarea {
+    border-color: var(--danger);
+    background: #fff7fa;
+  }
+
+  .has-error .choice { border-color: #f0a3c3; }
+
+  .error-summary {
+    margin-bottom: 24px;
+    padding: 14px 16px;
+    background: var(--danger-soft);
+    border: 1px solid #f5b9d2;
+    border-radius: var(--radius);
+  }
+
+  .error-summary[hidden] { display: none; }
+
+  .error-summary h2 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--danger);
+  }
+
+  .error-summary ul { margin: 0; padding-left: 18px; }
+  .error-summary li { margin-bottom: 4px; font-size: 13px; }
+  .error-summary li:last-child { margin-bottom: 0; }
+
+  .error-summary a {
+    color: var(--danger);
+    text-underline-offset: 2px;
+  }
+
+  .error-summary a:hover { text-decoration: none; }
+
+  /* ---------- Draft notice ---------- */
+
+  .draft-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin-bottom: 22px;
+    padding: 11px 14px;
+    background: var(--blue-soft);
+    border: 1px solid #a9c3d6;
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--blue-dark);
+  }
+
+  .draft-note[hidden] { display: none; }
+
+  .draft-note button {
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-dark);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ---------- Same as requester ---------- */
+
+  .same-as-me {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .same-as-me input[type="checkbox"] {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .field[hidden], .conditional .field[hidden] { display: none; }
+
+  /* ---------- Event checklist ---------- */
+
+  .checklist {
+    margin-bottom: 24px;
+    padding: 18px 20px;
+    background: #f4f7fa;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .checklist .lead {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .checklist .lead + .lead { margin-bottom: 12px; }
+
+  .checklist ol {
+    margin: 0 0 12px;
+    padding-left: 22px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .checklist ol li { margin-bottom: 9px; line-height: 1.5; }
+  .checklist ol li:last-child { margin-bottom: 0; }
+  .checklist ol li::marker { font-weight: 700; color: var(--blue); }
+
+  .checklist .updated {
+    margin: 0 0 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #dde5ec;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .checklist .terms { margin: 0 0 14px; }
+  .checklist .terms p {
+    margin: 0 0 9px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .checklist .terms p:last-child { margin-bottom: 0; }
+
+  /* ---------- Conditional block ---------- */
+
+  .conditional {
+    margin: -8px 0 20px;
+    padding: 14px 16px;
+    background: #fff8e0;
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+  }
+
+  .conditional[hidden] { display: none; }
+
+  .conditional p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  /* ---------- Occupancy agreement ---------- */
+
+  .occupancy {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    background: #f4f7fa;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .occupancy > p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .occupancy .caps {
+    margin: 0 0 14px;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .occupancy .caps th,
+  .occupancy .caps td {
+    text-align: left;
+    padding: 5px 0;
+    border-bottom: 1px solid #dde5ec;
+    vertical-align: baseline;
+  }
+
+  .occupancy .caps tr:last-child th,
+  .occupancy .caps tr:last-child td { border-bottom: none; }
+
+  .occupancy .caps th {
+    width: 3.4em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .occupancy .caps td { color: var(--muted); padding-left: 10px; }
+
+  .agree {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .agree input[type="checkbox"] {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .agree input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Slots ---------- */
+
+  .slots-section { margin-bottom: 24px; }
+
+  .slots-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-bottom: 8px;
+  }
+
+  .slots-head label { margin-bottom: 0; }
+
+  .head-right {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .count {
+    font-size: 13px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .clear-btn {
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .clear-btn:hover { color: var(--blue-dark); }
+
+  .hint {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 11px 6px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background .12s, border-color .12s, color .12s, transform .06s;
+  }
+
+  .slot .until {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .slot:hover {
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  .slot:focus-visible {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .22);
+  }
+
+  .slot:active { transform: scale(.98); }
+
+  .slot.selected,
+  .slot.selected:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+
+  .slot.selected .until { color: rgba(255, 255, 255, .8); }
+
+  /* Mid-block hours can't be removed without splitting the block. */
+  .slot.selected.interior { cursor: default; }
+
+  /* Available, but not adjacent to the current block. */
+  .slot.blocked,
+  .slot.blocked:hover {
+    background: #fff;
+    border-color: var(--line);
+    opacity: .38;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+  }
+
+  .slot.unavailable,
+  .slot.unavailable:hover {
+    background: #f4f7fa;
+    border-color: var(--line);
+    border-style: dashed;
+    color: #8c9aa6;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+  }
+
+  /* Struck on the time itself — text-decoration on the button would
+     propagate to the status line below it and can't be cancelled there. */
+  .slot.unavailable .slot-time { text-decoration: line-through; }
+
+  .slot.unavailable .until { color: #8c9aa6; }
+
+  /* ---------- Messages ---------- */
+
+  .placeholder,
+  .loading,
+  .slot-error {
+    padding: 18px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .loading { color: var(--blue); border-color: #a9c3d6; background: var(--blue-soft); }
+
+  .slot-error {
+    color: var(--danger);
+    border-style: solid;
+    border-color: #f5b9d2;
+    background: var(--danger-soft);
+    text-align: left;
+  }
+
+  .retry {
+    margin-top: 8px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--danger);
+    background: #fff;
+    border: 1px solid #f5b9d2;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .retry:hover { background: var(--danger-soft); }
+
+  .spinner {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 8px;
+    vertical-align: -2px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+
+  /* ---------- Submit ---------- */
+
+  .submit {
+    width: 100%;
+    padding: 13px;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 650;
+    color: #fff;
+    background: var(--blue);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .submit:hover:not(:disabled) { background: var(--blue-dark); }
+
+  .submit:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 60, 108, .38);
+  }
+
+  .submit:disabled { opacity: .6; cursor: not-allowed; }
+
+  .status {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    border: 1px solid transparent;
+  }
+
+  .status[hidden] { display: none; }
+  .status.info    { color: var(--blue);    background: var(--blue-soft);   border-color: #a9c3d6; }
+  .status.error   { color: var(--danger);  background: var(--danger-soft); border-color: #f5b9d2; }
+  .status.success { color: var(--success); background: var(--success-soft);border-color: #a8d3d8; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 20px 12px; }
+    .card { padding: 22px; }
+    .hero { width: calc(100% + 44px); margin: -22px -22px 20px; aspect-ratio: 2 / 1; }
+    .slot-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<main class="card">
+
+  <img class="hero" src="../assets/panetta-close.webp" width="1440" height="960"
+       alt="The Institute of the Arts and Sciences at 100 Panetta Avenue, its concrete
+            facade lettered UC Santa Cruz beneath a timber upper floor.">
+
+  <header>
+    <h1>Panetta Conference Room Reservations</h1>
+    <p class="subtitle">Check the room&rsquo;s live availability and request a block of hours &mdash; an
+      administrator reviews every request before it is confirmed.</p>
+  </header>
+
+  <form id="reservation-form" novalidate>
+
+    <div class="demo-bar" id="demo-bar" hidden>
+      <span class="grow"><strong>Testing mode.</strong> Fills every field with sample data,
+        including a real open time slot.</span>
+      <button type="button" id="fill-demo">Fill with demo info</button>
+    </div>
+
+    <div class="draft-note" id="draft-note" hidden>
+      <span>We restored what you had filled in earlier.</span>
+      <button type="button" id="discard-draft">Start over</button>
+    </div>
+
+    <div class="error-summary" id="error-summary" role="alert" tabindex="-1" hidden></div>
+
+    <div class="form-section"><h2>Event</h2></div>
+
+    <div class="field">
+      <label for="event-title">Event Title <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="event-title" name="eventTitle" required maxlength="120"
+             autocomplete="off" placeholder="Team planning session">
+    </div>
+
+    <div class="field">
+      <label for="description">Brief description of your meeting/event <span class="req" aria-hidden="true">*</span></label>
+      <textarea id="description" name="eventDescription" rows="3" maxlength="1000" required
+                placeholder="Monthly faculty meeting with a short presentation."></textarea>
+    </div>
+
+    <div class="form-section"><h2>Who&rsquo;s requesting</h2></div>
+
+    <div class="field">
+      <label for="name">Full Name <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="name" name="name" required autocomplete="name" placeholder="Jane Doe">
+    </div>
+
+    <div class="field">
+      <label for="email">Email Address <span class="req" aria-hidden="true">*</span></label>
+      <input type="email" id="email" name="email" required autocomplete="email" placeholder="jane@example.com">
+    </div>
+
+    <div class="field">
+      <label for="department">Requesting UCSC Department <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="department" name="department" required maxlength="120"
+             autocomplete="organization" placeholder="Politics">
+    </div>
+
+    <div class="form-section">
+      <h2>UCSC Responsible Party</h2>
+      <p>This person will be the main contact for your event and will be responsible for
+         coordinating access to the building, set-up and break-down, catering, supplies,
+         AV operation, and similar arrangements.</p>
+    </div>
+
+    <label class="same-as-me" for="same-as-me">
+      <input type="checkbox" id="same-as-me">
+      <span>The responsible party is me</span>
+    </label>
+
+    <div class="field" id="rp-name-field">
+      <label for="rp-name">Name of UCSC Responsible Party <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="rp-name" name="responsiblePartyName" required maxlength="120"
+             autocomplete="off" placeholder="First and last name">
+    </div>
+
+    <div class="field">
+      <label for="rp-phone">Cell Phone Number <span class="req" aria-hidden="true">*</span></label>
+      <input type="tel" id="rp-phone" name="responsiblePartyPhone" required maxlength="30"
+             autocomplete="tel" placeholder="(831) 555-0123">
+    </div>
+
+    <div class="field" id="rp-email-field">
+      <label for="rp-email">Email of Responsible Party <span class="req" aria-hidden="true">*</span></label>
+      <p class="hint">Must be a ucsc.edu address.</p>
+      <input type="email" id="rp-email" name="responsiblePartyEmail" required
+             autocomplete="email" placeholder="name@ucsc.edu">
+    </div>
+
+    <div class="form-section"><h2>When</h2></div>
+
+    <!-- Only a multi-room space shows this; reservation.js fills it from
+         config and unhides it. Panetta has one room, so it stays hidden. -->
+    <fieldset id="room-field" hidden>
+      <legend>Which room? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices" id="room-choices"></div>
+    </fieldset>
+
+    <div class="field">
+      <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
+      <p class="hint" id="date-window"><span id="date-window-text"></span>
+        <button type="button" class="cal-link" id="cal-open">View the full calendar</button></p>
+      <input type="date" id="date" name="date" required>
+    </div>
+
+    <div class="slots-section">
+      <div class="slots-head">
+        <label id="slots-label">Time Slots <span class="req" aria-hidden="true">*</span></label>
+        <div class="head-right">
+          <span class="count" id="slot-count" hidden></span>
+          <button type="button" class="clear-btn" id="clear-btn" hidden>Clear</button>
+        </div>
+      </div>
+      <p class="hint">Pick a start time, then extend it hour by hour. A reservation has to be one unbroken block. All times <span id="tz-note">Pacific</span>.</p>
+
+      <div id="slots" role="group" aria-labelledby="slots-label" aria-live="polite">
+        <div class="placeholder">Select a date to see available times.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="more-dates">Need the room on other dates? <span class="optional">(optional)</span></label>
+      <p class="hint">Only the date and hours you picked above are confirmed. List any other dates
+        you need and we&rsquo;ll check whether the room is free and follow up.</p>
+      <textarea id="more-dates" name="additionalDates" rows="3" maxlength="500"
+                placeholder="Sept 3 and Sept 10, same times"></textarea>
+    </div>
+
+    <div class="form-section"><h2>Attendance</h2></div>
+
+    <div class="field">
+      <label for="total-guests">Total number of guests <span class="req" aria-hidden="true">*</span></label>
+      <p class="hint">Please see the occupancy limits below.</p>
+      <input type="number" id="total-guests" name="totalGuests" required min="1" max="73"
+             inputmode="numeric" placeholder="20">
+    </div>
+
+    <fieldset>
+      <legend>Will this event be open to the general public? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="openToPublic" value="Yes, open to the public"><span>Yes, event is open to the public</span></label>
+        <label class="choice"><input type="radio" name="openToPublic" value="Not open to the public"><span>Not open to the public</span></label>
+      </div>
+    </fieldset>
+
+    <div class="occupancy">
+      <p>I agree that my reservation <strong>WILL NOT EXCEED</strong> the Fire Marshal&rsquo;s listed occupancy.</p>
+      <table class="caps">
+        <tbody>
+          <tr><th scope="row">28</th><td>Conference (tables and chairs)</td></tr>
+          <tr><th scope="row">32</th><td>Dining (tables and chairs)</td></tr>
+          <tr><th scope="row">32</th><td>Presentation style seating (tables and chairs)</td></tr>
+          <tr><th scope="row">54</th><td>Presentation style seating (chairs only)</td></tr>
+          <tr><th scope="row">73</th><td>Standing (no tables or chairs)</td></tr>
+        </tbody>
+      </table>
+      <label class="agree" for="occupancy">
+        <input type="checkbox" id="occupancy" name="occupancyAgreement" required>
+        <span>I agree to not exceed listed occupancy. <span class="req" aria-hidden="true">*</span></span>
+      </label>
+    </div>
+
+
+    <div class="form-section"><h2>Food, vendors &amp; alcohol</h2></div>
+
+    <fieldset>
+      <legend>Will your event include food? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="food" value="Yes, self-service food"><span>Yes, self-service food</span></label>
+        <label class="choice"><input type="radio" name="food" value="Yes, catered food"><span>Yes, catered food<span class="sub">Responsible party must meet the caterer during the set-up time of the event.</span></span></label>
+        <label class="choice"><input type="radio" name="food" value="No, food will not be served"><span>No, food will not be served</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Will your event use an outside vendor for additional tables, chairs or set-up? <span class="req" aria-hidden="true">*</span></legend>
+      <p class="hint">The responsible party must arrange to meet the catering company or vendor on-site,
+        at the time of delivery and pick-up, on the date of your reservation. Items may
+        <strong>not</strong> be delivered before your reservation or picked up after it.</p>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="outsideVendor" value="Yes, outside vendor"><span>Yes: outside vendor</span></label>
+        <label class="choice"><input type="radio" name="outsideVendor" value="No, outside vendor"><span>No: outside vendor</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Will your event serve alcohol? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="alcohol" value="Yes, alcohol"><span>Yes, alcohol</span></label>
+        <label class="choice"><input type="radio" name="alcohol" value="No alcohol"><span>No alcohol</span></label>
+      </div>
+    </fieldset>
+
+    <div class="conditional" id="alcohol-policy" hidden>
+      <div class="field" id="under-21-field">
+        <label for="guests-under-21">Number of guests under 21 <span class="req" aria-hidden="true">*</span></label>
+        <input type="number" id="guests-under-21" name="guestsUnder21" min="0" max="73"
+               inputmode="numeric" placeholder="0">
+      </div>
+
+      <p>If your event will serve alcohol, you agree that you have read, understand, and will
+         abide by the University Alcohol Policy.
+         <a id="alcohol-policy-link" href="#" target="_blank" rel="noopener noreferrer">Link to policy</a></p>
+      <label class="agree" for="alcohol-agree">
+        <input type="checkbox" id="alcohol-agree" name="alcoholPolicyAgreement">
+        <span>I have read, understand, and agree to abide by the University Alcohol Policy.
+          <span class="req" aria-hidden="true">*</span></span>
+      </label>
+    </div>
+
+    <div class="form-section"><h2>Anything else</h2></div>
+
+    <div class="field">
+      <label for="notes">Is there anything else you would like to communicate regarding your reservation request? <span class="optional">(optional)</span></label>
+      <textarea id="notes" name="additionalNotes" rows="3" maxlength="1000"
+                placeholder="Anything we should know."></textarea>
+    </div>
+
+    <div class="form-section"><h2>Event checklist</h2></div>
+
+    <div class="checklist">
+      <p class="lead">100 Panetta Conference is a <strong>NO-HOST</strong> event space.
+        Set-up and clean-up is the responsibility of the Responsible Party.</p>
+      <p class="lead"><strong>I agree to all of the following conditions:</strong></p>
+
+      <ol>
+        <li>Begin and end your event on time (reservation times include setup and cleanup).</li>
+        <li>Return the facility, tables and chairs to a neat configuration (2 chairs per table).
+            Any extra chairs used should be returned to the chair dolly.</li>
+        <li>Wipe down tables, chairs and lectern using provided sanitary wipes (including on patios).</li>
+        <li>Wipe clean and return extra chairs to the chair rack in the chair room.</li>
+        <li>Remove and tie trash bags. Place them into the provided large white trash can in the chair room.</li>
+        <li>Close and lock all windows and balcony doors. <strong>Leave the balcony key in the lectern!</strong></li>
+        <li>Turn off all A/V equipment, including D-Ten. Projector and screen are controlled from the wall
+            controller. All other AV equipment is controlled from the AV cart <strong>MAIN ON/OFF</strong> switch.</li>
+        <li>Turn off conference room lights (hall &amp; stair lights are on motion sensors).</li>
+        <li>Close conference room doors.</li>
+        <li>Return the 4-wheel cart to the 3rd floor chair room.</li>
+      </ol>
+
+      <p class="updated">Updated 8/2026</p>
+
+      <div class="terms">
+        <p>I agree that if the above items are not completed, and 100 Panetta staff time is required to
+           complete any of these tasks, our department will cover the costs of returning the room to its
+           original condition.</p>
+        <p>If items are damaged or missing, our department agrees to repair or replace items.</p>
+        <p>We agree to provide a department FOAPAL should there be any charges related to the facility
+           condition after our event.</p>
+        <p>We acknowledge that this reservation is for the 3rd floor conference room only. Access to other
+           parts of the building is not included in this reservation, other than the additional rest room on
+           the second floor, unless otherwise arranged separately.</p>
+      </div>
+
+      <label class="agree" for="checklist-agree">
+        <input type="checkbox" id="checklist-agree" name="checklistAgreement" required>
+        <span>I agree with the event checklist. <span class="req" aria-hidden="true">*</span></span>
+      </label>
+    </div>
+
+    <button type="submit" class="submit" id="submit-btn">Request Reservation</button>
+    <div class="status" id="status" role="status" hidden></div>
+  </form>
+</main>
+
+<!-- Month view of the room calendar. A dialog rather than a new tab: the form
+     is long and often half-filled by this point, and a tab switch is where a
+     draft gets lost. The iframe src is set on first open, so the page does not
+     call Google Calendar for people who never look. -->
+<dialog id="cal-dialog" aria-labelledby="cal-dialog-title">
+  <div class="cal-head">
+    <h2 id="cal-dialog-title">Room availability</h2>
+    <p class="cal-note">Showing hours already booked. Close this to pick your times on the form.
+      <a class="cal-newtab" id="cal-newtab" href="#" target="_blank" rel="noopener">Open in a new tab</a></p>
+    <button type="button" class="cal-close" id="cal-close" aria-label="Close calendar">&times;</button>
+  </div>
+  <div class="cal-body">
+    <iframe id="cal-frame" title="Panetta Conference Room calendar" src="about:blank"
+            frameborder="0" scrolling="no"></iframe>
+  </div>
+</dialog>
+
+<script>
+/* The space this page books. Every space is a folder alongside this one
+   with its own copy of this block; the paths above are the same in each. */
+window.SPACE_CONFIG = {
+  spaceName: 'Panetta Conference Room',
+  webhookUrl: 'https://hooks.zapier.com/hooks/catch/28202083/4hukm6i/',
+  rooms: [
+    { label: 'Panetta Conference Room',
+      calendarId: 'c_f477f318e76558b105514d45eac70620263207ec74bd5d848ac7ac9d6baadef5@group.calendar.google.com' }
+  ],
+  draftKey: 'panetta-reservation-draft',
+  confirmationPage: '../confirmed.html',
+  maxGuests: 73,
+  maxGuestsNote: '73 is the highest listed occupancy, for standing room.'
+};
+</script>
+<script src="../reservation.js"></script>
+
+
+</body>
+</html>

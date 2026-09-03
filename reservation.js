@@ -1168,6 +1168,9 @@ async function handleSubmit(event) {
         startTime: payload.startTime,
         endTime: payload.endTime,
         location: payload.location,
+        // Which form this came from, so "Make another reservation" returns
+        // here rather than to whichever space the shared page defaults to.
+        returnTo: window.location.pathname,
         responsiblePartyName: payload.responsiblePartyName,
         totalGuests: payload.totalGuests,
         name: payload.name,
