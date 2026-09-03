@@ -1,17 +1,34 @@
 /* =========================================================
-   Panetta Conference Room — reservation form behaviour.
+   Arts Division room reservations — shared form behaviour.
 
-   Loaded from index.html at the end of <body>, so the DOM is already
-   parsed and no defer/DOMContentLoaded guard is needed.
+   Each page declares its own space — name, webhook, rooms — in a
+   window.SPACE_CONFIG block just before this script loads. index.html is
+   Panetta (one room, so no picker); darc/index.html is DARC (two rooms).
+
+   Loaded at the end of <body>, so the DOM is already parsed and no
+   defer/DOMContentLoaded guard is needed.
    ========================================================= */
 
 /* =========================================================
    CONFIGURATION
    ========================================================= */
 
-const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/28202083/4hukm6i/';
-const GOOGLE_API_KEY     = 'AIzaSyBVsrrO4AdL8NHQPqlEe4fiqpiV76NXbuQ';
-const CALENDAR_ID        = 'c_f477f318e76558b105514d45eac70620263207ec74bd5d848ac7ac9d6baadef5@group.calendar.google.com';
+/* Everything space-specific comes from the page; everything below the CFG
+   lines is Arts Division policy shared by every space. A page that forgets
+   its config should fail loudly here, not half-work. */
+const CFG = window.SPACE_CONFIG;
+if (!CFG || !Array.isArray(CFG.rooms) || CFG.rooms.length === 0) {
+  throw new Error('window.SPACE_CONFIG with a rooms list must be declared before reservation.js');
+}
+
+const SPACE_NAME         = CFG.spaceName;
+const ZAPIER_WEBHOOK_URL = CFG.webhookUrl;
+const ROOMS              = CFG.rooms;          // [{ label, calendarId }]
+const MAX_GUESTS         = CFG.maxGuests;
+const MAX_GUESTS_NOTE    = CFG.maxGuestsNote;
+
+// One key for every space: it can only read public calendars.
+const GOOGLE_API_KEY = 'AIzaSyBVsrrO4AdL8NHQPqlEe4fiqpiV76NXbuQ';
 
 // The room's own time zone. Slots are shown and submitted in this zone no
 // matter where the person booking happens to be.
@@ -60,7 +77,7 @@ const draftNote    = document.getElementById('draft-note');
 // ucsc.edu and its subdomains, e.g. soe.ucsc.edu
 const UCSC_EMAIL = /^[^@\s]+@([a-z0-9-]+\.)*ucsc\.edu$/i;
 
-const DRAFT_KEY = 'panetta-reservation-draft';
+const DRAFT_KEY = CFG.draftKey;
 
 /* The draft outlives a submission on purpose. A request can still be turned
    away after it is sent — a clash, or times the Zap cannot read — and the
@@ -70,8 +87,10 @@ const DRAFT_KEY = 'panetta-reservation-draft';
 const DRAFT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 // Where a successful submission lands, and the key it passes details through.
-const CONFIRMATION_PAGE = 'confirmed.html';
-const CONFIRMATION_KEY  = 'panetta-reservation-confirmation';
+// confirmed.html is shared by every space, so the key is shared too — the
+// payload carries the location.
+const CONFIRMATION_PAGE = CFG.confirmationPage;
+const CONFIRMATION_KEY  = 'reservation-confirmation';
 
 // Consent is never restored from a draft — agreeing has to be a deliberate act
 // each time, not something a saved form does on someone's behalf.
@@ -101,6 +120,43 @@ function syncAlcoholPolicy() {
   alcoholPolicyBox.hidden = !serving;
   if (!serving) alcoholAgreeBox.checked = false;   // never submit a stale agreement
 }
+/* =========================================================
+   ROOMS
+   ========================================================= */
+
+/* A one-room space never shows the picker: its single room is implicit, and
+   Panetta stays exactly the form it was. Multi-room spaces get radios built
+   from config, so the rooms are defined in one place only. */
+
+function selectedRoom() {
+  if (ROOMS.length === 1) return ROOMS[0];
+  const label = radioValue('room');
+  return ROOMS.find(room => room.label === label) || null;
+}
+
+// Where the event happens, for the payload and the confirmation page.
+function locationLabel(room) {
+  return ROOMS.length === 1 ? SPACE_NAME : `${SPACE_NAME} — ${room.label}`;
+}
+
+function buildRoomField() {
+  if (ROOMS.length === 1) return;
+  const choices = document.getElementById('room-choices');
+  ROOMS.forEach(room => {
+    const label = document.createElement('label');
+    label.className = 'choice';
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'room';
+    input.value = room.label;
+    const span = document.createElement('span');
+    span.textContent = room.label;
+    label.append(input, span);
+    choices.appendChild(label);
+  });
+  document.getElementById('room-field').hidden = false;
+}
+
 const nameInput  = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const deptInput  = document.getElementById('department');
@@ -276,20 +332,22 @@ function resetSlots(message) {
 const PREFETCH_DAYS = 45;
 const AVAILABILITY_TTL_MS = 5 * 60 * 1000;
 
-let availability = null;        // { from, to, intervals, fetchedAt }
+// calendarId -> { from, to, intervals, fetchedAt }. One entry per room, so a
+// two-room space can answer for either without the caches trampling each other.
+const availabilityByCal = new Map();
 let prefetchInFlight = null;
 
 // Google returns at most 250 events per page. A single day never approaches
 // that, but a 45-day window on a busy calendar can — and events past the cap
 // come back silently, which would render booked hours as free.
-async function fetchBusyRange(timeMin, timeMax) {
+async function fetchBusyRange(calendarId, timeMin, timeMax) {
   const intervals = [];
   let pageToken = null;
   let pages = 0;
 
   do {
     const url = new URL(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events`
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`
     );
     url.searchParams.set('key', GOOGLE_API_KEY);
     url.searchParams.set('timeMin', timeMin.toISOString());
@@ -346,8 +404,9 @@ async function fetchBusyRange(timeMin, timeMax) {
 }
 
 // One day, live. Used whenever the cache cannot answer.
-function fetchBusyIntervals(day) {
+function fetchBusyIntervals(calendarId, day) {
   return fetchBusyRange(
+    calendarId,
     zonedInstant(day.year, day.month, day.day, 0, 0, 0, 0),
     zonedInstant(day.year, day.month, day.day, 23, 59, 59, 999)
   );
@@ -362,10 +421,15 @@ function prefetchAvailability() {
   const from = zonedInstant(y, m - 1, d, 0, 0, 0, 0);
   const to   = zonedInstant(y, m - 1, d + PREFETCH_DAYS, 23, 59, 59, 999);
 
-  prefetchInFlight = fetchBusyRange(from, to)
-    .then(intervals => { availability = { from, to, intervals, fetchedAt: Date.now() }; })
-    .catch(() => { availability = null; })
-    .finally(() => { prefetchInFlight = null; });
+  // Every room's window in parallel. At this room's traffic the extra request
+  // for a second calendar is nothing, and either can fail without the other.
+  prefetchInFlight = Promise.all(ROOMS.map(room =>
+    fetchBusyRange(room.calendarId, from, to)
+      .then(intervals => {
+        availabilityByCal.set(room.calendarId, { from, to, intervals, fetchedAt: Date.now() });
+      })
+      .catch(() => { availabilityByCal.delete(room.calendarId); })
+  )).finally(() => { prefetchInFlight = null; });
 
   return prefetchInFlight;
 }
@@ -374,15 +438,16 @@ function prefetchAvailability() {
    data is still fresh. Every interval is handed to renderSlots regardless of
    which day it falls on: an interval from another date simply never overlaps
    this date's slots, so no per-day bucketing is needed. */
-function cachedBusyFor(day) {
-  if (!availability) return null;
-  if (Date.now() - availability.fetchedAt > AVAILABILITY_TTL_MS) return null;
+function cachedBusyFor(calendarId, day) {
+  const entry = availabilityByCal.get(calendarId);
+  if (!entry) return null;
+  if (Date.now() - entry.fetchedAt > AVAILABILITY_TTL_MS) return null;
 
   const dayStart = zonedInstant(day.year, day.month, day.day, 0, 0, 0, 0);
   const dayEnd   = zonedInstant(day.year, day.month, day.day, 23, 59, 59, 999);
-  if (dayStart < availability.from || dayEnd > availability.to) return null;
+  if (dayStart < entry.from || dayEnd > entry.to) return null;
 
-  return availability.intervals;
+  return entry.intervals;
 }
 
 function overlapsBusy(slotStart, slotEnd, busy) {
@@ -538,6 +603,12 @@ async function loadAvailability() {
     return;
   }
 
+  const room = selectedRoom();
+  if (!room) {
+    resetSlots('Choose a room to see available times.');
+    return;
+  }
+
   const day = parseDateValue(value);
   const token = ++requestToken;
 
@@ -547,7 +618,7 @@ async function loadAvailability() {
   slotButtons = [];
   selection = null;
   updateSlotCount();
-  if (!cachedBusyFor(day)) {
+  if (!cachedBusyFor(room.calendarId, day)) {
     slotsBox.innerHTML =
       '<div class="loading"><span class="spinner"></span>Checking calendar availability&hellip;</div>';
   }
@@ -558,13 +629,13 @@ async function loadAvailability() {
     if (prefetchInFlight) await prefetchInFlight;
     if (token !== requestToken) return;
 
-    const cached = cachedBusyFor(day);
+    const cached = cachedBusyFor(room.calendarId, day);
     if (cached) {
       renderSlots(day, cached);          // no network, no spinner
       return;
     }
 
-    const busy = await fetchBusyIntervals(day);
+    const busy = await fetchBusyIntervals(room.calendarId, day);
     if (token !== requestToken) return; // a newer date was picked
     renderSlots(day, busy);
   } catch (error) {
@@ -684,6 +755,8 @@ async function fillDemo() {
 
   setValue(notesInput, randomOf(DEMO.notes));
   checklistBox.checked = true;
+
+  if (ROOMS.length > 1) setRadio('room', randomOf(ROOMS).label);
 
   // Pick a real open block, which means waiting on the live availability check.
   setValue(dateInput, demoDateValue());
@@ -823,6 +896,10 @@ function fieldErrors() {
     add(rpPhone, 'Enter a 10-digit cell phone number for the responsible party.');
   }
 
+  if (ROOMS.length > 1 && !selectedRoom()) {
+    add(form.querySelector('input[name="room"]'), 'Choose a room.');
+  }
+
   if (!dateInput.value) {
     add(dateInput, 'Choose a date.');
   } else if (dateInput.value < earliestBookableDate()) {
@@ -838,8 +915,8 @@ function fieldErrors() {
   const total = Number(totalGuests.value);
   if (blank(totalGuests) || !Number.isFinite(total) || total < 1) {
     add(totalGuests, 'Enter the total number of guests.');
-  } else if (total > 73) {
-    add(totalGuests, '73 is the highest listed occupancy, for standing room.');
+  } else if (total > MAX_GUESTS) {
+    add(totalGuests, MAX_GUESTS_NOTE);
   }
 
   if (!radioValue('openToPublic')) {
@@ -949,6 +1026,7 @@ async function handleSubmit(event) {
 
   const chosen = slotButtons.filter(button => button.classList.contains('selected'));
   const day = parseDateValue(dateInput.value);
+  const room = selectedRoom();   // validation guarantees one is chosen
 
   // The UI can only build a contiguous block, but the webhook depends on it —
   // so confirm the run really is unbroken before anything is sent.
@@ -973,13 +1051,13 @@ async function handleSubmit(event) {
 
   let stillFree = true;
   try {
-    const fresh = await fetchBusyIntervals(day);
+    const fresh = await fetchBusyIntervals(room.calendarId, day);
     const taken = chosen.filter(button =>
       overlapsBusy(new Date(button.dataset.start), new Date(button.dataset.end), fresh));
 
     if (taken.length) {
       stillFree = false;
-      availability = null;               // the window is now known to be wrong
+      availabilityByCal.delete(room.calendarId);   // now known to be wrong
       renderSlots(day, fresh);           // repaint with the truth; clears the selection
       const which = taken.map(b => b.dataset.label.split(' – ')[0]).join(', ');
       showStatus(
@@ -1020,6 +1098,11 @@ async function handleSubmit(event) {
     date: dateInput.value,                    // "2026-08-31"
     startTime: formatTime(blockStart),        // "11:00 AM"
     endTime: formatTime(blockEnd),            // "2:00 PM"
+
+    // Which room, by label — a one-room space sends its only room. A
+    // multi-room Zap branches on this to pick the calendar it writes to.
+    room: room.label,
+    location: locationLabel(room),
 
     // Free text, empty when unused. When it is NOT empty someone has to read it
     // and duplicate the event by hand — availability was never checked for the
@@ -1084,6 +1167,7 @@ async function handleSubmit(event) {
         date: payload.date,
         startTime: payload.startTime,
         endTime: payload.endTime,
+        location: payload.location,
         responsiblePartyName: payload.responsiblePartyName,
         totalGuests: payload.totalGuests,
         name: payload.name,
@@ -1106,6 +1190,8 @@ async function handleSubmit(event) {
    INIT
    ========================================================= */
 
+buildRoomField();   // before draft restore, so a saved room can be re-checked
+
 document.getElementById('tz-note').textContent = TIME_ZONE_LABEL;
 dateInput.min = earliestBookableDate();
 dateInput.max = latestBookableDate();
@@ -1113,6 +1199,8 @@ document.getElementById('date-window-text').textContent =
   `Requests need at least ${MIN_LEAD_DAYS} days' notice, and can be made up to ` +
   `${MAX_MONTHS_AHEAD} months ahead — so between ${longDate(dateInput.min)} and ${longDate(dateInput.max)}.`;
 dateInput.addEventListener('change', loadAvailability);
+form.querySelectorAll('input[name="room"]').forEach(radio =>
+  radio.addEventListener('change', loadAvailability));
 clearBtn.addEventListener('click', clearSelection);
 
 prefetchAvailability();
@@ -1120,8 +1208,10 @@ prefetchAvailability();
 /* A tab left open for a while is the case most likely to act on stale data,
    so expire the window on return and let the next date pick refetch. */
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible' || !availability) return;
-  if (Date.now() - availability.fetchedAt > AVAILABILITY_TTL_MS) availability = null;
+  if (document.visibilityState !== 'visible') return;
+  for (const [calId, entry] of availabilityByCal) {
+    if (Date.now() - entry.fetchedAt > AVAILABILITY_TTL_MS) availabilityByCal.delete(calId);
+  }
 });
 sameAsMe.addEventListener('change', syncSameAsMe);
 [nameInput, emailInput].forEach(input =>
@@ -1141,8 +1231,9 @@ form.querySelectorAll('input[name="alcohol"]')
 form.addEventListener('submit', handleSubmit);
 
 // ---------- Calendar dialog ----------
-// Built from CALENDAR_ID and TIME_ZONE rather than a pasted URL, so the room
-// and the zone cannot drift apart from the availability lookup above.
+// Built from the rooms list and TIME_ZONE rather than a pasted URL, so the
+// dialog cannot drift from the availability lookup above. A multi-room space
+// overlays every room in one view — Google colours each calendar differently.
 const calDialog = document.getElementById('cal-dialog');
 const calFrame  = document.getElementById('cal-frame');
 
@@ -1153,7 +1244,7 @@ const calFrame  = document.getElementById('cal-frame');
 // and switching does not reload the frame.
 const CALENDAR_EMBED_URL =
   'https://calendar.google.com/calendar/embed'
-  + `?src=${encodeURIComponent(CALENDAR_ID)}`
+  + '?' + ROOMS.map(room => `src=${encodeURIComponent(room.calendarId)}`).join('&')
   + `&ctz=${encodeURIComponent(TIME_ZONE)}`
   + '&mode=WEEK&showTitle=0&showPrint=0&showTabs=1&showCalendars=0';
 

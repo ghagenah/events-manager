@@ -169,7 +169,7 @@
 
   <h1>Reservation requested</h1>
 
-  <p class="lead">Your request for the Panetta Conference Room has been submitted and is
+  <p class="lead">Your request for the <span id="lead-location">room</span> has been submitted and is
     <strong>awaiting approval by an administrator</strong>.</p>
 
   <p class="email-note">Look out for an email confirming the details you submitted.</p>
@@ -191,7 +191,9 @@
    reservation carries someone's name and email, which have no business
    sitting in a query string, in browser history, or in a referrer header. */
 
-const SUMMARY_KEY = 'panetta-reservation-confirmation';
+/* One key for every space — this page serves Panetta and DARC alike, and the
+   payload says where the booking is. */
+const SUMMARY_KEY = 'reservation-confirmation';
 
 function formatDate(value) {
   if (!value) return '';
@@ -211,11 +213,15 @@ function formatDate(value) {
   }
   if (!data) return;   // opened directly, without submitting
 
+  if (data.location) {
+    document.getElementById('lead-location').textContent = data.location;
+  }
+
   // Same rows, in the same order, as the "request received" email, so the
   // page and the email that follows it do not disagree.
   const rows = [
     ['Event', data.eventTitle],
-    ['Location', 'Panetta Conference Room'],
+    ['Location', data.location],
     ['Date', formatDate(data.date)],
     ['Time', data.startTime && data.endTime
       ? `${data.startTime} – ${data.endTime} Pacific` : ''],

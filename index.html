@@ -933,6 +933,13 @@
 
     <div class="form-section"><h2>When</h2></div>
 
+    <!-- Only a multi-room space shows this; reservation.js fills it from
+         config and unhides it. Panetta has one room, so it stays hidden. -->
+    <fieldset id="room-field" hidden>
+      <legend>Which room? <span class="req" aria-hidden="true">*</span></legend>
+      <div class="choices" id="room-choices"></div>
+    </fieldset>
+
     <div class="field">
       <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
       <p class="hint" id="date-window"><span id="date-window-text"></span>
@@ -1117,6 +1124,22 @@
   </div>
 </dialog>
 
+<script>
+/* The space this page books. reservation.js reads this — everything
+   Panetta-specific it needs is here; darc/index.html declares its own. */
+window.SPACE_CONFIG = {
+  spaceName: 'Panetta Conference Room',
+  webhookUrl: 'https://hooks.zapier.com/hooks/catch/28202083/4hukm6i/',
+  rooms: [
+    { label: 'Panetta Conference Room',
+      calendarId: 'c_f477f318e76558b105514d45eac70620263207ec74bd5d848ac7ac9d6baadef5@group.calendar.google.com' }
+  ],
+  draftKey: 'panetta-reservation-draft',
+  confirmationPage: 'confirmed.html',
+  maxGuests: 73,
+  maxGuestsNote: '73 is the highest listed occupancy, for standing room.'
+};
+</script>
 <script src="reservation.js"></script>
 
 
