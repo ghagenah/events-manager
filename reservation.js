@@ -88,7 +88,7 @@ const DRAFT_KEY = CFG.draftKey;
 const DRAFT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 // Where a successful submission lands, and the key it passes details through.
-// confirmed.html is shared by every space, so the key is shared too — the
+// confirmation.html is shared by every space, so the key is shared too — the
 // payload carries the location.
 const CONFIRMATION_PAGE = CFG.confirmationPage;
 const CONFIRMATION_KEY  = 'reservation-confirmation';
