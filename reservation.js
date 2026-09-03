@@ -122,6 +122,46 @@ function syncAlcoholPolicy() {
   if (!serving) alcoholAgreeBox.checked = false;   // never submit a stale agreement
 }
 /* =========================================================
+   SPACES
+   ========================================================= */
+
+/* Every space on the site, for the switcher above the card. This is the one
+   thing a new space cannot derive for itself: each page has to know the
+   others exist. Adding a space means a folder, its config block, and a line
+   here — miss this line and the space still works, it just cannot be
+   reached from the others.
+
+   Paths are relative to a space folder, which is where every page using
+   this file lives. Labels are short on purpose: they sit side by side. */
+const SPACES = [
+  { label: 'Panetta', path: '../panetta/' },
+  { label: 'DARC',    path: '../darc/' }
+];
+
+/* Which entry is the page we are on, matched on folder name so a space
+   never has to state its own identity twice. Falling through leaves nothing
+   highlighted, which is cosmetic — the links all still work. */
+function currentSpacePath() {
+  const here = location.pathname.replace(/index\.html$/, '');
+  return SPACES.find(space => here.endsWith(space.path.replace('../', '')));
+}
+
+function buildSpaceSwitcher() {
+  const nav = document.getElementById('spaces');
+  if (!nav || SPACES.length < 2) return;   // nothing to switch between
+
+  const current = currentSpacePath();
+  SPACES.forEach(space => {
+    const link = document.createElement('a');
+    link.href = space.path;
+    link.textContent = space.label;
+    if (space === current) link.setAttribute('aria-current', 'page');
+    nav.appendChild(link);
+  });
+  nav.hidden = false;
+}
+
+/* =========================================================
    ROOMS
    ========================================================= */
 
@@ -1194,6 +1234,7 @@ async function handleSubmit(event) {
    INIT
    ========================================================= */
 
+buildSpaceSwitcher();
 buildRoomField();   // before draft restore, so a saved room can be re-checked
 
 document.getElementById('tz-note').textContent = TIME_ZONE_LABEL;

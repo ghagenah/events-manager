@@ -34,8 +34,8 @@
     padding: 40px 20px;
     min-height: 100vh;
     display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    flex-direction: column;    /* switcher, then card */
+    align-items: center;
     background: var(--bg);
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -217,6 +217,43 @@
        button to the edge on the first one. */
     .cal-head h2 { margin-right: auto; }
     .cal-note { order: 3; width: 100%; flex: none; }
+  }
+
+  /* ---------- Space switcher ---------- */
+
+  /* Site-level navigation, so it sits outside the card rather than looking
+     like part of the form. Hidden when there is only one space to go to. */
+  .spaces {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 0 14px;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(18, 33, 46, .05);
+  }
+  .spaces[hidden] { display: none; }
+
+  .spaces a {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+  }
+  .spaces a:hover { color: var(--ink); background: var(--bg); }
+  .spaces a[aria-current="page"] { color: #fff; background: var(--blue); }
+  .spaces a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  /* Comfortable tap targets on a phone; 36px is fine with a pointer. */
+  @media (max-width: 480px) {
+    .spaces a { padding: 12px 10px; }
   }
 
   /* ---------- Section headings ---------- */
@@ -840,6 +877,9 @@
 </style>
 </head>
 <body>
+
+<!-- Filled from the SPACES list in reservation.js. -->
+<nav class="spaces" id="spaces" aria-label="Choose a space" hidden></nav>
 
 <main class="card">
 
