@@ -32,6 +32,29 @@
     .bg-notice  { background-color: #3a0f24 !important; border-color: #8f2050 !important; }
     .text-notice{ color: #f8c8dc !important; }
   }
+
+  /* ---------- Phones ---------- */
+  @media only screen and (max-width: 480px) {
+    /* Beside a 46px marker the headline only gets ~250px and breaks badly,
+       so it moves underneath instead. */
+    .hdr-mark, .hdr-title {
+      display: block !important;
+      width: 100% !important;
+    }
+    .hdr-title {
+      padding-left: 0 !important;
+      padding-top: 12px !important;
+    }
+
+    /* Claw back horizontal space — 32px a side on a 320px screen leaves
+       very little for the values in the details table. */
+    .bg-page   { padding: 24px 8px !important; }
+    .hdr-cell  { padding: 26px 18px 0 !important; }
+    .body-cell { padding: 18px 18px 26px !important; }
+    .foot-cell { padding: 14px 18px !important; }
+    .box-head  { padding: 10px 14px !important; }
+    .box-body  { padding: 4px 14px 12px !important; }
+  }
 </style>
 </head>
 
@@ -58,10 +81,10 @@
         </tr>
 
         <tr>
-          <td style="padding:36px 32px 0;">
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+          <td class="hdr-cell" style="padding:36px 32px 0;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
               <tr>
-                <td width="46" valign="middle" style="width:46px;">
+                <td class="hdr-mark" width="46" valign="middle" style="width:46px;">
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="46">
                     <tr>
                       <td class="mark-well" width="46" height="46" align="center" valign="middle"
@@ -71,7 +94,7 @@
                     </tr>
                   </table>
                 </td>
-                <td valign="middle" style="padding-left:14px;">
+                <td class="hdr-title" valign="middle" style="padding-left:14px;">
                   <h1 class="text-ink" style="margin:0; color:#12212e; font-size:25px; font-weight:700; letter-spacing:-0.5px; line-height:1.2;">Those times don&rsquo;t look right</h1>
                 </td>
               </tr>
@@ -82,7 +105,7 @@
 
         <!-- ---------- Body ---------- -->
         <tr>
-          <td class="text-body" style="padding:20px 32px 32px; color:#33424f; font-size:15px; line-height:1.6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+          <td class="text-body body-cell" style="padding:20px 32px 32px; color:#33424f; font-size:15px; line-height:1.6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
             <p style="margin:0 0 16px;">Hi <strong>{{=gives["373784826"]["Recipient Name"]}}</strong>,</p>
 
@@ -112,12 +135,12 @@
 
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d5dee6; border-radius:12px; overflow:hidden; margin:0 0 22px;">
               <tr>
-                <td class="bg-surface text-muted" style="background-color:#f4f7fa; border-bottom:1px solid #d5dee6; padding:11px 18px; color:#5b6b79; font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+                <td class="bg-surface text-muted box-head" style="background-color:#f4f7fa; border-bottom:1px solid #d5dee6; padding:11px 18px; color:#5b6b79; font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
                   What you requested
                 </td>
               </tr>
               <tr>
-                <td style="padding:6px 18px 14px;">
+                <td class="box-body" style="padding:6px 18px 14px;">
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
                     <tr>
@@ -169,14 +192,14 @@
             </p>
 
             <p style="margin:0 0 4px;">Thank you,</p>
-            <p class="text-ink" style="margin:0; color:#12212e; font-weight:700;">The Panetta Conference Team</p>
+            <p class="text-ink" style="margin:0; color:#12212e; font-weight:700;">Panetta Administrators</p>
 
           </td>
         </tr>
 
         <!-- ---------- Footer ---------- -->
         <tr>
-          <td class="bg-footer text-muted" align="center" style="background-color:#f4f7fa; border-top:1px solid #d5dee6; padding:16px 32px; color:#5b6b79; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+          <td class="bg-footer text-muted foot-cell" align="center" style="background-color:#f4f7fa; border-top:1px solid #d5dee6; padding:16px 32px; color:#5b6b79; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
             100 Panetta Ave, Santa Cruz, CA 95060
           </td>
         </tr>
