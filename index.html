@@ -6,24 +6,25 @@
 <title>Arts Division Room Reservations</title>
 
 <!--
-  Every space lives in its own folder under reservations/ — panetta, darc —
-  so the paths back up to the shared files (reservation.js, confirmed.html,
-  assets/) are the same in each and a copied page cannot get them subtly wrong.
+  Every space lives in its own folder — panetta, darc — so the paths back up
+  to the shared files (reservation.js, confirmed.html, assets/) are the same
+  in each and a copied page cannot get them subtly wrong. The /reservations/
+  in the public URL comes from the repository name, not from a folder here.
 
-  This page only exists to keep that move from breaking anything. Booking
-  emails already sent carry buttons pointing at this URL and mean "the
-  Panetta form" by it, so it goes there. The redirect is a meta refresh plus
-  a script — no server-side redirects on GitHub Pages — with a real link
-  behind it for anyone the redirect does not carry.
+  This page is what /reservations/ itself serves. It forwards to Panetta,
+  which is what older booking emails pointing at the bare site root mean by
+  it. The redirect is a meta refresh plus a script — GitHub Pages has no
+  server-side redirects — with a real link behind it for anyone the redirect
+  does not carry.
 
   If a landing page listing every space is ever wanted, this is the file to
-  replace; the conflict and invalid emails already point at
-  reservations/panetta/ directly, so only very old mail would land here.
+  replace; the conflict and invalid emails point at panetta/ directly, so
+  only older mail would land here.
 -->
 
-<meta http-equiv="refresh" content="0; url=reservations/panetta/">
-<link rel="canonical" href="reservations/panetta/">
-<script>window.location.replace('reservations/panetta/' + window.location.search);</script>
+<meta http-equiv="refresh" content="0; url=panetta/">
+<link rel="canonical" href="panetta/">
+<script>window.location.replace('panetta/' + window.location.search);</script>
 
 <style>
   body {
@@ -42,6 +43,6 @@
 </style>
 </head>
 <body>
-  <p>Taking you to the <a href="reservations/panetta/">Panetta Conference Room booking form</a>&hellip;</p>
+  <p>Taking you to the <a href="panetta/">Panetta Conference Room booking form</a>&hellip;</p>
 </body>
 </html>

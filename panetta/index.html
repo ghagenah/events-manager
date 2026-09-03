@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DARC Room Reservations</title>
+<title>Panetta Conference Room Reservations</title>
 <style>
   :root {
     /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
@@ -843,14 +843,14 @@
 
 <main class="card">
 
-  <!-- TODO: add a DARC photo to ../../assets and restore the hero image here,
-       matching the Panetta page's markup. -->
+  <img class="hero" src="../assets/panetta-close.webp" width="1440" height="960"
+       alt="The Institute of the Arts and Sciences at 100 Panetta Avenue, its concrete
+            facade lettered UC Santa Cruz beneath a timber upper floor.">
 
   <header>
-    <h1>DARC Room Reservations</h1>
-    <p class="subtitle">Reserve a room in the Digital Arts Research Center &mdash; check live
-      availability and request a block of hours. An administrator reviews every request
-      before it is confirmed.</p>
+    <h1>Panetta Conference Room Reservations</h1>
+    <p class="subtitle">Check the room&rsquo;s live availability and request a block of hours &mdash; an
+      administrator reviews every request before it is confirmed.</p>
   </header>
 
   <form id="reservation-form" novalidate>
@@ -933,8 +933,8 @@
 
     <div class="form-section"><h2>When</h2></div>
 
-    <!-- reservation.js fills this with one radio per room from config and
-         unhides it — DARC has two rooms, so the picker shows here. -->
+    <!-- Only a multi-room space shows this; reservation.js fills it from
+         config and unhides it. Panetta has one room, so it stays hidden. -->
     <fieldset id="room-field" hidden>
       <legend>Which room? <span class="req" aria-hidden="true">*</span></legend>
       <div class="choices" id="room-choices"></div>
@@ -975,7 +975,7 @@
     <div class="field">
       <label for="total-guests">Total number of guests <span class="req" aria-hidden="true">*</span></label>
       <p class="hint">Please see the occupancy limits below.</p>
-      <input type="number" id="total-guests" name="totalGuests" required min="1" max="100"
+      <input type="number" id="total-guests" name="totalGuests" required min="1" max="73"
              inputmode="numeric" placeholder="20">
     </div>
 
@@ -989,12 +989,13 @@
 
     <div class="occupancy">
       <p>I agree that my reservation <strong>WILL NOT EXCEED</strong> the Fire Marshal&rsquo;s listed occupancy.</p>
-      <!-- TODO: replace with the Fire Marshal's listed occupancies for the
-           DARC rooms before this page goes live. -->
       <table class="caps">
         <tbody>
-          <tr><th scope="row">TBD</th><td>Conference (tables and chairs)</td></tr>
-          <tr><th scope="row">TBD</th><td>Standing (no tables or chairs)</td></tr>
+          <tr><th scope="row">28</th><td>Conference (tables and chairs)</td></tr>
+          <tr><th scope="row">32</th><td>Dining (tables and chairs)</td></tr>
+          <tr><th scope="row">32</th><td>Presentation style seating (tables and chairs)</td></tr>
+          <tr><th scope="row">54</th><td>Presentation style seating (chairs only)</td></tr>
+          <tr><th scope="row">73</th><td>Standing (no tables or chairs)</td></tr>
         </tbody>
       </table>
       <label class="agree" for="occupancy">
@@ -1062,8 +1063,7 @@
     <div class="form-section"><h2>Event checklist</h2></div>
 
     <div class="checklist">
-      <!-- Adapted from the Panetta checklist — TODO: confirm the wording holds for DARC. -->
-      <p class="lead">The Digital Arts Research Center (DARC) is a <strong>NO-HOST</strong> event space.
+      <p class="lead">100 Panetta Conference is a <strong>NO-HOST</strong> event space.
         Set-up and clean-up is the responsibility of the Responsible Party.</p>
       <p class="lead"><strong>I agree to all of the following conditions:</strong></p>
 
@@ -1085,7 +1085,7 @@
       <p class="updated">Updated 8/2026</p>
 
       <div class="terms">
-        <p>I agree that if the above items are not completed, and DARC staff time is required to
+        <p>I agree that if the above items are not completed, and 100 Panetta staff time is required to
            complete any of these tasks, our department will cover the costs of returning the room to its
            original condition.</p>
         <p>If items are damaged or missing, our department agrees to repair or replace items.</p>
@@ -1119,29 +1119,28 @@
     <button type="button" class="cal-close" id="cal-close" aria-label="Close calendar">&times;</button>
   </div>
   <div class="cal-body">
-    <iframe id="cal-frame" title="DARC room calendars" src="about:blank"
+    <iframe id="cal-frame" title="Panetta Conference Room calendar" src="about:blank"
             frameborder="0" scrolling="no"></iframe>
   </div>
 </dialog>
 
 <script>
-/* The space this page books. Three placeholders must be filled before this
-   page goes live — grep for REPLACE_. Each room needs its own PUBLIC Google
-   calendar (like Panetta's), and the webhook needs a DARC Zap of its own. */
+/* The space this page books. Every space is a folder alongside this one
+   with its own copy of this block; the paths above are the same in each. */
 window.SPACE_CONFIG = {
-  spaceName: 'Digital Arts Research Center',
-  webhookUrl: 'REPLACE_WITH_DARC_ZAPIER_WEBHOOK_URL',
+  spaceName: 'Panetta Conference Room',
+  webhookUrl: 'https://hooks.zapier.com/hooks/catch/28202083/4hukm6i/',
   rooms: [
-    { label: 'Room 1', calendarId: 'REPLACE_WITH_DARC_ROOM_1_CALENDAR_ID' },
-    { label: 'Room 2', calendarId: 'REPLACE_WITH_DARC_ROOM_2_CALENDAR_ID' }
+    { label: 'Panetta Conference Room',
+      calendarId: 'c_f477f318e76558b105514d45eac70620263207ec74bd5d848ac7ac9d6baadef5@group.calendar.google.com' }
   ],
-  draftKey: 'darc-reservation-draft',
-  confirmationPage: '../../confirmed.html',
-  maxGuests: 100,   // TODO: set to DARC's highest listed occupancy
-  maxGuestsNote: '100 is the highest listed occupancy.'   // TODO: match the table above
+  draftKey: 'panetta-reservation-draft',
+  confirmationPage: '../confirmed.html',
+  maxGuests: 73,
+  maxGuestsNote: '73 is the highest listed occupancy, for standing room.'
 };
 </script>
-<script src="../../reservation.js"></script>
+<script src="../reservation.js"></script>
 
 
 </body>
