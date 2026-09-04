@@ -21,10 +21,11 @@
   open it up: fill in its SPACE_CONFIG, then swap the <div class="row soon">
   for an <a class="row" href="…/"> and drop the status line.
 
-  Thumbnails are their own small files, not the page photos scaled down — a
-  landing page should not pull two full-size images. The alt text is empty
-  deliberately: the link already names the space, so describing the photo
-  would only make a screen reader say it twice.
+  Thumbnails are their own small files, cropped to their subject, not the page
+  photos scaled down — a landing page should not pull two full-size images to
+  draw two small boxes. The alt text is empty deliberately: the link already
+  names the space, so describing the photo would only make a screen reader say
+  it twice.
 
   Styling is inline rather than from styles.css: that sheet is the booking
   form's, and this page has no form. It repeats the palette, as
@@ -119,15 +120,14 @@
 
   .thumb {
     flex: none;
-    width: 116px;
+    width: 152px;
     /* auto, or the height attribute on the tag wins and the photo sets the
        card's height instead of the text — same trap as .hero in styles.css. */
     height: auto;
     align-self: stretch;       /* as tall as whatever the text needs */
+    /* Both thumbnails are already cropped to their subject and are wider than
+       this slot, so cover trims the sides and no object-position is needed. */
     object-fit: cover;
-    /* Favour the lower part of both photos: centred, the Panetta crop is
-       mostly sky. Matches what .hero does on the form pages. */
-    object-position: center 72%;
     background: var(--surface);
   }
 
@@ -193,7 +193,7 @@
     body { padding: 20px 12px; }
     .card { padding: 26px 22px; }
     /* A narrower photo, so the name still gets a usable column. */
-    .thumb { width: 84px; }
+    .thumb { width: 96px; }
     .text { padding: 12px 14px; }
   }
 </style>
@@ -210,7 +210,7 @@
   <ul class="spaces">
     <li>
       <a class="row" href="panetta/">
-        <img class="thumb" src="assets/panetta-thumb.webp" width="320" height="214" alt="">
+        <img class="thumb" src="assets/panetta-thumb.webp" width="320" height="149" alt="">
         <span class="text">
           <span class="name">Panetta Conference Room</span>
           <span class="detail">100 Panetta Avenue &middot; seats 28, up to 73 standing</span>
