@@ -10,9 +10,14 @@
 
 <main class="card">
 
-  <img class="hero" src="../assets/panetta-close.webp" width="1440" height="960"
-       alt="The Institute of the Arts and Sciences at 100 Panetta Avenue, its concrete
-            facade lettered UC Santa Cruz beneath a timber upper floor.">
+  <!-- object-position is per-photo, not per-page: .hero crops a 5:2 slice, and
+       the 82% the stylesheet defaults to was tuned for a different picture and
+       would cut this building's roof off. -->
+  <img class="hero" src="../assets/panetta.webp" width="1440" height="960"
+       style="object-position: center 45%;"
+       alt="The Institute of the Arts and Sciences at 100 Panetta Avenue, seen
+            from the street: a timber-clad upper floor cantilevered out over a
+            white concrete ground floor.">
 
   <header>
     <h1>Panetta Conference Room Reservations</h1>
