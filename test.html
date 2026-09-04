@@ -390,15 +390,24 @@ function render() {
     d.document.getElementById('cal-open').click();
     return [!d.document.getElementById('cal-dialog').open, d.document.getElementById('cal-dialog').open ? 'opened' : 'stayed closed'];
   });
-  check('choosing a room enables it again', () => {
+  check('choosing a room enables it again, and the label names that room', () => {
     d.document.querySelector(`input[name="room"][value="${D2.ROOMS[0].label}"]`).checked = true;
     dSync();
     const b = d.document.getElementById('cal-open');
-    return [!b.disabled && /view the full calendar/i.test(b.textContent), `${b.disabled ? 'DISABLED' : 'enabled'}: "${b.textContent.trim()}"`];
+    const ok = !b.disabled && b.textContent.includes(D2.ROOMS[0].label);
+    return [ok, `${b.disabled ? 'DISABLED' : 'enabled'}: "${b.textContent.trim()}"`];
   });
-  check('one room: the link is never disabled', () => {
+  check('switching room re-labels the link', () => {
+    d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
+    d.document.querySelector(`input[name="room"][value="${D2.ROOMS[1].label}"]`).checked = true;
+    dSync();
+    const t = d.document.getElementById('cal-open').textContent;
+    return [t.includes(D2.ROOMS[1].label) && !t.includes(D2.ROOMS[0].label), `"${t.trim()}"`];
+  });
+  check('one room: never disabled, and the label stays plain', () => {
     const b = w.document.getElementById('cal-open');
-    return [!b.disabled, `${b.disabled ? 'DISABLED' : 'enabled'}: "${b.textContent.trim()}"`];
+    const plain = b.textContent.trim() === 'View the full calendar';
+    return [!b.disabled && plain, `${b.disabled ? 'DISABLED' : 'enabled'}: "${b.textContent.trim()}"`];
   });
 
   check('the link never carries more than one calendar', () => {

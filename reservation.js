@@ -1281,8 +1281,12 @@ function syncCalendarDialog() {
      label says what to do rather than just going grey. */
   const blocked = multi && !room;
   calOpen.disabled = blocked;
-  calOpen.textContent = blocked ? 'Choose a room to see its calendar'
-                                : 'View the full calendar';
+  /* Name the room once one is chosen, so it is obvious whose calendar opens.
+     A one-room space leaves it off — naming the only room is noise. */
+  calOpen.textContent =
+      blocked ? 'Choose a room to see its calendar'
+    : multi   ? `View the full calendar for ${room.label}`
+              : 'View the full calendar';
   if (blocked) return;   // leave the link and frame as they were
 
   const url = calendarEmbedUrl(room);

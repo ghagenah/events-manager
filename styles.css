@@ -143,7 +143,13 @@
     cursor: default;
   }
 
-  .cal-hint { margin: 16px 0 4px; }
+  /* Belongs to the room picker above it, not the date field below. Sibling
+     margins collapse to the larger, so the fieldset's own 20px is trimmed for
+     this one case rather than fought with a negative margin here. */
+  #room-field:not([hidden]) { margin-bottom: 6px; }
+  /* .hint is defined further down and would win at equal specificity, so
+     this is qualified rather than silently overridden. */
+  .hint.cal-hint { margin: 0 0 22px; }
 
   #cal-dialog {
     width: min(92vw, 900px);
