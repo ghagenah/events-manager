@@ -134,14 +134,7 @@
     border-bottom: 1px solid currentColor;
     cursor: pointer;
   }
-  .cal-link:hover:not(:disabled) { color: var(--blue-dark); }
-
-  /* Disabled it is a statement, not a control: no underline, no pointer. */
-  .cal-link:disabled {
-    color: var(--muted);
-    border-bottom-color: transparent;
-    cursor: default;
-  }
+  .cal-link:hover { color: var(--blue-dark); }
 
   /* Belongs to the room picker above it, not the date field below. Sibling
      margins collapse to the larger, so the fieldset's own 20px is trimmed for
@@ -150,6 +143,7 @@
   /* .hint is defined further down and would win at equal specificity, so
      this is qualified rather than silently overridden. */
   .hint.cal-hint { margin: 0 0 22px; }
+  .hint.cal-hint[hidden] { display: none; }
 
   #cal-dialog {
     width: min(92vw, 900px);
