@@ -365,15 +365,6 @@ function render() {
   });
   check('one room: the heading stays generic', () => [titleOf(w) === 'Room availability', titleOf(w)]);
 
-  check('two rooms, none chosen: every calendar is shown', () => {
-    d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
-    dSync();
-    const got = srcsOf(d, linkOf(d));
-    return [got.length === D2.ROOMS.length, got.join(', ')];
-  });
-  check('two rooms, none chosen: the heading stays generic',
-    () => [titleOf(d) === 'Room availability', titleOf(d)]);
-
   for (const i of [0, 1]) {
     check(`choosing ${D2.ROOMS[i].label}: only its calendar is shown`, () => {
       d.document.querySelector(`input[name="room"][value="${D2.ROOMS[i].label}"]`).checked = true;
@@ -386,6 +377,36 @@ function render() {
       return [t === `${D2.ROOMS[i].label} availability`, t];
     });
   }
+
+  /* With two rooms there is nothing sensible to show until one is picked, so
+     the control is disabled and says why rather than opening on both. */
+  check('two rooms, none chosen: the link is disabled and says what to do', () => {
+    d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
+    dSync();
+    const b = d.document.getElementById('cal-open');
+    return [b.disabled && /choose a room/i.test(b.textContent), `${b.disabled ? 'disabled' : 'ENABLED'}: "${b.textContent.trim()}"`];
+  });
+  check('two rooms, none chosen: clicking it does not open the dialog', () => {
+    d.document.getElementById('cal-open').click();
+    return [!d.document.getElementById('cal-dialog').open, d.document.getElementById('cal-dialog').open ? 'opened' : 'stayed closed'];
+  });
+  check('choosing a room enables it again', () => {
+    d.document.querySelector(`input[name="room"][value="${D2.ROOMS[0].label}"]`).checked = true;
+    dSync();
+    const b = d.document.getElementById('cal-open');
+    return [!b.disabled && /view the full calendar/i.test(b.textContent), `${b.disabled ? 'DISABLED' : 'enabled'}: "${b.textContent.trim()}"`];
+  });
+  check('one room: the link is never disabled', () => {
+    const b = w.document.getElementById('cal-open');
+    return [!b.disabled, `${b.disabled ? 'DISABLED' : 'enabled'}: "${b.textContent.trim()}"`];
+  });
+
+  check('the link never carries more than one calendar', () => {
+    d.document.querySelector(`input[name="room"][value="${D2.ROOMS[1].label}"]`).checked = true;
+    dSync();
+    const got = srcsOf(d, linkOf(d));
+    return [got.length === 1, `${got.length}: ${got.join(', ')}`];
+  });
 
   check('the frame stays unloaded until the dialog is opened', () => {
     const src = d.document.getElementById('cal-frame').getAttribute('src');

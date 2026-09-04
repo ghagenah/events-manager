@@ -134,7 +134,16 @@
     border-bottom: 1px solid currentColor;
     cursor: pointer;
   }
-  .cal-link:hover { color: var(--blue-dark); }
+  .cal-link:hover:not(:disabled) { color: var(--blue-dark); }
+
+  /* Disabled it is a statement, not a control: no underline, no pointer. */
+  .cal-link:disabled {
+    color: var(--muted);
+    border-bottom-color: transparent;
+    cursor: default;
+  }
+
+  .cal-hint { margin: 8px 0 0; }
 
   #cal-dialog {
     width: min(92vw, 900px);

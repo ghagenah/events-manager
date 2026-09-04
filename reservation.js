@@ -1249,21 +1249,21 @@ form.addEventListener('submit', handleSubmit);
 const calDialog = document.getElementById('cal-dialog');
 const calFrame  = document.getElementById('cal-frame');
 const calTitle  = document.getElementById('cal-dialog-title');
+const calOpen   = document.getElementById('cal-open');
 
-/* Shows the chosen room, or every room until one is chosen. Overlaying them
-   all is fine as an overview, but once a room is picked the other one's
-   bookings are just noise — and showCalendars=0 hides Google's legend, so
-   there is nothing on screen saying which colour is which room.
+/* One room's calendar — always the one being booked. Overlaying several would
+   say nothing about which bookings belong to which room, since showCalendars=0
+   hides Google's legend. There is always a room by the time this runs: a
+   one-room space has an implicit one, and a multi-room space cannot open the
+   dialog until a room is picked.
 
    Opens on the week view: it lays out actual hour blocks, which is what
    someone about to pick time slots needs. Month only says a day has something
    on it. showTabs=1 keeps Google's own switcher, so month and list are a
    click away without reloading the frame. */
-function calendarEmbedUrl() {
-  const room = selectedRoom();
-  const shown = room ? [room] : ROOMS;
+function calendarEmbedUrl(room) {
   return 'https://calendar.google.com/calendar/embed'
-    + '?' + shown.map(r => `src=${encodeURIComponent(r.calendarId)}`).join('&')
+    + `?src=${encodeURIComponent(room.calendarId)}`
     + `&ctz=${encodeURIComponent(TIME_ZONE)}`
     + '&mode=WEEK&showTitle=0&showPrint=0&showTabs=1&showCalendars=0';
 }
@@ -1273,20 +1273,31 @@ function calendarEmbedUrl() {
    about:blank and reloading it would fetch the calendar for someone who never
    looked. */
 function syncCalendarDialog() {
-  const url = calendarEmbedUrl();
+  const multi = ROOMS.length > 1;
+  const room = selectedRoom();
+
+  /* With more than one room there is no sensible calendar to show until one
+     is picked — overlaying both says nothing about the room being booked. The
+     label says what to do rather than just going grey. */
+  const blocked = multi && !room;
+  calOpen.disabled = blocked;
+  calOpen.textContent = blocked ? 'Choose a room to see its calendar'
+                                : 'View the full calendar';
+  if (blocked) return;   // leave the link and frame as they were
+
+  const url = calendarEmbedUrl(room);
   document.getElementById('cal-newtab').href = url;
   if (calFrame.getAttribute('src') !== 'about:blank') calFrame.setAttribute('src', url);
 
-  const room = ROOMS.length > 1 ? selectedRoom() : null;
-  calTitle.textContent = room ? `${room.label} availability` : 'Room availability';
+  calTitle.textContent = multi && room ? `${room.label} availability` : 'Room availability';
 }
 
 syncCalendarDialog();
 
-document.getElementById('cal-open').addEventListener('click', () => {
+calOpen.addEventListener('click', () => {
   // Loaded on first open only; reopening reuses the frame already there.
   if (calFrame.getAttribute('src') === 'about:blank') {
-    calFrame.setAttribute('src', calendarEmbedUrl());
+    calFrame.setAttribute('src', calendarEmbedUrl(selectedRoom()));
   }
   calDialog.showModal();
 });
