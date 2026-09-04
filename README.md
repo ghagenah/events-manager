@@ -12,6 +12,7 @@ Live at <https://ghagenah.github.io/reservations/>
 ```
 index.html          landing page listing the spaces
 tokens.css          colour palette and radius scale, shared by every page
+favicon.svg         calendar mark, shared by every page
 styles.css          all form styling, shared by every space page
 reservation.js      all form behaviour, shared by every space page
 confirmation.html   landing page after a successful request, shared
