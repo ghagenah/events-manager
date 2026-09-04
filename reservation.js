@@ -1286,11 +1286,14 @@ function syncCalendarDialog() {
   /* With more than one room there is no sensible calendar to show until one
      is picked — overlaying both says nothing about the room being booked. The
      label says what to do rather than just going grey. */
-  /* With more than one room there is nothing to show until one is picked, so
-     the link is simply absent rather than present-but-dead. The room is
-     required anyway, so it appears the moment it becomes usable. */
-  calHint.hidden = multi && !room;
-  if (calHint.hidden) return;
+  /* With more than one room there is nothing to show until one is picked. The
+     link is made invisible rather than removed, so its space is already
+     reserved and the fields below do not jump when a room is chosen. Its
+     label is left alone while hidden, so the space held matches the text
+     that will appear in it. */
+  const empty = multi && !room;
+  calHint.classList.toggle('is-empty', empty);
+  if (empty) return;
 
   /* Name the room once one is chosen, so it is obvious whose calendar opens.
      A one-room space leaves it off — naming the only room is noise. */

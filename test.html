@@ -380,18 +380,21 @@ function render() {
 
   /* With two rooms there is nothing to show until one is picked, so the link
      is absent rather than present-but-dead. */
-  check('two rooms, none chosen: the link is not there at all', () => {
+  check('two rooms, none chosen: the link is invisible but holds its space', () => {
     d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
     dSync();
     const h = d.document.getElementById('cal-hint');
-    return [h.hidden && h.getBoundingClientRect().height === 0, h.hidden ? 'hidden' : 'STILL VISIBLE'];
+    const invisible = d.getComputedStyle(h).visibility === 'hidden';
+    const holdsSpace = h.getBoundingClientRect().height > 0;
+    return [invisible && holdsSpace, `${invisible ? 'invisible' : 'VISIBLE'}, height ${Math.round(h.getBoundingClientRect().height)}px`];
   });
   check('choosing a room brings it back, labelled with that room', () => {
     d.document.querySelector(`input[name="room"][value="${D2.ROOMS[0].label}"]`).checked = true;
     dSync();
     const h = d.document.getElementById('cal-hint');
     const b = d.document.getElementById('cal-open');
-    return [!h.hidden && b.textContent.includes(D2.ROOMS[0].label), `${h.hidden ? 'HIDDEN' : 'shown'}: "${b.textContent.trim()}"`];
+    const shown = d.getComputedStyle(h).visibility === 'visible';
+    return [shown && b.textContent.includes(D2.ROOMS[0].label), `${shown ? 'shown' : 'HIDDEN'}: "${b.textContent.trim()}"`];
   });
   check('switching room re-labels the link', () => {
     d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
@@ -404,7 +407,8 @@ function render() {
     const h = w.document.getElementById('cal-hint');
     const b = w.document.getElementById('cal-open');
     const plain = b.textContent.trim() === 'View the full calendar';
-    return [!h.hidden && plain, `${h.hidden ? 'HIDDEN' : 'shown'}: "${b.textContent.trim()}"`];
+    const shown = w.getComputedStyle(h).visibility === 'visible';
+    return [shown && plain, `${shown ? 'shown' : 'HIDDEN'}: "${b.textContent.trim()}"`];
   });
 
   check('the link never carries more than one calendar', () => {
@@ -421,9 +425,21 @@ function render() {
     dSync();
     d.document.getElementById('discard-draft').click();
     const cleared = !d.document.querySelector('input[name="room"]:checked');
-    const hidden = d.document.getElementById('cal-hint').hidden;
+    const hidden = d.getComputedStyle(d.document.getElementById('cal-hint')).visibility === 'hidden';
     return [cleared && hidden,
             `room ${cleared ? 'cleared' : 'STILL SET'}, link ${hidden ? 'hidden' : 'STILL SHOWN'}`];
+  });
+
+  check('choosing a room moves nothing below it', () => {
+    const dateTop = () => Math.round(
+      d.document.querySelector('label[for="date"]').getBoundingClientRect().top);
+    d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
+    dSync();
+    const before = dateTop();
+    d.document.querySelector(`input[name="room"][value="${D2.ROOMS[0].label}"]`).checked = true;
+    dSync();
+    const after = dateTop();
+    return [before === after, `date field moved ${Math.abs(after - before)}px`];
   });
 
   check('the frame stays unloaded until the dialog is opened', () => {
