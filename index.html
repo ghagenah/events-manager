@@ -88,19 +88,25 @@
     font-size: 15px;
   }
 
+  /* Grid rather than a stack so every card is as tall as the tallest —
+     otherwise the one with a status badge stands a line higher. 1fr rows
+     equalise them without hardcoding a height. */
   .spaces {
     margin: 0 0 24px;
     padding: 0;
     list-style: none;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-auto-rows: 1fr;
     gap: 10px;
   }
+
+  .spaces li { display: flex; }
 
   /* No padding of its own: the photo runs to the top, bottom and left edges,
      and the text carries the padding instead. overflow clips the photo to the
      rounded corner, so the image needs no radius. */
   .row {
+    flex: 1;                   /* fill the grid row it sits in */
     display: flex;
     align-items: stretch;
     padding: 0;
@@ -125,10 +131,13 @@
     background: var(--surface);
   }
 
-  /* min-width lets long names wrap instead of squeezing the photo. */
+  /* min-width lets long names wrap instead of squeezing the photo. Centred,
+     so the shorter card's text does not sit against the top edge once both
+     are the same height. */
   .text {
     min-width: 0;
     padding: 14px 16px;
+    align-self: center;
   }
 
   a.row:hover {
