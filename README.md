@@ -108,12 +108,16 @@ Add `?demo=1` to a space URL for a button that fills the form with plausible
 test data and picks a real open time slot. Titles are prefixed `TEST`.
 Submitting still creates a real calendar event and sends real email.
 
-## Email templates
+## The Zapier side
 
-`email-templates/` holds the four Zapier outbound emails: request received,
-approved, time-slot conflict, invalid times. They are pasted into Zapier by
-hand, so a change here is not live until it is pasted. The merge expressions
-reference Zap step IDs and will not survive reformatting.
+Everything after the POST — the calendar event, the table record, the four
+emails — happens in Zapier. See [ZAPIER.md](ZAPIER.md) for the step IDs, the
+booking Sub-Zap, the record statuses, and the known problems.
+
+`email-templates/` holds the four outbound emails: request received, approved,
+time-slot conflict, invalid times. They are pasted into Zapier by hand, so a
+change here is not live until it is pasted. The merge expressions reference Zap
+step IDs and will not survive reformatting.
 
 ## Outstanding
 
@@ -123,5 +127,7 @@ reference Zap step IDs and will not survive reformatting.
   requests, with no link; `index.html` says how to open it up.
 - `guide.html` is Panetta-specific. A second space needing a guide means
   deciding whether it becomes per-space.
-- The Zapier side is undocumented, and is the part of this system that cannot
-  be read from the repository.
+- The error path in the booking Sub-Zap sends the *invalid times* email for any
+  calendar failure, and records it as a time conflict. See ZAPIER.md.
+- The room calendar's default timezone is America/New_York, which is cosmetic
+  today but would matter for recurring events. See ZAPIER.md.
