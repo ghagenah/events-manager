@@ -127,6 +127,11 @@ step IDs and will not survive reformatting.
   requests, with no link; `index.html` says how to open it up.
 - `guide.html` is Panetta-specific. A second space needing a guide means
   deciding whether it becomes per-space.
+- The reschedule Zap's filter appears to require the date **and** both times to
+  have changed, so the ordinary case — same hours, different day — may never
+  reach the calendar. Check this first. See ZAPIER.md.
+- A rescheduled booking's email renders Responsible party and Guests blank: the
+  reschedule Zap does not pass either field to the child. See ZAPIER.md.
 - The error path in the booking Sub-Zap sends the *invalid times* email for any
   calendar failure, and records it as a time conflict. See ZAPIER.md.
 - The room calendar's default timezone is America/New_York, which is cosmetic

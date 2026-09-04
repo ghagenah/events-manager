@@ -14,21 +14,23 @@ form (this repo)
   └─ POST, form-encoded, 30 fields
        │
        ▼
-  Parent Zap  ── catch hook ──▶ create Zapier Table record
-       │
-       ▼
-  Sub-Zap "Process Panetta Booking Logic"   ← documented below
-       │
-       ├─ Path A: free    → calendar event, status "Pending Approval", success email
-       └─ Path B: busy    → status "Time Conflict", conflict email
-       │
-       └─ error: calendar query failed → status "Time Conflict", invalid-times email
-
-  Approval Zap  ── table record updated ──▶ approved email
+  [PARENT] new booking      ── catch hook ──▶ create table record ──┐
+                                                                   │
+  [PARENT] rescheduled      ── record updated ──▶ filter ──▶ delete │
+           booking                                    old event ───┤
+                                                                   │
+  [PARENT] approval         ── record updated ──▶ approved email    │
+                                                                   ▼
+                            [CHILD] Process Panetta Booking Logic
+                                       │
+                       ├─ Path A: free  → event, "Pending Approval", success email
+                       ├─ Path B: busy  → "Time Conflict", conflict email
+                       └─ error         → "Time Conflict", invalid-times email
 ```
 
-Two Zaps plus a Sub-Zap. The approval Zap is separate and fires when an
-administrator changes a record's status.
+Three parent Zaps and one child. Two of the parents trigger on the *same*
+event — any update to a record in the Panetta Reservations table — and are
+separated only by their filters.
 
 ## Step IDs
 
@@ -46,26 +48,44 @@ text — renaming or reformatting a merge expression breaks the send.
 `377074420` is read only by the success email because it is the only path where
 a calendar event exists.
 
-The approval Zap's trigger exposes fields as `old.data.fN` rather than by name:
-`f1` email, `f2` name, `f17` event title, `f18` start, `f22` end, `f24`
-responsible party, `f25` total guests. `f18` and `f22` are read as `["label"]`,
-not `["value"]`. There is no way to tell from the repository what any other `fN`
-holds.
+Table fields are addressed as `fN` rather than by name. Known so far:
+
+| Field | Holds | Seen in |
+|---|---|---|
+| `f1` | recipient email | approved email |
+| `f2` | recipient name | approved email |
+| `f7` | Google Calendar event ID | reschedule Zap |
+| `f17` | event title | approved email |
+| `f18` | start time — read as `["label"]`, not `["value"]` | approved email |
+| `f22` | end time — read as `["label"]` | approved email |
+| `f24` | responsible party | approved email |
+| `f25` | total guests | approved email |
+
+Nothing in the repository says what any other `fN` holds. Add to this table
+when you find out.
 
 ## Sub-Zap: Process Panetta Booking Logic
 
-Validates a reservation and either books it or turns it away. Triggered by the
-parent Zap after a booking record is created.
+Validates a reservation and either books it or turns it away. Called by two
+parents: after a new booking record is created, and after an existing one is
+rescheduled.
 
 ### Input
 
-Nine fields from the parent: Responsible Party, Total Guests, Date, Start Time,
-End Time, Event Title, Record ID, Recipient Email, Recipient Name.
+Two different parents call this child, and **they do not pass the same fields**:
 
-The form sends **30**. The rest sit in the table record for an administrator to
-read at approval time — the description, the guest breakdown, food, vendor and
-alcohol answers, the three agreement confirmations, and the free-text
-"additional dates" field.
+| From new booking | From reschedule |
+|---|---|
+| Date, Start Time, End Time, Event Title, Record ID, Recipient Email, Recipient Name | same seven |
+| Responsible Party, Total Guests | — |
+| — | Start DateTime, End DateTime |
+
+That difference is a live bug — see *Known problems*.
+
+The form sends **30** fields in all. The rest sit in the table record for an
+administrator to read at approval time: the description, the guest breakdown,
+food, vendor and alcohol answers, the three agreement confirmations, and the
+free-text "additional dates" field.
 
 ### Steps
 
@@ -97,6 +117,32 @@ unavailable* email → return `Conflict`.
 
 Note that `Approved` here means "added to the calendar", not "an administrator
 approved it". The record's status at this point is `Pending Approval`.
+
+## Parent: Rescheduled Booking Request
+
+Triggered when a record in the table is updated. Deletes the old calendar
+event, if there was one, and re-runs the booking logic for the new time.
+
+1. **Trigger** — Zapier Tables, record updated.
+2. **Queue delay, 0.25 min** — collapses a burst of quick edits to the same
+   record into one run.
+3. **Find Record** by Record ID, for the full current row.
+4. **& 5. Strip the time off** the new and old dates, so the comparison below
+   is date-to-date rather than timestamp-to-timestamp.
+6. **Filter** — continue only if the time or date actually changed. Editing a
+   title or an email address should not touch the calendar. **See *Known
+   problems*: as described, this filter looks inverted.**
+7. **Branch on whether a calendar event exists** — old `f7` non-empty means
+   delete the old event first (silently, no attendee notification), then call
+   the child. Empty `f7` means no event was ever created, most likely because
+   the original request hit a conflict, so it calls the child directly.
+
+Both branches then call the child Sub-Zap with the new details.
+
+Rescheduling therefore sends the requester the *request received* email again
+and puts the record back to `Pending Approval` — an already-approved booking
+that gets moved silently needs approving a second time. That is defensible, but
+it is not obvious from the outside.
 
 ## Record status
 
@@ -134,6 +180,39 @@ failure.
 **The error path also sets the wrong status.** A calendar failure records
 `Time Conflict`, which is indistinguishable in the table from a real
 double-booking. Nobody can tell how often the calendar query is failing.
+
+**A rescheduled booking sends an email with two blank rows.** The success and
+conflict templates both read `Responsible Party` and `Total Guests` from the
+child's trigger, but the reschedule parent does not pass either. Every email
+sent after a reschedule renders those two rows empty. Fix by passing both from
+the reschedule parent — the values are already on the record it just looked up,
+as `f24` and `f25`.
+
+**The reschedule filter looks inverted.** Described as three conditions that
+must *all* be false to continue — new date equals old, new start equals old, new
+end equals old — which is an AND, so the Zap proceeds only when the date **and**
+the start **and** the end have all changed. The intent is surely *any* of them.
+As written, the ordinary cases stop:
+
+| Change | date same? | start same? | end same? | proceeds? |
+|---|---|---|---|---|
+| Tuesday 9–11 → Wednesday 9–11 | no | **yes** | **yes** | no |
+| 9–11 → 10–11, same day | **yes** | no | **yes** | no |
+| 9–11 → 9–12, same day | **yes** | **yes** | no | no |
+| Tuesday 9–11 → Wednesday 10–12 | no | no | no | yes |
+
+Moving a meeting to a different day at the same time is the single most likely
+reschedule, and it is the first row. The symptom is silent: the record updates,
+no calendar change happens, and the old event stays where it was. Worth checking
+in the editor before anything else here — this is read from the description
+rather than from the Zap, and Zapier filters do support OR groups, so it may
+already be built that way.
+
+**Three timezone spellings are in play.** The form works in
+`America/Los_Angeles`, the reschedule Zap in `PST8PDT`, and the calendar's own
+events are labelled `America/New_York`. The first two agree in practice —
+`PST8PDT` follows the same US DST rules — so nothing is broken, but one spelling
+would be easier to trust.
 
 **The calendar's timezone is America/New_York.** Every event on it carries that
 label while its times carry correct Pacific offsets, so the instants are right
