@@ -97,11 +97,14 @@
     gap: 10px;
   }
 
+  /* No padding of its own: the photo runs to the top, bottom and left edges,
+     and the text carries the padding instead. overflow clips the photo to the
+     rounded corner, so the image needs no radius. */
   .row {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 14px;
+    align-items: stretch;
+    padding: 0;
+    overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     text-decoration: none;
@@ -110,18 +113,23 @@
 
   .thumb {
     flex: none;
-    width: 104px;
-    height: 78px;
+    width: 116px;
+    /* auto, or the height attribute on the tag wins and the photo sets the
+       card's height instead of the text — same trap as .hero in styles.css. */
+    height: auto;
+    align-self: stretch;       /* as tall as whatever the text needs */
     object-fit: cover;
     /* Favour the lower part of both photos: centred, the Panetta crop is
        mostly sky. Matches what .hero does on the form pages. */
     object-position: center 72%;
-    border-radius: 8px;
     background: var(--surface);
   }
 
-  /* min-width lets long names wrap instead of squeezing the thumbnail. */
-  .text { min-width: 0; }
+  /* min-width lets long names wrap instead of squeezing the photo. */
+  .text {
+    min-width: 0;
+    padding: 14px 16px;
+  }
 
   a.row:hover {
     border-color: var(--blue);
@@ -175,8 +183,9 @@
   @media (max-width: 480px) {
     body { padding: 20px 12px; }
     .card { padding: 26px 22px; }
-    /* A narrower thumbnail, so the name still gets a usable column. */
-    .thumb { width: 76px; height: 62px; }
+    /* A narrower photo, so the name still gets a usable column. */
+    .thumb { width: 84px; }
+    .text { padding: 12px 14px; }
   }
 </style>
 </head>
