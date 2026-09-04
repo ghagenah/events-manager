@@ -153,6 +153,14 @@ function buildRoomField() {
     input.setAttribute('aria-required', 'true');   // the legend carries a *
     const span = document.createElement('span');
     span.textContent = room.label;
+    // An optional line describing the room, in the same style the food and
+    // vendor choices use for their sub-text.
+    if (room.note) {
+      const note = document.createElement('span');
+      note.className = 'sub';
+      note.textContent = room.note;
+      span.appendChild(note);
+    }
     label.append(input, span);
     choices.appendChild(label);
   });
