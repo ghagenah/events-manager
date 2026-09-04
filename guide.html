@@ -4,29 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>100 Panetta Event Guide</title>
-<style>
-  :root {
-    /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
-       Neutrals are derived with a blue bias toward the primary. */
-    --blue: #003c6c;           /* Primary Blue  */
-    --blue-dark: #00294a;
-    --blue-soft: #e6eef4;
-    --gold: #fdc700;           /* Primary Yellow — blocks only, never text */
-    --gold-soft: #fff8e0;
-    --teal: #007988;           /* Dark Teal     */
-    --teal-soft: #e3f0f1;
-    --rubine: #da216d;         /* Rubine Red    */
-    --ink: #12212e;
-    --muted: #5b6b79;
-    --muted-strong: #4a5967;   /* small text over tinted rows */
-    --line: #d5dee6;
-    --line-soft: #dde5ec;
-    --bg: #edf1f5;
-    --card: #ffffff;
-    --surface: #f4f7fa;
-    --radius: 12px;
-  }
+<link rel="stylesheet" href="tokens.css">
 
+<style>
   * { box-sizing: border-box; }
 
   body {
@@ -50,7 +30,7 @@
     max-width: 720px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
     padding: 36px 40px 40px;

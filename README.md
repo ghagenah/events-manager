@@ -11,6 +11,7 @@ Live at <https://ghagenah.github.io/reservations/>
 
 ```
 index.html          landing page listing the spaces
+tokens.css          colour palette and radius scale, shared by every page
 styles.css          all form styling, shared by every space page
 reservation.js      all form behaviour, shared by every space page
 confirmation.html   landing page after a successful request, shared
@@ -97,10 +98,10 @@ not restored from a saved draft.
   was being filled in.
 - **Drafts survive submission** on purpose, so someone turned away by a clash
   only has to pick a new time rather than retype everything.
-- `styles.css` is the booking form's, and is not used by `index.html`,
-  `confirmation.html` or `guide.html`. Those define `.card`, `body`, `h1` and
-  `.hero` differently, or have no form at all, and keep their styling inline.
-  The colour palette is therefore repeated in four files.
+- `tokens.css` holds the colour palette and radius scale, and every page loads
+  it. `styles.css` is the booking form's alone: `index.html`,
+  `confirmation.html` and `guide.html` define `.card`, `body`, `h1` and `.hero`
+  differently, so those rules would leak into them.
 
 ## Testing
 

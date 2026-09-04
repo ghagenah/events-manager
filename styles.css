@@ -1,40 +1,12 @@
 /* =========================================================
    Arts Division room reservations — shared form styles.
 
-   Used by every space page (panetta/, darc/, …), which is why it lives
-   here rather than inline: the two pages were byte-identical for all 833
-   lines of this, so a fix had to be made twice or the spaces drifted.
+   Loaded by every space page (panetta/, darc/, …) after tokens.css.
 
-   Not used by confirmation.html or guide.html. Those define .card, body,
-   h1 and .hero differently, and linking this in would leak the rules they
-   do not happen to override. They each exist once, so their styles are not
-   duplicated anywhere and are fine kept inline.
-
-   The colour palette below is therefore repeated in those two files. If
-   you change a brand colour, change it in all three.
+   Not loaded by index, confirmation or guide: those define .card, body,
+   h1 and .hero differently, so these rules would leak into them. They
+   share tokens.css only.
    ========================================================= */
-
-  :root {
-    /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
-       Neutrals are not specified by the brand, so those below are derived
-       with a blue bias toward the primary so they read as chosen. */
-    --blue: #003c6c;           /* Primary Blue  */
-    --gold: #fdc700;           /* Primary Yellow — blocks only, never text */
-    --teal: #007988;           /* Dark Teal     */
-    --rubine: #da216d;         /* Rubine Red    */
-    --blue-dark: #00294a;
-    --blue-soft: #e6eef4;
-    --ink: #12212e;
-    --muted: #5b6b79;
-    --line: #d5dee6;
-    --bg: #edf1f5;
-    --card: #ffffff;
-    --danger: #da216d;
-    --danger-soft: #fdeaf2;
-    --success: #007988;
-    --success-soft: #e3f0f1;
-    --radius: 12px;
-  }
 
   * { box-sizing: border-box; }
 
@@ -59,7 +31,7 @@
     max-width: 560px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     overflow: hidden;              /* so the banner can reach the card edges */
     box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
     padding: 32px;
@@ -325,11 +297,11 @@
     gap: 10px 14px;
     margin-bottom: 22px;
     padding: 12px 14px;
-    background: #fff8e0;
+    background: var(--gold-soft);
     border: 1px dashed var(--gold);
     border-radius: var(--radius);
     font-size: 13px;
-    color: #12212e;
+    color: var(--ink);
   }
 
   .demo-bar[hidden] { display: none; }
@@ -342,10 +314,10 @@
     font: inherit;
     font-size: 13px;
     font-weight: 650;
-    color: #12212e;            /* white on gold is 1.6:1 — ink is 14:1 */
+    color: var(--ink);            /* white on gold is 1.6:1 — ink is 14:1 */
     background: var(--gold);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
   }
 
@@ -353,7 +325,7 @@
   .demo-bar button:disabled { opacity: .6; cursor: not-allowed; }
 
   .demo-bar button:focus-visible {
-    outline: 2px solid #12212e;
+    outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
 
@@ -400,7 +372,7 @@
     margin-bottom: 24px;
     padding: 14px 16px;
     background: var(--danger-soft);
-    border: 1px solid #f5b9d2;
+    border: 1px solid var(--danger-line);
     border-radius: var(--radius);
   }
 
@@ -434,7 +406,7 @@
     margin-bottom: 22px;
     padding: 11px 14px;
     background: var(--blue-soft);
-    border: 1px solid #a9c3d6;
+    border: 1px solid var(--blue-line);
     border-radius: var(--radius);
     font-size: 13px;
     color: var(--blue-dark);
@@ -483,7 +455,7 @@
   .checklist {
     margin-bottom: 24px;
     padding: 18px 20px;
-    background: #f4f7fa;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--radius);
   }
@@ -510,7 +482,7 @@
   .checklist .updated {
     margin: 0 0 14px;
     padding-bottom: 14px;
-    border-bottom: 1px solid #dde5ec;
+    border-bottom: 1px solid var(--line-soft);
     font-size: 12px;
     color: var(--muted);
   }
@@ -529,7 +501,7 @@
   .conditional {
     margin: -8px 0 20px;
     padding: 14px 16px;
-    background: #fff8e0;
+    background: var(--gold-soft);
     border: 1px solid var(--gold);
     border-radius: var(--radius);
   }
@@ -547,7 +519,7 @@
   .occupancy {
     margin-bottom: 24px;
     padding: 16px 18px;
-    background: #f4f7fa;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--radius);
   }
@@ -569,7 +541,7 @@
   .occupancy .caps td {
     text-align: left;
     padding: 5px 0;
-    border-bottom: 1px solid #dde5ec;
+    border-bottom: 1px solid var(--line-soft);
     vertical-align: baseline;
   }
 
@@ -725,7 +697,7 @@
 
   .slot.unavailable,
   .slot.unavailable:hover {
-    background: #f4f7fa;
+    background: var(--surface);
     border-color: var(--line);
     border-style: dashed;
     color: #8c9aa6;
@@ -753,12 +725,12 @@
     text-align: center;
   }
 
-  .loading { color: var(--blue); border-color: #a9c3d6; background: var(--blue-soft); }
+  .loading { color: var(--blue); border-color: var(--blue-line); background: var(--blue-soft); }
 
   .slot-error {
     color: var(--danger);
     border-style: solid;
-    border-color: #f5b9d2;
+    border-color: var(--danger-line);
     background: var(--danger-soft);
     text-align: left;
   }
@@ -771,8 +743,8 @@
     font-weight: 600;
     color: var(--danger);
     background: #fff;
-    border: 1px solid #f5b9d2;
-    border-radius: 8px;
+    border: 1px solid var(--danger-line);
+    border-radius: var(--radius-sm);
     cursor: pointer;
   }
 
@@ -827,8 +799,8 @@
   }
 
   .status[hidden] { display: none; }
-  .status.info    { color: var(--blue);    background: var(--blue-soft);   border-color: #a9c3d6; }
-  .status.error   { color: var(--danger);  background: var(--danger-soft); border-color: #f5b9d2; }
+  .status.info    { color: var(--blue);    background: var(--blue-soft);   border-color: var(--blue-line); }
+  .status.error   { color: var(--danger);  background: var(--danger-soft); border-color: var(--danger-line); }
   .status.success { color: var(--success); background: var(--success-soft);border-color: #a8d3d8; }
 
   .sr-only {

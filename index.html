@@ -6,48 +6,23 @@
 <title>Arts Division Room Reservations</title>
 
 <!--
-  What /reservations/ itself serves: the list of bookable spaces.
+  What /reservations/ serves: the list of bookable spaces.
 
-  Each space is a folder alongside this file — panetta, darc — holding a copy
-  of the form with its own window.SPACE_CONFIG. The /reservations/ in the
-  public URL comes from the repository name, not from a folder here.
+  Each space is a folder alongside this file — panetta, darc — holding its
+  own copy of the form. The /reservations/ in the public URL comes from the
+  repository name, not from a folder here.
 
-  This list is written out by hand. It is the one place that has to know every
-  space exists, so adding a space means adding a folder, its config block, and
-  an entry below. A space left out still works if you know its URL; it just
-  cannot be found from here.
+  This list is hand-written, and is the only thing that knows every space
+  exists: adding one means a folder, its config block, and an entry below. A
+  space left out still works at its own URL, it just cannot be found here.
 
-  To mark a space as reachable but not yet bookable — its SPACE_CONFIG still
-  holding REPLACE_ placeholders, so a submission would post nowhere — add
-  `soon` to its row and a <span class="status"> line under the name.
-
-  Thumbnails are their own files, cropped to their subject, not the page photos
-  scaled down — a landing page should not pull two full-size images to draw two
-  small boxes. They are sized for a 3x display: at 320px wide they were being
-  upscaled up to 2.6x on a phone and looked soft. The alt text is empty deliberately: the link already
-  names the space, so describing the photo would only make a screen reader say
-  it twice.
-
-  Styling is inline rather than from styles.css: that sheet is the booking
-  form's, and this page has no form. It repeats the palette, as
-  confirmation.html and guide.html also do.
+  To show a space as not yet bookable, add `soon` to its row and a
+  <span class="status"> line under the name.
 -->
 
-<style>
-  :root {
-    /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
-       Neutrals are derived with a blue bias toward the primary. */
-    --blue: #003c6c;           /* Primary Blue  */
-    --blue-dark: #00294a;
-    --ink: #12212e;
-    --muted: #5b6b79;
-    --line: #d5dee6;
-    --bg: #edf1f5;
-    --card: #ffffff;
-    --surface: #f4f7fa;
-    --radius: 12px;
-  }
+<link rel="stylesheet" href="tokens.css">
 
+<style>
   * { box-sizing: border-box; }
 
   body {
@@ -72,7 +47,7 @@
     padding: 36px 32px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
   }
 
@@ -119,6 +94,9 @@
     color: inherit;
   }
 
+  /* Cropped to their subject and wider than this slot, so cover only trims the
+     sides — no object-position needed. Sized for a 3x display: at 320px they
+     were upscaled up to 2.6x on a phone and looked soft. */
   .thumb {
     flex: none;
     width: 152px;
@@ -126,8 +104,6 @@
        card's height instead of the text — same trap as .hero in styles.css. */
     height: auto;
     align-self: stretch;       /* as tall as whatever the text needs */
-    /* Both thumbnails are already cropped to their subject and are wider than
-       this slot, so cover trims the sides and no object-position is needed. */
     object-fit: cover;
     background: var(--surface);
   }
