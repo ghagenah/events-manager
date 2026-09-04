@@ -19,7 +19,8 @@ form (this repo)
   [PARENT] rescheduled      ── record updated ──▶ filter ──▶ delete │
            booking                                    old event ───┤
                                                                    │
-  [PARENT] approval         ── record updated ──▶ approved email    │
+  [PARENT] approval         ── record updated ──▶ add attendee,     │
+                                                 approved email    │
                                                                    ▼
                             [CHILD] Process Panetta Booking Logic
                                        │
@@ -42,27 +43,32 @@ text — renaming or reformatting a merge expression breaks the send.
 | `373784826` | Sub-Zap trigger (Start a Sub-Zap) | success, conflict, invalid |
 | `377256141` | Date formatter, Step 2 | success, conflict, invalid |
 | `377074420` | Create Google Calendar Event, Path A | success only |
-| `377233437` | Approval Zap trigger — table record updated | approved only |
-| `374556109` | Google Calendar lookup in the approval Zap | approved only |
+| `377233437` | Approval Zap trigger — table record updated (Step 1) | approved only |
+| `374556109` | Approval Zap's Find Event by ID (Step 5) | approved only |
 
 `377074420` is read only by the success email because it is the only path where
 a calendar event exists.
 
-Table fields are addressed as `fN` rather than by name. Known so far:
+## The table
 
-| Field | Holds | Seen in |
-|---|---|---|
-| `f1` | recipient email | approved email |
-| `f2` | recipient name | approved email |
-| `f7` | Google Calendar event ID | reschedule Zap |
-| `f17` | event title | approved email |
-| `f18` | start time — read as `["label"]`, not `["value"]` | approved email |
-| `f22` | end time — read as `["label"]` | approved email |
-| `f24` | responsible party | approved email |
-| `f25` | total guests | approved email |
+`Panetta Reservations`, id `01KY8431YHENJWDHVXRVG5G2A7`. Fields are addressed
+as `fN`, not by name:
 
-Nothing in the repository says what any other `fN` holds. Add to this table
-when you find out.
+| Field | Holds |
+|---|---|
+| `f1` | requester email |
+| `f2` | requester name |
+| `f6` | status — `Pending Approval`, `Approved`, `Time Conflict` |
+| `f7` | Google Calendar event ID |
+| `f17` | event title |
+| `f18` | start time — read as `["label"]`, not `["value"]` |
+| `f22` | end time — read as `["label"]` |
+| `f24` | responsible party |
+| `f25` | guest count |
+| `record_id` | row identifier, passed between Zaps |
+
+The form posts 30 fields; these ten are the ones any Zap addresses by name.
+Add to this table when you identify another.
 
 ## Sub-Zap: Process Panetta Booking Logic
 
@@ -144,6 +150,26 @@ and puts the record back to `Pending Approval` — an already-approved booking
 that gets moved silently needs approving a second time. That is defensible, but
 it is not obvious from the outside.
 
+## Parent: Reservation Approved
+
+Fires when an administrator sets a record's status to `Approved`, adds the
+requester to the calendar event, and sends the approval email.
+
+1. **Trigger** — Zapier Tables, record updated, watching status (`f6`).
+2. **Queue delay, 0.25 min** — lets the row settle before it is read back.
+3. **Filter** — continue only if status is `Approved`, case-insensitive.
+4. **Find Record** by `record_id`, for the current row.
+5. **Find Event** on the calendar by `f7`.
+6. **Add the requester as an attendee** to that event, so it appears in their
+   own calendar.
+7. **Send the approved email.**
+
+Roughly 4–5 tasks per approval, all in steps 4–7; the delay and filter are
+free. Immaterial at this room's volume — around 19 bookings a year.
+
+**Requires the calendar event to already exist.** Approving a record whose
+`f7` is empty — one that hit a conflict — leaves step 5 with nothing to find.
+
 ## Record status
 
 ```
@@ -207,6 +233,32 @@ no calendar change happens, and the old event stays where it was. Worth checking
 in the editor before anything else here — this is read from the description
 rather than from the Zap, and Zapier filters do support OR groups, so it may
 already be built that way.
+
+**The approved email reads the record as it was *before* the update.** Step 4
+looks the row up to get its current state, and the email does not use that step
+at all — every field comes from `gives["377233437"]["old"]["data"]`, the
+trigger's pre-update snapshot. For a status-only edit the two are identical, so
+this works today. It stops working the moment anyone changes a time and approves
+in the same edit: the email would show the old times while the calendar holds
+the new ones. Pointing the merge fields at the Step 4 lookup instead would make
+the email say what the record actually says.
+
+**The four emails get their date from two different places.** Success, conflict
+and invalid read the formatter (`377256141`); approved reads the calendar event
+(`374556109`, `start.date_pretty`). Both are reasonable — the calendar is
+arguably the better source of truth — but it means a date-format change has to
+be made twice, and the two can disagree if an event is moved in Google directly.
+
+**Three Zaps watch one event.** Reschedule and approval both trigger on any
+update to a record in this table, separated only by their filters. An edit that
+changes the time *and* sets status to `Approved` satisfies both. They run
+concurrently on independent queues, so the ordering is undefined: reschedule
+deletes the calendar event and creates a new one with a new `f7`, while approval
+is looking that same event up by the old `f7` and adding an attendee to it. The
+plausible outcomes include an approval email for an event that no longer exists,
+and a record that ends up back at `Pending Approval` after its requester was
+told it was approved. Worth deciding whether administrators should ever do both
+in one edit, and if not, making it impossible rather than merely discouraged.
 
 **Three timezone spellings are in play.** The form works in
 `America/Los_Angeles`, the reschedule Zap in `PST8PDT`, and the calendar's own

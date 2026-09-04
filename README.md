@@ -127,6 +127,8 @@ step IDs and will not survive reformatting.
   requests, with no link; `index.html` says how to open it up.
 - `guide.html` is Panetta-specific. A second space needing a guide means
   deciding whether it becomes per-space.
+- Reschedule and approval both trigger on any table-record update, so an edit
+  that changes a time *and* approves it runs both concurrently. See ZAPIER.md.
 - The reschedule Zap's filter appears to require the date **and** both times to
   have changed, so the ordinary case — same hours, different day — may never
   reach the calendar. Check this first. See ZAPIER.md.
