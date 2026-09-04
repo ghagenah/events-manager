@@ -129,9 +129,6 @@ step IDs and will not survive reformatting.
   deciding whether it becomes per-space.
 - Reschedule and approval both trigger on any table-record update, so an edit
   that changes a time *and* approves it runs both concurrently. See ZAPIER.md.
-- The reschedule Zap's filter appears to require the date **and** both times to
-  have changed, so the ordinary case — same hours, different day — may never
-  reach the calendar. Check this first. See ZAPIER.md.
 - A rescheduled booking's email renders Responsible party and Guests blank: the
   reschedule Zap does not pass either to the child. See ZAPIER.md.
 - The approved email shows the record as it was before the update, so an edit

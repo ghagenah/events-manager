@@ -8,6 +8,10 @@ This is the overview. Field names, step IDs and merge expressions live in the
 Zap editor and in `email-templates/` — they are not repeated here. *Known
 problems* below is the exception, and is worth reading before changing anything.
 
+Zapier can generate documentation for a Zap. It has been wrong at least once,
+describing the reschedule filter as an AND when the Zap actually uses an OR —
+which inverted the meaning entirely. Check the editor before trusting it.
+
 See [README.md](README.md) for the front end.
 
 ## Shape
@@ -43,12 +47,13 @@ marks the record `Pending Approval`, or marks it `Time Conflict` and asks the
 requester to pick another time. A failure of the calendar query itself is caught
 and treated as a third outcome.
 
-**Reschedule.** Fires when a record is edited. If the date or time changed, it
-deletes the old calendar event and re-runs the child for the new time. Editing a
-title or an email address should change nothing. Because the child runs again, a
-reschedule sends the request-received email a second time and returns the record
-to `Pending Approval` — an already-approved booking that gets moved silently
-needs approving again.
+**Reschedule.** Fires when a record is edited. Its filter continues if the date
+**or** the start **or** the end changed — any one of the three is enough — and
+stops otherwise, so editing a title or an email address touches nothing. When it
+does continue, it deletes the old calendar event and re-runs the child for the
+new time. Because the child runs again, a reschedule sends the request-received
+email a second time and returns the record to `Pending Approval` — an
+already-approved booking that gets moved silently needs approving again.
 
 **Approval.** Fires when an administrator sets a record to `Approved`. Adds the
 requester to the calendar event so it lands in their own calendar, then sends
@@ -77,13 +82,6 @@ If conflict emails start arriving often, the problem is in layer 1 or 2, not the
 room being busy.
 
 ## Known problems
-
-**The reschedule filter looks inverted.** As described it continues only when the
-date **and** the start **and** the end have all changed; the intent is surely
-*any* of them. Moving a meeting to a different day at the same hours — the most
-likely reschedule there is — would not qualify. The failure is silent: the record
-updates, the calendar does not, and the old event stays where it was. Worth
-checking first.
 
 **A rescheduled booking emails two blank rows.** The request-received and
 conflict templates show the responsible party and the guest count; the reschedule
