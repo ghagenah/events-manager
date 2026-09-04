@@ -133,7 +133,9 @@ step IDs and will not survive reformatting.
   have changed, so the ordinary case — same hours, different day — may never
   reach the calendar. Check this first. See ZAPIER.md.
 - A rescheduled booking's email renders Responsible party and Guests blank: the
-  reschedule Zap does not pass either field to the child. See ZAPIER.md.
+  reschedule Zap does not pass either to the child. See ZAPIER.md.
+- The approved email shows the record as it was before the update, so an edit
+  that changes a time and approves it emails the old time. See ZAPIER.md.
 - The error path in the booking Sub-Zap sends the *invalid times* email for any
   calendar failure, and records it as a time conflict. See ZAPIER.md.
 - The room calendar's default timezone is America/New_York, which is cosmetic
