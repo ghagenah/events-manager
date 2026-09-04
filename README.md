@@ -10,7 +10,7 @@ Live at <https://ghagenah.github.io/reservations/>
 ## Layout
 
 ```
-index.html          redirect to panetta/
+index.html          landing page listing the spaces
 styles.css          all form styling, shared by every space page
 reservation.js      all form behaviour, shared by every space page
 confirmation.html   landing page after a successful request, shared
@@ -58,7 +58,10 @@ only read public calendars.
    guest cap. Leave `confirmationPage` and the `../` paths alone.
 3. Replace the space-specific copy: title, subtitle, hero image, occupancy
    table, checklist wording.
-4. Give it a Zap of its own. A multi-room space should branch on the `room`
+4. Add it to the list in `index.html`. That is the only place that knows every
+   space exists; leave it out and the space still works, it just cannot be
+   found from the landing page.
+5. Give it a Zap of its own. A multi-room space should branch on the `room`
    field to choose which calendar to write to.
 
 Two spaces sharing a `draftKey` would share saved drafts. Nothing checks for
@@ -94,9 +97,10 @@ not restored from a saved draft.
   was being filled in.
 - **Drafts survive submission** on purpose, so someone turned away by a clash
   only has to pick a new time rather than retype everything.
-- `styles.css` is not used by `confirmation.html` or `guide.html`. Those define
-  `.card`, `body`, `h1` and `.hero` differently and keep their styling inline.
-  The colour palette is therefore repeated in three files.
+- `styles.css` is the booking form's, and is not used by `index.html`,
+  `confirmation.html` or `guide.html`. Those define `.card`, `body`, `h1` and
+  `.hero` differently, or have no form at all, and keep their styling inline.
+  The colour palette is therefore repeated in four files.
 
 ## Testing
 
@@ -115,7 +119,8 @@ reference Zap step IDs and will not survive reformatting.
 
 - `darc/index.html` is not live: its webhook and both calendar IDs are
   `REPLACE_` placeholders, occupancy is `TBD`, and it has no photo. Grep
-  `REPLACE_` and `TODO`.
+  `REPLACE_` and `TODO`. It is listed on the landing page as not yet accepting
+  requests, with no link; `index.html` says how to open it up.
 - `guide.html` is Panetta-specific. A second space needing a guide means
   deciding whether it becomes per-space.
 - The Zapier side is undocumented, and is the part of this system that cannot

@@ -6,43 +6,184 @@
 <title>Arts Division Room Reservations</title>
 
 <!--
-  Every space lives in its own folder — panetta, darc — so the paths back up
-  to the shared files (reservation.js, confirmation.html, assets/) are the same
-  in each and a copied page cannot get them subtly wrong. The /reservations/
-  in the public URL comes from the repository name, not from a folder here.
+  What /reservations/ itself serves: the list of bookable spaces.
 
-  This page is what /reservations/ itself serves. It forwards to Panetta,
-  which is what older booking emails pointing at the bare site root mean by
-  it. The redirect is a meta refresh plus a script — GitHub Pages has no
-  server-side redirects — with a real link behind it for anyone the redirect
-  does not carry.
+  Each space is a folder alongside this file — panetta, darc — holding a copy
+  of the form with its own window.SPACE_CONFIG. The /reservations/ in the
+  public URL comes from the repository name, not from a folder here.
 
-  If a landing page listing every space is ever wanted, this is the file to
-  replace; the conflict and invalid emails point at panetta/ directly, so
-  only older mail would land here.
+  This list is written out by hand. It is the one place that has to know every
+  space exists, so adding a space means adding a folder, its config block, and
+  an entry below. A space left out still works if you know its URL; it just
+  cannot be found from here.
+
+  A space marked `soon` has no link, for one that is not configured yet. To
+  open it up: fill in its SPACE_CONFIG, then swap the <div class="row soon">
+  for an <a class="row" href="…/"> and drop the status line.
+
+  Styling is inline rather than from styles.css: that sheet is the booking
+  form's, and this page has no form. It repeats the palette, as
+  confirmation.html and guide.html also do.
 -->
 
-<meta http-equiv="refresh" content="0; url=panetta/">
-<link rel="canonical" href="panetta/">
-<script>window.location.replace('panetta/' + window.location.search);</script>
-
 <style>
+  :root {
+    /* UC Santa Cruz brand palette — communications.ucsc.edu/brand-overview/color
+       Neutrals are derived with a blue bias toward the primary. */
+    --blue: #003c6c;           /* Primary Blue  */
+    --blue-dark: #00294a;
+    --ink: #12212e;
+    --muted: #5b6b79;
+    --line: #d5dee6;
+    --bg: #edf1f5;
+    --card: #ffffff;
+    --surface: #f4f7fa;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
   body {
     margin: 0;
+    padding: 40px 20px;
     min-height: 100vh;
-    display: grid;
-    place-items: center;
-    padding: 24px;
-    background: #edf1f5;
-    color: #12212e;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                 'Helvetica Neue', Arial, sans-serif;
-    text-align: center;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
   }
-  a { color: #003c6c; }
+
+  .card {
+    width: 100%;
+    max-width: 560px;
+    padding: 36px 32px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(18, 33, 46, .05), 0 12px 32px rgba(18, 33, 46, .09);
+  }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    margin: 0 0 26px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .spaces {
+    margin: 0 0 24px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .row {
+    display: block;
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  a.row:hover {
+    border-color: var(--blue);
+    background: var(--surface);
+  }
+  a.row:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  .name {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  a.row .name { color: var(--blue); }
+
+  .detail {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+
+  /* A space that exists but is not taking requests yet. */
+  .soon { background: var(--surface); }
+  .soon .name { color: var(--muted); }
+
+  .status {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .foot {
+    margin: 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+  .foot a { color: var(--blue); }
+
+  @media (max-width: 480px) {
+    body { padding: 20px 12px; }
+    .card { padding: 26px 22px; }
+  }
 </style>
 </head>
 <body>
-  <p>Taking you to the <a href="panetta/">Panetta Conference Room booking form</a>&hellip;</p>
+
+<main class="card">
+
+  <h1>Room Reservations</h1>
+  <p class="subtitle">UC Santa Cruz Arts Division event spaces. Pick a space to
+    check its live availability and request a block of hours &mdash; an
+    administrator reviews every request before it is confirmed.</p>
+
+  <ul class="spaces">
+    <li>
+      <a class="row" href="panetta/">
+        <span class="name">Panetta Conference Room</span>
+        <span class="detail">100 Panetta Avenue &middot; seats 28, up to 73 standing</span>
+      </a>
+    </li>
+    <li>
+      <div class="row soon">
+        <span class="name">Digital Arts Research Center</span>
+        <span class="detail">Two rooms</span>
+        <span class="status">Not yet accepting requests</span>
+      </div>
+    </li>
+  </ul>
+
+  <p class="foot">Booking the Panetta room for the first time? Read the
+    <a href="guide.html">event guide</a> before your event.</p>
+
+</main>
+
 </body>
 </html>
