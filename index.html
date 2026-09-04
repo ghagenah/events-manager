@@ -21,9 +21,10 @@
   open it up: fill in its SPACE_CONFIG, then swap the <div class="row soon">
   for an <a class="row" href="…/"> and drop the status line.
 
-  Thumbnails are their own small files, cropped to their subject, not the page
-  photos scaled down — a landing page should not pull two full-size images to
-  draw two small boxes. The alt text is empty deliberately: the link already
+  Thumbnails are their own files, cropped to their subject, not the page photos
+  scaled down — a landing page should not pull two full-size images to draw two
+  small boxes. They are sized for a 3x display: at 320px wide they were being
+  upscaled up to 2.6x on a phone and looked soft. The alt text is empty deliberately: the link already
   names the space, so describing the photo would only make a screen reader say
   it twice.
 
@@ -210,7 +211,7 @@
   <ul class="spaces">
     <li>
       <a class="row" href="panetta/">
-        <img class="thumb" src="assets/panetta-thumb.webp" width="320" height="149" alt="">
+        <img class="thumb" src="assets/panetta-thumb.webp" width="860" height="400" alt="">
         <span class="text">
           <span class="name">Panetta Conference Room</span>
           <span class="detail">100 Panetta Avenue &middot; seats 28, up to 73 standing</span>
@@ -219,7 +220,7 @@
     </li>
     <li>
       <div class="row soon">
-        <img class="thumb" src="assets/darc-thumb.webp" width="320" height="173" alt="">
+        <img class="thumb" src="assets/darc-thumb.webp" width="743" height="400" alt="">
         <span class="text">
           <span class="name">Digital Arts Research Center</span>
           <span class="detail">Two rooms</span>
