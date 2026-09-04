@@ -13,6 +13,7 @@ Live at <https://ghagenah.github.io/reservations/>
 index.html          landing page listing the spaces
 tokens.css          colour palette and radius scale, shared by every page
 favicon.svg         clock mark, shared by every page
+test.html           open in a browser to run the tests
 styles.css          all form styling, shared by every space page
 reservation.js      all form behaviour, shared by every space page
 confirmation.html   landing page after a successful request, shared
@@ -105,6 +106,12 @@ not restored from a saved draft.
   differently, so those rules would leak into them.
 
 ## Testing
+
+`test.html` runs 40 assertions against the real forms, loaded in hidden
+frames. Open it in a browser — no build step, nothing to install. It covers
+the logic that fails silently rather than loudly: daylight saving, the
+booking window, busy-interval boundaries, the contiguous-block rules, and the
+room/config wiring. It does not cover the network or anything visual.
 
 Add `?demo=1` to a space URL for a button that fills the form with plausible
 test data and picks a real open time slot. Titles are prefixed `TEST`.

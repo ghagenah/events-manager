@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reservation form tests</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="tokens.css">
+
+<!--
+  Open this page in a browser. No build step, no dependencies, no runner.
+
+  It loads the real forms in hidden iframes and asserts against their own
+  functions, so there is nothing to keep in step with reservation.js — if a
+  function is renamed, the test fails loudly rather than testing a stale copy.
+
+  What it covers: the logic that fails silently and plausibly. A daylight
+  saving bug books the wrong hour, it does not throw. So does an off-by-one
+  in the busy-interval check, or a selection rule that lets a block span a
+  booked hour.
+
+  What it does not cover: the network (the calendar read and the webhook
+  post), and anything visual. Those need a live service or a human eye.
+
+  Two things to know before editing:
+
+  reservation.js is a classic script, so its `function` declarations land on
+  the frame's window but its `const` and `let` do not — those are lexical
+  globals. Everything here is read through frame.eval(), which reaches both,
+  and mutable state must be re-read rather than captured once.
+
+  The tests must also be as timezone-careful as the code. Date.getHours()
+  reads the *browser's* zone; the room's is Pacific. Use readZoneClock.
+-->
+
+<style>
+  body {
+    margin: 0;
+    padding: 32px 20px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -.4px; }
+  .sub { margin: 0 0 22px; color: var(--muted); font-size: 14px; }
+
+  #summary {
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--card);
+    font-weight: 700;
+  }
+  #summary.ok   { border-color: var(--success); background: var(--success-soft); color: var(--success); }
+  #summary.bad  { border-color: var(--danger);  background: var(--danger-soft);  color: var(--danger); }
+
+  section {
+    margin-bottom: 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--card);
+    overflow: hidden;
+  }
+  section > h2 {
+    margin: 0;
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  ol { margin: 0; padding: 8px 18px 14px 38px; }
+  li { padding: 3px 0; }
+  li.fail { color: var(--danger); font-weight: 600; }
+  .detail { color: var(--muted); font-size: 13px; }
+  li.fail .detail { color: var(--danger); }
+  .env { margin-top: 20px; color: var(--muted); font-size: 13px; }
+  iframe { position: absolute; left: -9999px; width: 900px; height: 1200px; border: 0; }
+</style>
+</head>
+<body>
+
+<main>
+  <h1>Reservation form tests</h1>
+  <p class="sub">Runs against the real forms, loaded in hidden frames. Reload to run again.</p>
+  <div id="summary">Running&hellip;</div>
+  <div id="groups"></div>
+  <p class="env" id="env"></p>
+</main>
+
+<script>
+/* ---------- tiny harness ---------- */
+
+const groups = [];
+let current = null;
+
+function group(name) {
+  current = { name, tests: [] };
+  groups.push(current);
+}
+
+/* An assertion that throws is a failure, not a crashed run — one broken
+   group should still let the rest report. */
+function check(name, fn) {
+  let pass = false, detail = '';
+  try {
+    const r = fn();
+    if (Array.isArray(r)) { pass = r[0]; detail = String(r[1]); }
+    else pass = !!r;
+  } catch (err) {
+    pass = false;
+    detail = 'threw: ' + err.message;
+  }
+  current.tests.push({ name, pass, detail });
+}
+
+function loadForm(src) {
+  return new Promise(resolve => {
+    const f = document.createElement('iframe');
+    f.src = src;
+    f.onload = () => setTimeout(() => resolve(f.contentWindow), 250);
+    document.body.appendChild(f);
+  });
+}
+
+function render() {
+  const total = groups.reduce((n, g) => n + g.tests.length, 0);
+  const failed = groups.reduce((n, g) => n + g.tests.filter(t => !t.pass).length, 0);
+
+  const sum = document.getElementById('summary');
+  sum.textContent = failed
+    ? `${failed} of ${total} failed`
+    : `All ${total} passed`;
+  sum.className = failed ? 'bad' : 'ok';
+
+  document.getElementById('groups').innerHTML = groups.map(g => `
+    <section>
+      <h2>${g.name}</h2>
+      <ol>${g.tests.map(t => `
+        <li class="${t.pass ? '' : 'fail'}">${t.pass ? '' : '✗ '}${t.name}
+          ${t.detail ? `<span class="detail">— ${t.detail}</span>` : ''}
+        </li>`).join('')}
+      </ol>
+    </section>`).join('');
+}
+
+/* ---------- the tests ---------- */
+
+(async function run() {
+  const w = await loadForm('panetta/index.html');
+
+  /* frame.eval reaches lexical globals; plain property access does not. */
+  const read = (win, expr) => win.eval(expr);
+  const grab = (win, names) => Object.fromEntries(names.map(n => [n, win.eval(n)]));
+
+  const {
+    zonedInstant, toZonedISO, formatTime, readZoneClock, overlapsBusy,
+    parseDateValue, dateValueFromToday, earliestBookableDate, latestBookableDate,
+    renderSlots, handleSlotClick, clearSelection, selectedRoom, locationLabel
+  } = grab(w, ['zonedInstant','toZonedISO','formatTime','readZoneClock','overlapsBusy',
+               'parseDateValue','dateValueFromToday','earliestBookableDate','latestBookableDate',
+               'renderSlots','handleSlotClick','clearSelection','selectedRoom','locationLabel']);
+
+  const { MIN_LEAD_DAYS, MAX_MONTHS_AHEAD, START_HOUR, END_HOUR, TIME_ZONE, ROOMS, DRAFT_KEY } =
+    grab(w, ['MIN_LEAD_DAYS','MAX_MONTHS_AHEAD','START_HOUR','END_HOUR','TIME_ZONE','ROOMS','DRAFT_KEY']);
+
+  /* --- Daylight saving. US Pacific 2026: PDT starts Mar 8, PST returns Nov 1.
+         The room is in one place, so 9:00 AM has to mean 9:00 AM there on
+         every date, and the offset carried to Zapier has to change with it. */
+  group('Time zone and daylight saving');
+
+  const at9 = (m, d) => zonedInstant(2026, m, d, 9);
+  check('9am Mar 7 carries the standard-time offset', () => {
+    const iso = toZonedISO(at9(2, 7));
+    return [iso.endsWith('-08:00'), iso];
+  });
+  check('9am Mar 8 carries the daylight offset', () => {
+    const iso = toZonedISO(at9(2, 8));
+    return [iso.endsWith('-07:00'), iso];
+  });
+  check('9am Oct 31 carries the daylight offset', () => {
+    const iso = toZonedISO(at9(9, 31));
+    return [iso.endsWith('-07:00'), iso];
+  });
+  check('9am Nov 1 carries the standard-time offset', () => {
+    const iso = toZonedISO(at9(10, 1));
+    return [iso.endsWith('-08:00'), iso];
+  });
+  check('9am stays 9am either side of the spring change', () => {
+    const a = formatTime(at9(2, 7)), b = formatTime(at9(2, 8));
+    return [a === '9:00 AM' && b === '9:00 AM', `${a} / ${b}`];
+  });
+  check('9am stays 9am either side of the autumn change', () => {
+    const a = formatTime(at9(9, 31)), b = formatTime(at9(10, 1));
+    return [a === '9:00 AM' && b === '9:00 AM', `${a} / ${b}`];
+  });
+  /* Newer ICU puts U+202F before AM/PM. It looks like a space and is not one,
+     which breaks anything downstream matching on the text. */
+  check('formatTime uses an ordinary space before AM/PM', () => {
+    const t = formatTime(at9(2, 8));
+    return [!/[  ]/.test(t), JSON.stringify(t)];
+  });
+  check('an hour is an hour across the spring forward', () => {
+    const a = zonedInstant(2026, 2, 8, 1), b = zonedInstant(2026, 2, 8, 3);
+    return [(b - a) === 3600000, `1am to 3am = ${(b - a) / 60000} min of real time`];
+  });
+
+  /* --- The booking window, which the date input, the validation and the
+         draft restore all have to agree on. */
+  group('Booking window');
+
+  check(`earliest is ${MIN_LEAD_DAYS} days out`, () => {
+    const v = earliestBookableDate();
+    return [v === dateValueFromToday({ days: MIN_LEAD_DAYS }), v];
+  });
+  check(`latest is ${MAX_MONTHS_AHEAD} months out`, () => {
+    const v = latestBookableDate();
+    return [v === dateValueFromToday({ months: MAX_MONTHS_AHEAD }), v];
+  });
+  check('the date input advertises the same window', () => {
+    const i = w.document.getElementById('date');
+    return [i.min === earliestBookableDate() && i.max === latestBookableDate(),
+            `${i.min} .. ${i.max}`];
+  });
+  check('month arithmetic rolls the year over', () => {
+    // Date.UTC normalises, so month 11 + 12 must land the following year
+    const d = new Date(Date.UTC(2026, 11 + 12, 20));
+    return [d.getUTCFullYear() === 2027 && d.getUTCMonth() === 11, d.toISOString().slice(0, 10)];
+  });
+
+  /* --- Busy intervals. The boundary cases are where an off-by-one hides:
+         a booking that ends exactly when a slot starts must not block it. */
+  group('Availability');
+
+  const D = parseDateValue(earliestBookableDate());
+  const hour = (h, m = 0) => zonedInstant(D.year, D.month, D.day, h, m);
+  const busy = (a, b) => [{ start: hour(a), end: hour(b) }];
+  const slot = [hour(9), hour(10)];
+
+  check('a booking ending at 9 does not block 9-10',
+    () => overlapsBusy(slot[0], slot[1], busy(8, 9)) === false);
+  check('a booking starting at 10 does not block 9-10',
+    () => overlapsBusy(slot[0], slot[1], busy(10, 11)) === false);
+  check('an exact match blocks it',
+    () => overlapsBusy(slot[0], slot[1], busy(9, 10)) === true);
+  check('an enclosing booking blocks it',
+    () => overlapsBusy(slot[0], slot[1], busy(8, 11)) === true);
+  check('a partial overlap blocks it',
+    () => overlapsBusy(slot[0], slot[1], [{ start: hour(9, 30), end: hour(10, 30) }]) === true);
+  check('an empty calendar blocks nothing',
+    () => overlapsBusy(slot[0], slot[1], []) === false);
+
+  /* --- The selection model. A reservation must be one unbroken run of
+         hours, because the webhook sends a single start and end. */
+  group('Slot selection');
+
+  renderSlots(D, busy(12, 13));                     // noon is taken
+  const S = () => { const s = read(w, 'selection'); return s ? `${s.start}-${s.end}` : 'none'; };
+  const buttons = () => read(w, 'slotButtons');
+  // the room's hour, not the browser's — see the note at the top of this file
+  const idx = h => buttons().findIndex(
+    b => Number(readZoneClock(new Date(b.dataset.start)).hour) === h);
+  const [h9, h10, h11, h12, h14] = [9, 10, 11, 12, 14].map(idx);
+
+  check(`renders one slot per hour from ${START_HOUR} to ${END_HOUR}`,
+    () => [buttons().length === END_HOUR - START_HOUR, `${buttons().length} slots`]);
+  check('the booked hour is disabled', () => buttons()[h12].disabled);
+  check('free hours are not', () => !buttons()[h9].disabled && !buttons()[h14].disabled);
+
+  clearSelection();
+  check('the first click starts a block', () => { handleSlotClick(h9); return [S() === `${h9}-${h9}`, S()]; });
+  check('an adjacent click grows it',     () => { handleSlotClick(h10); return [S() === `${h9}-${h10}`, S()]; });
+  check('and again',                      () => { handleSlotClick(h11); return [S() === `${h9}-${h11}`, S()]; });
+  check('a non-adjacent click is refused',() => { handleSlotClick(h14); return [S() === `${h9}-${h11}`, S()]; });
+  check('an interior click is refused',   () => { handleSlotClick(h10); return [S() === `${h9}-${h11}`, S()]; });
+  check('clicking the end shrinks it',    () => { handleSlotClick(h11); return [S() === `${h9}-${h10}`, S()]; });
+  check('clicking the start shrinks it',  () => { handleSlotClick(h9);  return [S() === `${h10}-${h10}`, S()]; });
+  check('clicking the last hour clears it',() => { handleSlotClick(h10); return [S() === 'none', S()]; });
+
+  check('a block cannot span a booked hour', () => {
+    clearSelection(); handleSlotClick(h11); handleSlotClick(h12);
+    return [S() === `${h11}-${h11}`, S()];
+  });
+  check('labels stay chronological when the block grows backwards', () => {
+    clearSelection(); handleSlotClick(h10); handleSlotClick(h11); handleSlotClick(h9);
+    const want = [h9, h10, h11].map(i => buttons()[i].dataset.label).join(' | ');
+    const got = read(w, 'selectedSlots').join(' | ');
+    return [got === want, got];
+  });
+  clearSelection();
+
+  /* --- Rooms. Panetta has one and shows no picker; DARC has two and must
+         require a choice and key availability to the chosen calendar. */
+  group('Rooms');
+
+  check('a one-room space shows no picker', () => {
+    const f = w.document.getElementById('room-field');
+    return [ROOMS.length === 1 && f.hidden, `${ROOMS.length} room, hidden=${f.hidden}`];
+  });
+  check('its single room is implicit', () => {
+    const r = selectedRoom();
+    return [!!r && r.calendarId === ROOMS[0].calendarId, r ? r.label : 'null'];
+  });
+
+  const d = await loadForm('darc/index.html');
+  const D2 = grab(d, ['ROOMS','SPACE_NAME','DRAFT_KEY']);
+  const dSelectedRoom = read(d, 'selectedRoom'), dLocationLabel = read(d, 'locationLabel');
+  check('a two-room space builds a radio per room', () => {
+    const vals = [...d.document.querySelectorAll('input[name="room"]')].map(r => r.value);
+    return [vals.length === 2 && vals.join(',') === D2.ROOMS.map(r => r.label).join(','), vals.join(', ')];
+  });
+  check('its picker is visible', () => !d.document.getElementById('room-field').hidden);
+  check('no room is chosen until one is clicked', () => [dSelectedRoom() === null, String(dSelectedRoom())]);
+  check('choosing one selects it', () => {
+    d.document.querySelector('input[name="room"][value="Room 2"]').checked = true;
+    const r = dSelectedRoom();
+    return [!!r && r.label === 'Room 2', r ? r.label : 'null'];
+  });
+  check('the location names the space and the room', () => {
+    const l = dLocationLabel(dSelectedRoom());
+    return [l === `${D2.SPACE_NAME} — Room 2`, l];
+  });
+  check('the rooms have different calendars', () => {
+    const ids = D2.ROOMS.map(r => r.calendarId);
+    return [new Set(ids).size === ids.length, `${ids.length} rooms, ${new Set(ids).size} calendars`];
+  });
+  check('each space uses its own draft key', () => [DRAFT_KEY !== D2.DRAFT_KEY, `${DRAFT_KEY} vs ${D2.DRAFT_KEY}`]);
+
+  render();
+  document.getElementById('env').textContent =
+    `Room zone ${TIME_ZONE} · this browser ${Intl.DateTimeFormat().resolvedOptions().timeZone}` +
+    ` · ${new Date().toISOString().slice(0, 10)}`;
+})();
+</script>
+
+</body>
+</html>
