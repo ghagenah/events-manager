@@ -417,6 +417,18 @@ function render() {
     return [got.length === 1, `${got.length}: ${got.join(', ')}`];
   });
 
+  /* Start over resets the form; anything derived from a field has to follow.
+     This one did not, and the link went on naming a room nobody had chosen. */
+  check('Start over resets the link along with the room', () => {
+    d.document.querySelector(`input[name="room"][value="${D2.ROOMS[0].label}"]`).checked = true;
+    dSync();
+    d.document.getElementById('discard-draft').click();
+    const b = d.document.getElementById('cal-open');
+    const cleared = !d.document.querySelector('input[name="room"]:checked');
+    return [cleared && b.disabled && /choose a room/i.test(b.textContent),
+            `room ${cleared ? 'cleared' : 'STILL SET'}, link "${b.textContent.trim()}"`];
+  });
+
   check('the frame stays unloaded until the dialog is opened', () => {
     const src = d.document.getElementById('cal-frame').getAttribute('src');
     return [src === 'about:blank', src.slice(0, 40)];

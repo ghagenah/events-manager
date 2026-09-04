@@ -75,6 +75,14 @@ const rpEmailField = document.getElementById('rp-email-field');
 const errorSummary = document.getElementById('error-summary');
 const draftNote    = document.getElementById('draft-note');
 
+// The calendar dialog. Declared here rather than beside its own code further
+// down so that anything resetting the form can sync it — a const declared
+// late is in the temporal dead zone for everything above it.
+const calDialog = document.getElementById('cal-dialog');
+const calFrame  = document.getElementById('cal-frame');
+const calTitle  = document.getElementById('cal-dialog-title');
+const calOpen   = document.getElementById('cal-open');
+
 // ucsc.edu and its subdomains, e.g. soe.ucsc.edu
 const UCSC_EMAIL = /^[^@\s]+@([a-z0-9-]+\.)*ucsc\.edu$/i;
 
@@ -847,6 +855,7 @@ function restoreDraft() {
 
   syncSameAsMe();
   syncAlcoholPolicy();
+  syncCalendarDialog();   // a restored room has to reach the link too
   draftNote.hidden = false;
 
   // Re-check the calendar for the restored date rather than trusting old availability.
@@ -868,6 +877,7 @@ function discardDraft() {
   clearStatus();
   syncSameAsMe();
   syncAlcoholPolicy();
+  syncCalendarDialog();   // the reset cleared the room; the link named it
   resetSlots('Select a date to see available times.');
   titleInput.focus();
 }
@@ -1246,10 +1256,6 @@ form.addEventListener('submit', handleSubmit);
 // ---------- Calendar dialog ----------
 // Built from the rooms list and TIME_ZONE rather than a pasted URL, so the
 // dialog cannot drift from the availability lookup above.
-const calDialog = document.getElementById('cal-dialog');
-const calFrame  = document.getElementById('cal-frame');
-const calTitle  = document.getElementById('cal-dialog-title');
-const calOpen   = document.getElementById('cal-open');
 
 /* One room's calendar — always the one being booked. Overlaying several would
    say nothing about which bookings belong to which room, since showCalendars=0
