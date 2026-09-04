@@ -327,13 +327,18 @@ function render() {
     return [r === null, r ? r.label : 'null'];
   });
   check('choosing one selects it', () => {
-    d.document.querySelector('input[name="room"][value="Room 2"]').checked = true;
+    const want = D2.ROOMS[1].label;
+    d.document.querySelector(`input[name="room"][value="${want}"]`).checked = true;
     const r = dSelectedRoom();
-    return [!!r && r.label === 'Room 2', r ? r.label : 'null'];
+    return [!!r && r.label === want, r ? r.label : 'null'];
   });
   check('the location names the space and the room', () => {
     const l = dLocationLabel(dSelectedRoom());
-    return [l === `${D2.SPACE_NAME} — Room 2`, l];
+    return [l === `${D2.SPACE_NAME} — ${D2.ROOMS[1].label}`, l];
+  });
+  check('every room has a real calendar, not a placeholder', () => {
+    const bad = D2.ROOMS.filter(r => !/@group\.calendar\.google\.com$/.test(r.calendarId));
+    return [bad.length === 0, bad.length ? bad.map(r => r.label).join(', ') : D2.ROOMS.map(r => r.label).join(' + ')];
   });
   check('the rooms have different calendars', () => {
     const ids = D2.ROOMS.map(r => r.calendarId);
@@ -386,7 +391,7 @@ function render() {
   try {
     localStorage.setItem(DKEY, JSON.stringify({
       at: Date.now(),
-      '@room': 'Room 1',
+      '@room': D2.ROOMS[0].label,
       '#event-title': 'Restored from a draft',
       '#occupancy': true, '#checklist-agree': true, '#alcohol-agree': true
     }));
@@ -394,7 +399,7 @@ function render() {
 
     check('a saved room comes back', () => {
       const picked = r.document.querySelector('input[name="room"]:checked');
-      return [!!picked && picked.value === 'Room 1', picked ? picked.value : 'none'];
+      return [!!picked && picked.value === D2.ROOMS[0].label, picked ? picked.value : 'none'];
     });
     check('a saved text field comes back', () => {
       const v = r.document.getElementById('event-title').value;

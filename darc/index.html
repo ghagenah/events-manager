@@ -296,15 +296,19 @@
 </dialog>
 
 <script>
-/* The space this page books. Three placeholders must be filled before this
-   page goes live — grep for REPLACE_. Each room needs its own PUBLIC Google
-   calendar (like Panetta's), and the webhook needs a DARC Zap of its own. */
+/* The space this page books. Both room calendars are set and public. The
+   webhook is still a placeholder — grep REPLACE_ — so the form reads
+   availability correctly but a submission posts nowhere until DARC has a Zap
+   of its own, branching on the `room` field to pick which calendar to write
+   to. */
 window.SPACE_CONFIG = {
   spaceName: 'Digital Arts Research Center',
   webhookUrl: 'REPLACE_WITH_DARC_ZAPIER_WEBHOOK_URL',
   rooms: [
-    { label: 'Room 1', calendarId: 'REPLACE_WITH_DARC_ROOM_1_CALENDAR_ID' },
-    { label: 'Room 2', calendarId: 'REPLACE_WITH_DARC_ROOM_2_CALENDAR_ID' }
+    { label: 'Dark Lab',
+      calendarId: 'c_c2770e121f5c0fe0e616870934fc90a52f3b05f98133bd7ebfe25dff0f2c4a40@group.calendar.google.com' },
+    { label: 'Light Lab',
+      calendarId: 'c_c77d7168e295b89a4a028985fc6809bb34878d782ead8dd118a858d56739450b@group.calendar.google.com' }
   ],
   draftKey: 'darc-reservation-draft',
   confirmationPage: '../confirmation.html',
