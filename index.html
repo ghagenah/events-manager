@@ -17,9 +17,9 @@
   an entry below. A space left out still works if you know its URL; it just
   cannot be found from here.
 
-  A space marked `soon` is reachable but not yet bookable — its SPACE_CONFIG
-  still holds REPLACE_ placeholders, so a submission would post nowhere. Once
-  that config is real, drop the `soon` class and the status line.
+  To mark a space as reachable but not yet bookable — its SPACE_CONFIG still
+  holding REPLACE_ placeholders, so a submission would post nowhere — add
+  `soon` to its row and a <span class="status"> line under the name.
 
   Thumbnails are their own files, cropped to their subject, not the page photos
   scaled down — a landing page should not pull two full-size images to draw two
@@ -164,9 +164,9 @@
     font-size: 13.5px;
   }
 
-  /* A space you can open but cannot book yet — its config is still
-     placeholders. The badge under the name is what says so; the photo stays in
-     full colour. */
+  /* Unused while both spaces are listed as available. Kept as the way to mark
+     one that is reachable but not yet bookable: add `soon` to its row and a
+     <span class="status"> under the name. */
   .soon { background: var(--surface); }
 
   .status {
@@ -219,12 +219,11 @@
       </a>
     </li>
     <li>
-      <a class="row soon" href="darc/">
+      <a class="row" href="darc/">
         <img class="thumb" src="assets/darc-thumb.webp" width="743" height="400" alt="">
         <span class="text">
           <span class="name">Digital Arts Research Center</span>
           <span class="detail">Two rooms</span>
-          <span class="status">Setup in progress &middot; requests will not go through yet</span>
         </span>
       </a>
     </li>

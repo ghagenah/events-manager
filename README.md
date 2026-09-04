@@ -122,8 +122,9 @@ step IDs and will not survive reformatting.
 ## Outstanding
 
 - `darc/index.html` is not live: its webhook and both calendar IDs are
-  `REPLACE_` placeholders and occupancy is `TBD`. Grep `REPLACE_` and `TODO`. It is listed on the landing page as not yet accepting
-  requests, with no link; `index.html` says how to open it up.
+  `REPLACE_` placeholders and occupancy is `TBD`. Grep `REPLACE_` and `TODO`.
+  The landing page links to it and no longer flags it, so a request submitted
+  there will fail until the config is real.
 - `guide.html` is Panetta-specific. A second space needing a guide means
   deciding whether it becomes per-space.
 - Reschedule and approval both trigger on any table-record update, so an edit
