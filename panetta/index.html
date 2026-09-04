@@ -156,8 +156,8 @@
     <fieldset>
       <legend>Will this event be open to the general public? <span class="req" aria-hidden="true">*</span></legend>
       <div class="choices">
-        <label class="choice"><input type="radio" name="openToPublic" value="Yes, open to the public"><span>Yes, event is open to the public</span></label>
-        <label class="choice"><input type="radio" name="openToPublic" value="Not open to the public"><span>Not open to the public</span></label>
+        <label class="choice"><input type="radio" name="openToPublic" aria-required="true" value="Yes, open to the public"><span>Yes, event is open to the public</span></label>
+        <label class="choice"><input type="radio" name="openToPublic" aria-required="true" value="Not open to the public"><span>Not open to the public</span></label>
       </div>
     </fieldset>
 
@@ -184,9 +184,9 @@
     <fieldset>
       <legend>Will your event include food? <span class="req" aria-hidden="true">*</span></legend>
       <div class="choices">
-        <label class="choice"><input type="radio" name="food" value="Yes, self-service food"><span>Yes, self-service food</span></label>
-        <label class="choice"><input type="radio" name="food" value="Yes, catered food"><span>Yes, catered food<span class="sub">Responsible party must meet the caterer during the set-up time of the event.</span></span></label>
-        <label class="choice"><input type="radio" name="food" value="No, food will not be served"><span>No, food will not be served</span></label>
+        <label class="choice"><input type="radio" name="food" aria-required="true" value="Yes, self-service food"><span>Yes, self-service food</span></label>
+        <label class="choice"><input type="radio" name="food" aria-required="true" value="Yes, catered food"><span>Yes, catered food<span class="sub">Responsible party must meet the caterer during the set-up time of the event.</span></span></label>
+        <label class="choice"><input type="radio" name="food" aria-required="true" value="No, food will not be served"><span>No, food will not be served</span></label>
       </div>
     </fieldset>
 
@@ -196,23 +196,23 @@
         at the time of delivery and pick-up, on the date of your reservation. Items may
         <strong>not</strong> be delivered before your reservation or picked up after it.</p>
       <div class="choices">
-        <label class="choice"><input type="radio" name="outsideVendor" value="Yes, outside vendor"><span>Yes: outside vendor</span></label>
-        <label class="choice"><input type="radio" name="outsideVendor" value="No, outside vendor"><span>No: outside vendor</span></label>
+        <label class="choice"><input type="radio" name="outsideVendor" aria-required="true" value="Yes, outside vendor"><span>Yes: outside vendor</span></label>
+        <label class="choice"><input type="radio" name="outsideVendor" aria-required="true" value="No, outside vendor"><span>No: outside vendor</span></label>
       </div>
     </fieldset>
 
     <fieldset>
       <legend>Will your event serve alcohol? <span class="req" aria-hidden="true">*</span></legend>
       <div class="choices">
-        <label class="choice"><input type="radio" name="alcohol" value="Yes, alcohol"><span>Yes, alcohol</span></label>
-        <label class="choice"><input type="radio" name="alcohol" value="No alcohol"><span>No alcohol</span></label>
+        <label class="choice"><input type="radio" name="alcohol" aria-required="true" value="Yes, alcohol"><span>Yes, alcohol</span></label>
+        <label class="choice"><input type="radio" name="alcohol" aria-required="true" value="No alcohol"><span>No alcohol</span></label>
       </div>
     </fieldset>
 
     <div class="conditional" id="alcohol-policy" hidden>
       <div class="field" id="under-21-field">
         <label for="guests-under-21">Number of guests under 21 <span class="req" aria-hidden="true">*</span></label>
-        <input type="number" id="guests-under-21" name="guestsUnder21" min="0" max="73"
+        <input type="number" id="guests-under-21" name="guestsUnder21" aria-required="true" min="0" max="73"
                inputmode="numeric" placeholder="0">
       </div>
 
@@ -220,7 +220,7 @@
          abide by the University Alcohol Policy.
          <a id="alcohol-policy-link" href="#" target="_blank" rel="noopener noreferrer">Link to policy</a></p>
       <label class="agree" for="alcohol-agree">
-        <input type="checkbox" id="alcohol-agree" name="alcoholPolicyAgreement">
+        <input type="checkbox" id="alcohol-agree" name="alcoholPolicyAgreement" aria-required="true">
         <span>I have read, understand, and agree to abide by the University Alcohol Policy.
           <span class="req" aria-hidden="true">*</span></span>
       </label>

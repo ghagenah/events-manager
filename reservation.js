@@ -150,6 +150,7 @@ function buildRoomField() {
     input.type = 'radio';
     input.name = 'room';
     input.value = room.label;
+    input.setAttribute('aria-required', 'true');   // the legend carries a *
     const span = document.createElement('span');
     span.textContent = room.label;
     label.append(input, span);

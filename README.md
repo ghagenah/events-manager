@@ -77,7 +77,9 @@ Five places, all following the pattern of any existing field:
 1. The markup, in each space page that needs it
 2. An element reference near the top of `reservation.js`
 3. A rule in `fieldErrors()` if it is required
-4. An entry in `payload` in `handleSubmit()`
+4. An entry in `payload` in `handleSubmit()`, and `aria-required="true"` on
+   the control if it carries a `*` — the asterisk is `aria-hidden` decoration,
+   so it alone tells a screen reader nothing. `test.html` checks this.
 5. The mapping in Zapier, and the email template if it should appear there
 
 Add it to `NEVER_RESTORE` if it is a consent checkbox — those are deliberately
@@ -111,8 +113,9 @@ not restored from a saved draft.
 frames. Open it in a browser — no build step, nothing to install. It covers
 the logic that fails silently rather than loudly: daylight saving, the
 booking window, busy-interval boundaries, the contiguous-block rules, the
-room/config wiring, and draft restore including the agreements that must
-never come back ticked. It does not cover the network or anything visual.
+room/config wiring, draft restore including the agreements that must never
+come back ticked, and that every field marked required in the copy is
+actually announced as required. It does not cover the network or anything visual.
 
 Tests set up their own state rather than assuming a clean browser — a saved
 draft is re-applied on load, which will otherwise make a passing suite fail

@@ -341,6 +341,42 @@ function render() {
   });
   check('each space uses its own draft key', () => [DRAFT_KEY !== D2.DRAFT_KEY, `${DRAFT_KEY} vs ${D2.DRAFT_KEY}`]);
 
+  /* --- Accessibility. The asterisk is aria-hidden decoration, so anything it
+         marks has to carry required or aria-required or a screen reader never
+         hears about it. Written as a sweep rather than a list of six fields,
+         so a new field added without it fails here. */
+  group('Required fields are announced');
+
+  const controlFor = (doc, star) => {
+    const holder = star.closest('label, legend, .agree');
+    if (!holder) return null;
+    if (holder.tagName === 'LEGEND') {
+      const fs = holder.closest('fieldset');
+      return fs && fs.querySelector('input, select, textarea');
+    }
+    return holder.control
+        || (holder.htmlFor && doc.getElementById(holder.htmlFor))
+        || holder.querySelector('input, select, textarea');
+  };
+  const announced = el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true';
+
+  for (const [label, doc] of [['Panetta', w.document], ['DARC', d.document]]) {
+    check(`${label}: every required-marked field is announced as required`, () => {
+      const stars = [...doc.querySelectorAll('.req')];
+      const missing = stars
+        .map(sp => controlFor(doc, sp))
+        .filter(el => el && !announced(el))
+        .map(el => el.name || el.id);
+      return [missing.length === 0,
+              missing.length ? `missing on: ${[...new Set(missing)].join(', ')}`
+                             : `${stars.length} marked, all announced`];
+    });
+    check(`${label}: the asterisk itself stays hidden from screen readers`, () => {
+      const bad = [...doc.querySelectorAll('.req')].filter(sp => sp.getAttribute('aria-hidden') !== 'true');
+      return [bad.length === 0, bad.length ? `${bad.length} not aria-hidden` : 'all aria-hidden'];
+    });
+  }
+
   /* --- Drafts. What bit the test above: a saved draft is re-applied on load.
          Worth asserting directly, including the part that must NOT come back. */
   group('Draft restore');
