@@ -107,11 +107,16 @@ not restored from a saved draft.
 
 ## Testing
 
-`test.html` runs 40 assertions against the real forms, loaded in hidden
+`test.html` runs 46 assertions against the real forms, loaded in hidden
 frames. Open it in a browser — no build step, nothing to install. It covers
 the logic that fails silently rather than loudly: daylight saving, the
-booking window, busy-interval boundaries, the contiguous-block rules, and the
-room/config wiring. It does not cover the network or anything visual.
+booking window, busy-interval boundaries, the contiguous-block rules, the
+room/config wiring, and draft restore including the agreements that must
+never come back ticked. It does not cover the network or anything visual.
+
+Tests set up their own state rather than assuming a clean browser — a saved
+draft is re-applied on load, which will otherwise make a passing suite fail
+on a machine that has used the form.
 
 Add `?demo=1` to a space URL for a button that fills the form with plausible
 test data and picks a real open time slot. Titles are prefixed `TEST`.

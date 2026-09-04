@@ -318,7 +318,14 @@ function render() {
     return [vals.length === 2 && vals.join(',') === D2.ROOMS.map(r => r.label).join(','), vals.join(', ')];
   });
   check('its picker is visible', () => !d.document.getElementById('room-field').hidden);
-  check('no room is chosen until one is clicked', () => [dSelectedRoom() === null, String(dSelectedRoom())]);
+  /* Clear the radios first. A saved draft re-checks the room on load, so
+     asserting "nothing is chosen" on a fresh page only holds on a browser
+     that has never touched this form. */
+  check('with no room checked, none is selected', () => {
+    d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
+    const r = dSelectedRoom();
+    return [r === null, r ? r.label : 'null'];
+  });
   check('choosing one selects it', () => {
     d.document.querySelector('input[name="room"][value="Room 2"]').checked = true;
     const r = dSelectedRoom();
@@ -333,6 +340,40 @@ function render() {
     return [new Set(ids).size === ids.length, `${ids.length} rooms, ${new Set(ids).size} calendars`];
   });
   check('each space uses its own draft key', () => [DRAFT_KEY !== D2.DRAFT_KEY, `${DRAFT_KEY} vs ${D2.DRAFT_KEY}`]);
+
+  /* --- Drafts. What bit the test above: a saved draft is re-applied on load.
+         Worth asserting directly, including the part that must NOT come back. */
+  group('Draft restore');
+
+  const DKEY = D2.DRAFT_KEY;
+  const savedDraft = localStorage.getItem(DKEY);          // put the real one back after
+  try {
+    localStorage.setItem(DKEY, JSON.stringify({
+      at: Date.now(),
+      '@room': 'Room 1',
+      '#event-title': 'Restored from a draft',
+      '#occupancy': true, '#checklist-agree': true, '#alcohol-agree': true
+    }));
+    const r = await loadForm('darc/index.html');
+
+    check('a saved room comes back', () => {
+      const picked = r.document.querySelector('input[name="room"]:checked');
+      return [!!picked && picked.value === 'Room 1', picked ? picked.value : 'none'];
+    });
+    check('a saved text field comes back', () => {
+      const v = r.document.getElementById('event-title').value;
+      return [v === 'Restored from a draft', v || '(empty)'];
+    });
+    /* Agreeing has to be a deliberate act each time. If these ever came back
+       ticked, someone would submit liability terms they never read. */
+    check('the occupancy agreement does NOT come back', () => !r.document.getElementById('occupancy').checked);
+    check('the checklist agreement does NOT come back', () => !r.document.getElementById('checklist-agree').checked);
+    check('the alcohol agreement does NOT come back', () => !r.document.getElementById('alcohol-agree').checked);
+    check('the draft notice is shown', () => !r.document.getElementById('draft-note').hidden);
+  } finally {
+    if (savedDraft === null) localStorage.removeItem(DKEY);
+    else localStorage.setItem(DKEY, savedDraft);
+  }
 
   render();
   document.getElementById('env').textContent =
