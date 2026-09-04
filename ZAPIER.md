@@ -17,23 +17,55 @@ See [README.md](README.md) for the front end.
 ## Shape
 
 ```
-form ──POST──▶ [PARENT] new booking ──▶ create record ──┐
-                                                        │
-               [PARENT] rescheduled ──▶ delete old ─────┤
-                          booking          event        │
-                                                        ▼
-                              [CHILD] Process Panetta Booking Logic
-                                        │
-                    ├─ free  → calendar event, "Pending Approval", request-received email
-                    ├─ busy  → "Time Conflict", conflict email
-                    └─ error → "Time Conflict", invalid-times email
-
-               [PARENT] approval ──▶ add requester to event, approved email
+                        form
+                          │  POST, 30 fields
+                          ▼
+            ┌──────────────────────────────┐
+            │ [PARENT]  new booking        │
+            └──────────────────────────────┘
+                          │  creates the record, then calls
+                          ▼
+       ┌────────────────────────────────────────────┐
+       │ [CHILD]  Process Panetta Booking Logic     │
+       │                                            │
+       │   checks the calendar for the hours asked  │
+       │   for, and writes one of three outcomes:   │
+       │                                            │
+       │     free    →  event created, Pending      │
+       │     busy    →  Time Conflict               │
+       │     error   →  Time Conflict               │
+       │                                            │
+       │   emails the requester either way          │
+       └────────────────────────────────────────────┘
+                          │  writes the outcome
+                          ▼
+       ╔════════════════════════════════════════════╗
+       ║    Zapier Table · Panetta Reservations     ║
+       ╚════════════════════════════════════════════╝
+                          │
+                          │  ANY update to a record fires
+                          │  both of these — only their
+                          │  filters tell them apart
+              ┌───────────┴───────────┐
+              ▼                       ▼
+   ┌─────────────────────┐  ┌─────────────────────┐
+   │ [PARENT]            │  │ [PARENT]            │
+   │ rescheduled booking │  │ approval            │
+   │                     │  │                     │
+   │ runs if the date or │  │ runs if the status  │
+   │ start or end        │  │ became Approved     │
+   │ changed             │  │                     │
+   └─────────────────────┘  └─────────────────────┘
+              │                       │
+              ▼                       ▼
+    deletes the old event     adds the requester to
+    and re-runs [CHILD]       the event, then sends
+                              the approved email
 ```
 
-Three parent Zaps and one child, around a Zapier Table holding every booking.
-Two of the parents — reschedule and approval — trigger on the *same* event, any
-update to a record, and are told apart only by their filters.
+Three parent Zaps and one child, around a Zapier Table that holds every
+booking. The child is the only step that decides whether a booking happens; the
+parents decide when to run it.
 
 ## The four parts
 
