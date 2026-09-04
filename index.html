@@ -21,6 +21,11 @@
   open it up: fill in its SPACE_CONFIG, then swap the <div class="row soon">
   for an <a class="row" href="…/"> and drop the status line.
 
+  Thumbnails are their own small files, not the page photos scaled down — a
+  landing page should not pull two full-size images. The alt text is empty
+  deliberately: the link already names the space, so describing the photo
+  would only make a screen reader say it twice.
+
   Styling is inline rather than from styles.css: that sheet is the booking
   form's, and this page has no form. It repeats the palette, as
   confirmation.html and guide.html also do.
@@ -93,13 +98,30 @@
   }
 
   .row {
-    display: block;
-    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     text-decoration: none;
     color: inherit;
   }
+
+  .thumb {
+    flex: none;
+    width: 104px;
+    height: 78px;
+    object-fit: cover;
+    /* Favour the lower part of both photos: centred, the Panetta crop is
+       mostly sky. Matches what .hero does on the form pages. */
+    object-position: center 72%;
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  /* min-width lets long names wrap instead of squeezing the thumbnail. */
+  .text { min-width: 0; }
 
   a.row:hover {
     border-color: var(--blue);
@@ -127,6 +149,7 @@
   /* A space that exists but is not taking requests yet. */
   .soon { background: var(--surface); }
   .soon .name { color: var(--muted); }
+  .soon .thumb { filter: grayscale(1); opacity: .6; }
 
   .status {
     display: inline-block;
@@ -152,6 +175,8 @@
   @media (max-width: 480px) {
     body { padding: 20px 12px; }
     .card { padding: 26px 22px; }
+    /* A narrower thumbnail, so the name still gets a usable column. */
+    .thumb { width: 76px; height: 62px; }
   }
 </style>
 </head>
@@ -167,15 +192,21 @@
   <ul class="spaces">
     <li>
       <a class="row" href="panetta/">
-        <span class="name">Panetta Conference Room</span>
-        <span class="detail">100 Panetta Avenue &middot; seats 28, up to 73 standing</span>
+        <img class="thumb" src="assets/panetta-thumb.webp" width="320" height="214" alt="">
+        <span class="text">
+          <span class="name">Panetta Conference Room</span>
+          <span class="detail">100 Panetta Avenue &middot; seats 28, up to 73 standing</span>
+        </span>
       </a>
     </li>
     <li>
       <div class="row soon">
-        <span class="name">Digital Arts Research Center</span>
-        <span class="detail">Two rooms</span>
-        <span class="status">Not yet accepting requests</span>
+        <img class="thumb" src="assets/darc-thumb.webp" width="320" height="173" alt="">
+        <span class="text">
+          <span class="name">Digital Arts Research Center</span>
+          <span class="detail">Two rooms</span>
+          <span class="status">Not yet accepting requests</span>
+        </span>
       </div>
     </li>
   </ul>
