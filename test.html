@@ -346,6 +346,52 @@ function render() {
   });
   check('each space uses its own draft key', () => [DRAFT_KEY !== D2.DRAFT_KEY, `${DRAFT_KEY} vs ${D2.DRAFT_KEY}`]);
 
+  /* --- The "View the full calendar" dialog. It must show the room being
+         booked: Google's legend is switched off, so two overlaid calendars
+         give no way to tell whose booking is whose. */
+  group('Calendar dialog follows the room');
+
+  const srcsOf = (win, href) => {
+    const byId = Object.fromEntries(win.eval('ROOMS').map(r => [r.calendarId, r.label]));
+    return new URL(href).searchParams.getAll('src').map(x => byId[x] || 'unknown');
+  };
+  const linkOf = win => win.document.getElementById('cal-newtab').href;
+  const titleOf = win => win.document.getElementById('cal-dialog-title').textContent;
+  const dSync = read(d, 'syncCalendarDialog');
+
+  check('one room: the link carries just that calendar', () => {
+    const got = srcsOf(w, linkOf(w));
+    return [got.length === 1 && got[0] === ROOMS[0].label, got.join(', ')];
+  });
+  check('one room: the heading stays generic', () => [titleOf(w) === 'Room availability', titleOf(w)]);
+
+  check('two rooms, none chosen: every calendar is shown', () => {
+    d.document.querySelectorAll('input[name="room"]').forEach(r => { r.checked = false; });
+    dSync();
+    const got = srcsOf(d, linkOf(d));
+    return [got.length === D2.ROOMS.length, got.join(', ')];
+  });
+  check('two rooms, none chosen: the heading stays generic',
+    () => [titleOf(d) === 'Room availability', titleOf(d)]);
+
+  for (const i of [0, 1]) {
+    check(`choosing ${D2.ROOMS[i].label}: only its calendar is shown`, () => {
+      d.document.querySelector(`input[name="room"][value="${D2.ROOMS[i].label}"]`).checked = true;
+      dSync();
+      const got = srcsOf(d, linkOf(d));
+      return [got.length === 1 && got[0] === D2.ROOMS[i].label, got.join(', ')];
+    });
+    check(`choosing ${D2.ROOMS[i].label}: the heading names it`, () => {
+      const t = titleOf(d);
+      return [t === `${D2.ROOMS[i].label} availability`, t];
+    });
+  }
+
+  check('the frame stays unloaded until the dialog is opened', () => {
+    const src = d.document.getElementById('cal-frame').getAttribute('src');
+    return [src === 'about:blank', src.slice(0, 40)];
+  });
+
   /* --- Accessibility. The asterisk is aria-hidden decoration, so anything it
          marks has to carry required or aria-required or a screen reader never
          hears about it. Written as a sweep rather than a list of six fields,

@@ -1213,7 +1213,7 @@ document.getElementById('date-window-text').textContent =
   `${MAX_MONTHS_AHEAD} months ahead — so between ${longDate(dateInput.min)} and ${longDate(dateInput.max)}.`;
 dateInput.addEventListener('change', loadAvailability);
 form.querySelectorAll('input[name="room"]').forEach(radio =>
-  radio.addEventListener('change', loadAvailability));
+  radio.addEventListener('change', () => { loadAvailability(); syncCalendarDialog(); }));
 clearBtn.addEventListener('click', clearSelection);
 
 prefetchAvailability();
@@ -1245,28 +1245,48 @@ form.addEventListener('submit', handleSubmit);
 
 // ---------- Calendar dialog ----------
 // Built from the rooms list and TIME_ZONE rather than a pasted URL, so the
-// dialog cannot drift from the availability lookup above. A multi-room space
-// overlays every room in one view — Google colours each calendar differently.
+// dialog cannot drift from the availability lookup above.
 const calDialog = document.getElementById('cal-dialog');
 const calFrame  = document.getElementById('cal-frame');
+const calTitle  = document.getElementById('cal-dialog-title');
 
-// Opens on the week view: it lays out actual hour blocks, which is what
-// someone about to pick time slots needs to see. Month only says a day has
-// something on it. showTabs=1 keeps Google's own switcher — a dropdown on
-// desktop, a compact icon on a phone — so month and list are a click away
-// and switching does not reload the frame.
-const CALENDAR_EMBED_URL =
-  'https://calendar.google.com/calendar/embed'
-  + '?' + ROOMS.map(room => `src=${encodeURIComponent(room.calendarId)}`).join('&')
-  + `&ctz=${encodeURIComponent(TIME_ZONE)}`
-  + '&mode=WEEK&showTitle=0&showPrint=0&showTabs=1&showCalendars=0';
+/* Shows the chosen room, or every room until one is chosen. Overlaying them
+   all is fine as an overview, but once a room is picked the other one's
+   bookings are just noise — and showCalendars=0 hides Google's legend, so
+   there is nothing on screen saying which colour is which room.
 
-document.getElementById('cal-newtab').href = CALENDAR_EMBED_URL;
+   Opens on the week view: it lays out actual hour blocks, which is what
+   someone about to pick time slots needs. Month only says a day has something
+   on it. showTabs=1 keeps Google's own switcher, so month and list are a
+   click away without reloading the frame. */
+function calendarEmbedUrl() {
+  const room = selectedRoom();
+  const shown = room ? [room] : ROOMS;
+  return 'https://calendar.google.com/calendar/embed'
+    + '?' + shown.map(r => `src=${encodeURIComponent(r.calendarId)}`).join('&')
+    + `&ctz=${encodeURIComponent(TIME_ZONE)}`
+    + '&mode=WEEK&showTitle=0&showPrint=0&showTabs=1&showCalendars=0';
+}
+
+/* Keeps the link, the frame and the heading on the current room. The frame is
+   only reloaded once it has actually been opened — before that it is still
+   about:blank and reloading it would fetch the calendar for someone who never
+   looked. */
+function syncCalendarDialog() {
+  const url = calendarEmbedUrl();
+  document.getElementById('cal-newtab').href = url;
+  if (calFrame.getAttribute('src') !== 'about:blank') calFrame.setAttribute('src', url);
+
+  const room = ROOMS.length > 1 ? selectedRoom() : null;
+  calTitle.textContent = room ? `${room.label} availability` : 'Room availability';
+}
+
+syncCalendarDialog();
 
 document.getElementById('cal-open').addEventListener('click', () => {
   // Loaded on first open only; reopening reuses the frame already there.
   if (calFrame.getAttribute('src') === 'about:blank') {
-    calFrame.setAttribute('src', CALENDAR_EMBED_URL);
+    calFrame.setAttribute('src', calendarEmbedUrl());
   }
   calDialog.showModal();
 });
