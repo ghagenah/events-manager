@@ -114,13 +114,16 @@
       <div class="choices" id="room-choices"></div>
     </fieldset>
 
+    <!-- Outside the fieldset above: that is hidden on a one-room space, and
+         the calendar link has to survive it. -->
+    <p class="hint cal-hint">
+      <button type="button" class="cal-link" id="cal-open">View the full calendar</button>
+    </p>
+
     <div class="field">
       <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
       <p class="hint" id="date-window"><span id="date-window-text"></span></p>
       <input type="date" id="date" name="date" required>
-      <p class="hint cal-hint">
-        <button type="button" class="cal-link" id="cal-open">View the full calendar</button>
-      </p>
     </div>
 
     <div class="slots-section">
